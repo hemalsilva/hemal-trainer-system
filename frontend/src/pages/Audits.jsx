@@ -50,22 +50,6 @@ export default function Audits() {
     const bgColors = ['bg-yellow-400/10 border-yellow-400/30', 'bg-gray-300/10 border-gray-300/30', 'bg-amber-600/10 border-amber-600/30'];
     
     
-  const filteredAudits = audits.filter(a => {
-    if (department !== 'All' && employeeMap[a.emp_no] !== department) return false;
-    if (selectedType && a.audit_type !== selectedType) return false;
-    return true;
-  });
-
-  const filteredTopPerformers = filteredTopPerformers.filter(p => {
-    if (department !== 'All' && employeeMap[p.emp_no] !== department) return false;
-    return true;
-  });
-
-  const filteredBalances = balances.filter(b => {
-    if (department !== 'All' && b.department !== department) return false;
-    return true;
-  });
-
   return (
       <div key={`${performer.emp_no}-${performer.audit_type}-${index}`} className={`flex items-center justify-between p-4 rounded-xl border ${bgColors[index] || 'bg-gray-800/50 border-gray-700'}`}>
         <div className="flex items-center gap-4">
@@ -85,6 +69,23 @@ export default function Audits() {
     );
   };
 
+
+  const filteredAudits = audits.filter(a => {
+    if (department !== 'All' && employeeMap[a.emp_no] !== department) return false;
+    if (selectedType && a.audit_type !== selectedType) return false;
+    return true;
+  });
+
+  const filteredTopPerformers = topPerformers.filter(p => {
+    if (department !== 'All' && employeeMap[p.emp_no] !== department) return false;
+    return true;
+  });
+
+  const filteredBalances = balances.filter(b => {
+    if (department !== 'All' && b.department !== department) return false;
+    return true;
+  });
+
   return (
     <div className="p-8 w-full max-w-7xl mx-auto pb-24">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -98,22 +99,18 @@ export default function Audits() {
         
         <div className="flex items-center gap-3 bg-brand-card p-2 rounded-xl border border-gray-800">
           <CalendarIcon className="w-5 h-5 text-gray-400 ml-2" />
-          <select 
-            value={month} 
-            onChange={(e) => setMonth(e.target.value)}
-            className="bg-transparent text-white font-semibold outline-none cursor-pointer"
-          >
-            {Array.from({length: 12}, (_, i) => (
-              <option key={i+1} value={i+1} className="bg-gray-900">{new Date(0, i).toLocaleString('default', { month: 'long' })}</option>
-            ))}
-          </select>
-          <select 
-            value={year} 
-            onChange={(e) => setYear(e.target.value)}
-            className="bg-transparent text-white font-semibold outline-none cursor-pointer border-l border-gray-700 pl-3"
-          >
-            {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y} className="bg-gray-900">{y}</option>)}
-          </select>
+          <input 
+            type="month" 
+            value={`${year}-${String(month).padStart(2, '0')}`}
+            onChange={(e) => {
+              if (e.target.value) {
+                const [y, m] = e.target.value.split('-');
+                setYear(parseInt(y, 10));
+                setMonth(parseInt(m, 10));
+              }
+            }}
+            className="bg-transparent text-white font-semibold outline-none cursor-pointer [color-scheme:dark]"
+          />
         </div>
       </header>
 
