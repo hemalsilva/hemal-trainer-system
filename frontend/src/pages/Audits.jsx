@@ -7,8 +7,9 @@ export default function Audits() {
   const [topPerformers, setTopPerformers] = useState([]);
   const [balances, setBalances] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const year = parseInt(selectedDate.split('-')[0], 10);
+  const month = parseInt(selectedDate.split('-')[1], 10);
   const [activeTab, setActiveTab] = useState('overview');
   const [department, setDepartment] = useState('All');
   const [selectedType, setSelectedType] = useState(null);
@@ -100,13 +101,11 @@ export default function Audits() {
         <div className="flex items-center gap-3 bg-brand-card p-2 rounded-xl border border-gray-800">
           <CalendarIcon className="w-5 h-5 text-gray-400 ml-2" />
           <input 
-            type="month" 
-            value={`${year}-${String(month).padStart(2, '0')}`}
+            type="date" 
+            value={selectedDate}
             onChange={(e) => {
               if (e.target.value) {
-                const [y, m] = e.target.value.split('-');
-                setYear(parseInt(y, 10));
-                setMonth(parseInt(m, 10));
+                setSelectedDate(e.target.value);
               }
             }}
             className="bg-transparent text-white font-semibold outline-none cursor-pointer [color-scheme:dark]"
