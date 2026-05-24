@@ -160,39 +160,38 @@ export default function Settings() {
     setIsBackingUp(false);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTemplate(reader.result);
-        localStorage.setItem('cert_template', reader.result);
-      };
-      reader.readAsDataURL(file);
+  const handlePhotoSelect = (e) => {
+    if (e.target.files) {
+      setPhotosToUpload(Array.from(e.target.files));
     }
   };
 
-  const handleImageClick = (e) => {
-    if (!activeTag || !imageRef.current) return;
-    
-    const rect = imageRef.current.getBoundingClientRect();
-    const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
-    const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+  const handleBulkPhotoUpload = async () => {
+    if (photosToUpload.length === 0) return;
+    setUploadingPhotos(true);
+    setPhotoUploadStatus('');
 
-    const newCoords = {
-      ...coords,
-      [activeTag]: { x: xPercent, y: yPercent }
-    };
-    
-    setCoords(newCoords);
-    localStorage.setItem('cert_coords', JSON.stringify(newCoords));
-    setActiveTag(null);
-  };
+    const formData = new FormData();
+    photosToUpload.forEach(file => {
+      formData.append('photos', file);
+    });
 
-  const saveConfig = () => {
-    localStorage.setItem('cert_coords', JSON.stringify(coords));
-    setSaveStatus('Template configuration saved successfully!');
-    setTimeout(() => setSaveStatus(''), 3000);
+    try {
+      const res = await fetch('http://localhost:5000/api/employees/bulk-photos', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPhotoUploadStatus(`Successfully mapped ${data.processed} photos to employees!`);
+        setPhotosToUpload([]);
+      } else {
+        setPhotoUploadStatus('Upload failed: ' + data.error);
+      }
+    } catch (err) {
+      setPhotoUploadStatus('Network error during upload.');
+    }
+    setUploadingPhotos(false);
   };
 
   return (
