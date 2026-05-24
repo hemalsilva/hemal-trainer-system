@@ -16,7 +16,7 @@ export default function AttendancePortal() {
   useEffect(() => {
     const fetchTraining = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/trainings/${id}`);
+        const res = await axios.get(`/api/trainings/${id}`);
         setTraining(res.data);
       } catch (err) {
         setError('Training session not found or link is invalid.');
@@ -35,7 +35,7 @@ export default function AttendancePortal() {
     }
 
     try {
-      await axios.post(`http://localhost:5000/api/trainings/${id}/attendance`, { emp_no: empNo, emp_name: empName });
+      await axios.post(`/api/trainings/${id}/attendance`, { emp_no: empNo, emp_name: empName });
       setSuccess(true);
       setError('');
     } catch (err) {

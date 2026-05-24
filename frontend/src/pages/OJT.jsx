@@ -37,7 +37,7 @@ export default function OJT() {
     };
 
     try {
-      await axios.post('http://localhost:5000/api/ojt', payload);
+      await axios.post('/api/ojt', payload);
       alert('OJT Assessment Saved Successfully!');
       // Reset form
       setEmpDetails({ emp_no: '', emp_name: '', assessment_date: new Date().toISOString().split('T')[0] });

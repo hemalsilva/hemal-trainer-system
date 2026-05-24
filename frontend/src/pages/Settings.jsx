@@ -122,7 +122,7 @@ export default function Settings() {
 
   useEffect(() => {
     // Load config
-    fetch('http://localhost:5000/api/backups/config')
+    fetch('/api/backups/config')
       .then(r => r.json())
       .then(data => { if (data.oneDrivePath) setOneDrivePath(data.oneDrivePath); })
       .catch(console.error);
@@ -131,7 +131,7 @@ export default function Settings() {
   const saveOneDriveConfig = async () => {
     setIsSavingConfig(true);
     try {
-      await fetch('http://localhost:5000/api/backups/config', {
+      await fetch('/api/backups/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ oneDrivePath })
@@ -147,7 +147,7 @@ export default function Settings() {
     setIsBackingUp(true);
     setBackupResult(null);
     try {
-      const res = await fetch('http://localhost:5000/api/backups/trigger', { method: 'POST' });
+      const res = await fetch('/api/backups/trigger', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setBackupResult({ success: true, message: data.message });
@@ -177,7 +177,7 @@ export default function Settings() {
     });
 
     try {
-      const res = await fetch('http://localhost:5000/api/employees/bulk-photos', {
+      const res = await fetch('/api/employees/bulk-photos', {
         method: 'POST',
         body: formData
       });

@@ -18,7 +18,7 @@ export default function Certificates() {
 
   const fetchCertificates = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/certificates?month=${month}&year=${year}`);
+      const res = await axios.get(`/api/certificates?month=${month}&year=${year}`);
       setRecords(res.data);
     } catch (err) {
       console.error(err);
@@ -29,7 +29,7 @@ export default function Certificates() {
 
   const checkWaStatus = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/whatsapp/status');
+      const res = await axios.get('/api/whatsapp/status');
       setWaConnected(res.data.connected);
     } catch (err) {
       console.error(err);
@@ -37,12 +37,12 @@ export default function Certificates() {
   };
 
   const handleDownload = (id) => {
-    window.open(`http://localhost:5000/api/certificates/generate/${id}`, '_blank');
+    window.open(`/api/certificates/generate/${id}`, '_blank');
   };
 
   const handleDelete = async (id) => {
     if(window.confirm('Delete this certificate?')) {
-      await axios.delete(`http://localhost:5000/api/certificates/${id}`);
+      await axios.delete(`/api/certificates/${id}`);
       fetchCertificates();
     }
   };
@@ -55,7 +55,7 @@ export default function Certificates() {
       formData.append('photos', files[i]);
     }
     try {
-      await axios.post('http://localhost:5000/api/employees/photos/bulk', formData, {
+      await axios.post('/api/employees/photos/bulk', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Photos uploaded successfully!');
@@ -116,7 +116,7 @@ export default function Certificates() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 overflow-hidden">
-                          {record.photo_url ? <img src={`http://localhost:5000${record.photo_url}`} alt="Avatar" className="w-full h-full object-cover" /> : <Award className="w-5 h-5 text-gray-500" />}
+                          {record.photo_url ? <img src={`${record.photo_url}`} alt="Avatar" className="w-full h-full object-cover" /> : <Award className="w-5 h-5 text-gray-500" />}
                         </div>
                         <div>
                           <div className="font-semibold text-white">{record.employee_name}</div>

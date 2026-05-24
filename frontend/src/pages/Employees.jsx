@@ -17,7 +17,7 @@ export default function Employees() {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/employees');
+      const res = await axios.get('/api/employees');
       setEmployees(res.data);
     } catch (err) {
       console.error(err);
@@ -39,7 +39,7 @@ export default function Employees() {
     data.append('file', file);
 
     try {
-      await axios.post('http://localhost:5000/api/employees/upload', data);
+      await axios.post('/api/employees/upload', data);
       alert('Excel file processed successfully');
       fetchEmployees();
     } catch (err) {
@@ -57,7 +57,7 @@ export default function Employees() {
         if (formData[key]) data.append(key, formData[key]);
       });
 
-      await axios.post('http://localhost:5000/api/employees', data, {
+      await axios.post('/api/employees', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setShowModal(false);
@@ -185,7 +185,7 @@ export default function Employees() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {emp.photo_url ? (
-                          <img src={`http://localhost:5000/${emp.photo_url}`} alt={emp.full_name} className="w-9 h-9 rounded-full object-cover border border-gray-700" />
+                          <img src={`/${emp.photo_url}`} alt={emp.full_name} className="w-9 h-9 rounded-full object-cover border border-gray-700" />
                         ) : (
                           <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 text-brand-gold flex items-center justify-center font-bold text-sm">
                             {emp.full_name?.charAt(0) || '?'}

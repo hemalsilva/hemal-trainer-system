@@ -69,7 +69,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/employees');
+        const res = await axios.get('/api/employees');
         setEmployees(res.data);
       } catch (err) {
         console.error(err);

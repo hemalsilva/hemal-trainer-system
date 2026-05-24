@@ -15,7 +15,7 @@ export default function Reports() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/employees');
+        const res = await axios.get('/api/employees');
         setEmployees(res.data);
       } catch (err) {
         console.error('Failed to fetch employees for birthdays:', err);
@@ -71,7 +71,7 @@ export default function Reports() {
     setSelectedReportTab('ai-report');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/reports/ai', { prompt: aiPrompt });
+      const res = await axios.post('/api/reports/ai', { prompt: aiPrompt });
       setAiResult(res.data);
     } catch (err) {
       console.error(err);

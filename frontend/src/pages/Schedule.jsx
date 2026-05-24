@@ -63,14 +63,14 @@ export default function Schedule() {
 
   const fetchSchedules = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/trainings');
+      const res = await axios.get('/api/trainings');
       setSchedules(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchTrainerDaysOff = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/trainings/trainer/days-off');
+      const res = await axios.get('/api/trainings/trainer/days-off');
       setTrainerDaysOff(res.data);
     } catch (err) { console.error(err); }
   };
@@ -87,7 +87,7 @@ export default function Schedule() {
         trainer: formData.trainer || 'TBD',
         duration: formData.duration || 60,
       };
-      await axios.post('http://localhost:5000/api/trainings', payload);
+      await axios.post('/api/trainings', payload);
       setShowModal(false);
       setFormData({ topic: '', category: 'Mandatory', venue: '', duration: 60, trainer: '', training_date: '', google_form_link: '', department: '' });
       fetchSchedules();
@@ -100,14 +100,14 @@ export default function Schedule() {
   const handleAddDayOff = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/trainings/trainer/days-off', newDayOff);
+      await axios.post('/api/trainings/trainer/days-off', newDayOff);
       setNewDayOff({ trainer_name: '', date_off: '' });
       fetchTrainerDaysOff();
     } catch (err) { alert('Failed to add day off'); }
   };
   const handleDeleteDayOff = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trainings/trainer/days-off/${id}`);
+      await axios.delete(`/api/trainings/trainer/days-off/${id}`);
       fetchTrainerDaysOff();
     } catch (err) { alert('Failed to delete day off'); }
   };
@@ -134,7 +134,7 @@ export default function Schedule() {
   });
   const openSessionView = async (session) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/trainings/${session.id}/allocations`);
+      const res = await axios.get(`/api/trainings/${session.id}/allocations`);
       setViewSessionModal({ show: true, session, allocations: res.data });
     } catch (err) { alert('Failed to load allocated employees'); }
   };
@@ -143,7 +143,7 @@ export default function Schedule() {
     if (!phone) return;
     try {
       const message = `*HK TRAINING PORTAL*\n\nHello! You have been allocated to a mandatory training session.\n\n*Topic:* ${viewSessionModal.session.topic}\n*Date:* ${new Date(viewSessionModal.session.training_date).toLocaleString()}\n*Venue:* ${viewSessionModal.session.venue}\n*Trainer:* ${viewSessionModal.session.trainer_name}\n\nPlease ensure you attend on time!`;
-      await axios.post('http://localhost:5000/api/whatsapp/send', { phone, message });
+      await axios.post('/api/whatsapp/send', { phone, message });
       alert('WhatsApp Invite Sent!');
     } catch (err) { alert(err.response?.data?.error || 'Failed to send WhatsApp message.'); }
   };
@@ -171,7 +171,7 @@ export default function Schedule() {
       data.append('file', blob, 'upload.csv');
       data.append('department', calUploadDept);
 
-      await axios.post('http://localhost:5000/api/trainings/upload', data);
+      await axios.post('/api/trainings/upload', data);
       alert('Monthly Calendar imported successfully!');
       setShowCalUploadModal(false);
       fetchSchedules();
@@ -265,10 +265,10 @@ export default function Schedule() {
     setSavingAllocations(true);
     try {
       const idsToDelete = [...new Set(allocations.map(s => s.master_id_to_delete).filter(id => id !== null))];
-      for (const id of idsToDelete) await axios.delete(`http://localhost:5000/api/trainings/${id}`);
+      for (const id of idsToDelete) await axios.delete(`/api/trainings/${id}`);
       const promises = allocations.map(async (session) => {
-        const res = await axios.post('http://localhost:5000/api/trainings', { topic: session.topic, category: 'Mandatory', venue: session.venue, duration: 120, trainer: session.trainer, training_date: session.training_date, department: session.department });
-        await axios.post(`http://localhost:5000/api/trainings/${res.data.id}/allocations`, { employees: session.employees });
+        const res = await axios.post('/api/trainings', { topic: session.topic, category: 'Mandatory', venue: session.venue, duration: 120, trainer: session.trainer, training_date: session.training_date, department: session.department });
+        await axios.post(`/api/trainings/${res.data.id}/allocations`, { employees: session.employees });
       });
       await Promise.all(promises);
       alert('Smart Allocations saved to Master Calendar!');
@@ -416,7 +416,7 @@ export default function Schedule() {
     try {
       let saved = 0;
       for (const session of autoSchedulePreview) {
-        const res = await axios.post('http://localhost:5000/api/trainings', {
+        const res = await axios.post('/api/trainings', {
           topic: session.topic,
           category: 'Mandatory',
           venue: session.venue,
@@ -426,7 +426,7 @@ export default function Schedule() {
           department: session.dept,
         });
         if (session.employees.length > 0) {
-          await axios.post(`http://localhost:5000/api/trainings/${res.data.id}/allocations`, {
+          await axios.post(`/api/trainings/${res.data.id}/allocations`, {
             employees: session.employees.map(e => ({ emp_no: e.emp_no, name: e.name })),
           });
         }

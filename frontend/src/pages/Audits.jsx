@@ -20,10 +20,10 @@ export default function Audits() {
     setLoading(true);
     try {
       const [auditsRes, topRes, balRes, empRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/audits'),
-        axios.get(`http://localhost:5000/api/audits/top-performers?month=${month}&year=${year}`),
-        axios.get(`http://localhost:5000/api/audits/balances?month=${month}&year=${year}`),
-        axios.get('http://localhost:5000/api/employees')
+        axios.get('/api/audits'),
+        axios.get(`/api/audits/top-performers?month=${month}&year=${year}`),
+        axios.get(`/api/audits/balances?month=${month}&year=${year}`),
+        axios.get('/api/employees')
       ]);
       setAudits(auditsRes.data);
       setTopPerformers(topRes.data);
