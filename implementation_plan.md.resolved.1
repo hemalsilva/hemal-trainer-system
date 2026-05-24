@@ -1,0 +1,84 @@
+# Comprehensive Hotel Training Management System
+
+This document outlines the architectural plan and phased implementation for the full-scale Hotel Training Management System. The scope is massive, encompassing web, mobile, OCR, Google Forms integration, and role-based access control.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Scope & Phasing:** Building this entire system at once is a monumental task. I strongly recommend a phased approach so we can validate core features before moving to complex integrations.
+> **Please review the proposed phases below and confirm if you agree with this approach, or if you want me to prioritize a specific feature (e.g., OCR or Flutter App) first.**
+
+> [!WARNING]
+> **Third-Party Services:** Features like AWS S3, Google Vision API/AWS Textract, Google Sheets API, and Firebase Cloud Messaging require active developer accounts and API keys. We will implement the code for these integrations, but you will need to provision these services and provide the API keys in the `.env` file for them to work.
+
+## Open Questions
+
+1. **OCR Engine:** You mentioned Google Vision, Tesseract, or AWS Textract. Do you have a preference? (Tesseract is free and local, but Google Vision/Textract are far more accurate for handwritten forms).
+2. **Mobile App:** Do you want me to initialize the Flutter app in this workspace alongside the React frontend and Node backend?
+
+---
+
+## Proposed Architecture
+
+### 1. Database Schema Update (PostgreSQL)
+We need a robust schema to handle role-based access, OCR data, Google Forms metadata, and certificates.
+- `users`: Includes `role` (Admin, HR, Trainer, etc.) and `password_hash`.
+- `departments`: Mapping of hotel departments.
+- `trainings`: Expanded with venue, category, and Google Form links.
+- `attendance`: Manual, QR, and OCR entries.
+- `ojt_records`: OJT skills, trainer signatures, and ratings.
+- `questionnaire_results`: Scores mapped from Google Forms/Sheets.
+
+### 2. Backend Enhancements (Node.js/Express)
+- **Role-Based Auth Middleware:** JWT implementation verifying user roles.
+- **Excel Module:** Using `xlsx` or `exceljs` to parse uploads and bulk-insert to DB.
+- **OCR Module:** Integration with the chosen OCR engine to parse uploaded images.
+- **Google Sheets API:** Webhooks or chron jobs to pull form responses.
+- **PDF Generation:** Using `pdfmake` for certificates.
+
+### 3. Frontend Web App (React/Vite)
+- **Luxury UI/UX:** Dark mode with gold accents `#D4AF37`.
+- **Role-Based Routing:** Admin panels vs Trainer panels.
+- **Analytics Dashboard:** Integration with `recharts` for completion percentages and heatmaps.
+- **File Uploads:** Drag-and-drop zones for Excel sheets and OCR images.
+
+### 4. Mobile App (Flutter)
+- **Employee App:** View schedules, scan QR for attendance, view certificates.
+- **Trainer App:** Mark attendance, approve OJT.
+
+---
+
+## Phased Implementation Plan
+
+### Phase 1: Core Foundation & Luxury Web UI (Recommended First Step)
+1. Update database schema for roles, departments, and advanced training logs.
+2. Implement JWT Role-Based Auth on backend.
+3. Overhaul the React frontend to the luxury dark/gold theme.
+4. Build the Excel Import/Export employee module.
+
+### Phase 2: Attendance & OJT
+1. QR Code generation and validation backend endpoints.
+2. OJT Module with checklist and rating system.
+3. Analytics dashboard with charts.
+
+### Phase 3: Integrations (OCR & Google Forms)
+1. Setup Google Sheets API integration to pull form data.
+2. Implement OCR pipeline for uploaded attendance sheets.
+
+### Phase 4: Mobile & Output
+1. Initialize Flutter application.
+2. Implement PDF Certificate Generator.
+3. Firebase Cloud Messaging push notifications.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Postman/Jest tests for role-based API access.
+- Unit tests for the Excel parsing logic.
+
+### Manual Verification
+- Testing Excel upload by uploading a CSV and verifying DB insertion.
+- Testing QR generation visually on the web app.
+- Compiling the Flutter app for Android/iOS to verify UI layout.

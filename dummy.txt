@@ -1,0 +1,3 @@
+const express = require('express');
+const router = express.express();
+// Wait, oops, express.Router(). Will fix in actual code below.

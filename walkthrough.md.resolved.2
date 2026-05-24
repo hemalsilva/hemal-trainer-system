@@ -1,0 +1,27 @@
+# Hemal Trainer Management System - Phase 2 Complete
+
+Phase 2 of the Hotel Training Management System is now fully implemented! This phase focused on Attendance mechanisms and On-The-Job Training (OJT) supervision.
+
+## Overview of Phase 2 Changes
+
+### 1. Attendance & QR Integration
+- **Backend (`routes/attendance.js`)**: Created new API endpoints to handle QR Code attendance. 
+  - `POST /api/attendance/generate-qr`: Generates a secure, time-expiring base64 token for a training session.
+  - `POST /api/attendance/scan`: Allows employees to scan and automatically records them as 'Present' in the DB.
+- **Frontend (`pages/Schedule.jsx`)**: Designed a luxury Daily/Weekly Training Schedule calendar view. Training managers can view today's sessions and click the **"Generate QR"** button to allow staff to scan for attendance.
+
+### 2. On-The-Job Training (OJT) Evaluation
+- **Backend (`routes/ojt.js`)**: Upgraded the POST endpoint to support complex assessments, including `rating` (1-5 stars), `assessment_notes`, and a definitive `pass_fail` boolean.
+- **Frontend (`pages/OJT.jsx`)**: Created a beautiful Supervisor Assessment terminal. It includes:
+  - An interactive Skill Checklist
+  - A 1-to-5 Star Performance Rating selector
+  - A definitive Pass/Fail verdict
+  - Text area for trainer notes
+
+## How to Test
+If your frontend development server is still running from Phase 1, you will immediately see two new tabs on the left-side navigation panel:
+1. **Schedule**: Click here to view the daily training calendar and the QR Code generator buttons.
+2. **OJT Assessment**: Click here to view the supervisor terminal for rating employees on-the-job.
+
+> [!TIP]
+> **What's Next?** Phase 3 covers the complex Integrations: **OCR Data Extraction** (for scanning physical attendance sheets) and **Google Forms Integration** (for syncing training feedback).

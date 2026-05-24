@@ -1,0 +1,65 @@
+# Hemal Trainer Management System
+
+This plan outlines the steps to build the web-based system for the "Hemal Trainer Management" application based on the provided starter code specifications. The project will consist of a Node.js/Express backend and a React (Vite) frontend.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Database Selection:** The specifications call for a PostgreSQL database. 
+> - Do you already have a PostgreSQL database running locally or remotely (like Supabase/AWS)? 
+> - If you want to get up and running quickly without installing PostgreSQL, we can use **SQLite** for the initial development phase and migrate to PostgreSQL later. Please confirm which database you would like to proceed with.
+
+> [!WARNING]
+> **Scope of Work:** The specification includes a Flutter mobile app. Since you requested to "create webbasesystem", this plan currently only covers the **Backend API** and the **Web Admin Panel (React)**. If you also need the Flutter mobile app initialized, please let me know.
+
+## Proposed Changes
+
+We will create a monorepo structure with `/backend` and `/frontend` folders.
+
+### Backend Application (`/backend`)
+We will initialize a Node.js application and implement the core REST APIs for the management system.
+
+#### [NEW] `backend/server.js`
+- Core Express application setup, configuring CORS and JSON middleware.
+- Routing for `/api/employees`, `/api/trainings`, `/api/ojt`, and `/api/auth`.
+
+#### [NEW] `backend/config/db.js`
+- Database connection configuration.
+
+#### [NEW] `backend/routes/employees.js`
+- API endpoints to fetch and create employees.
+
+#### [NEW] `backend/routes/trainings.js`
+- API endpoints to fetch and create training sessions.
+
+#### [NEW] `backend/routes/auth.js`
+- JWT authentication endpoint for login.
+
+### Web Admin Panel (`/frontend`)
+We will use Vite with React and Tailwind CSS to create a modern, responsive web dashboard with a premium aesthetic.
+
+#### [NEW] `frontend/package.json`
+- Initialize Vite project and install dependencies (axios, react-router-dom, tailwindcss, lucide-react for icons).
+
+#### [NEW] `frontend/src/index.css`
+- Tailwind directives and custom design tokens for a rich, modern aesthetic.
+
+#### [NEW] `frontend/src/App.jsx`
+- Main application routing using `react-router-dom`.
+
+#### [NEW] `frontend/src/pages/Dashboard.jsx`
+- A visually impressive dashboard showing key metrics (Employees, Trainings, Pending, Completion rate).
+
+#### [NEW] `frontend/src/pages/Employees.jsx`
+- A data table view to list and manage employees.
+
+## Verification Plan
+
+### Automated Tests
+- We will verify that the backend server starts successfully and can connect to the database.
+- We will verify that the React frontend builds and starts locally without errors.
+
+### Manual Verification
+- We will start both the frontend and backend servers.
+- The web app should load at `http://localhost:5173` showing the modern Hemal Trainer Management Dashboard.
+- We will test API connections by navigating to the Employees page and ensuring data flows correctly from the backend to the frontend.

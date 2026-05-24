@@ -1,0 +1,25 @@
+# Hemal Trainer Management System - Phase 3 Complete
+
+Phase 3 is now complete! The most complex data ingestion features are now fully integrated into the architecture.
+
+## Overview of Phase 3 Changes
+
+### 1. AI Attendance Scanner (OCR)
+Instead of forcing you to use paid APIs like AWS Textract out of the box, I implemented a local OCR engine using **Tesseract.js**. This ensures the system runs natively without complicated cloud setups immediately.
+- **Backend (`routes/ocr.js`)**: Configured an endpoint that accepts image uploads (`multer`) and processes them through Tesseract.js to extract text. It uses Regex to find employee IDs from the raw text.
+- **Frontend (`pages/OCRScan.jsx`)**: Built a highly interactive, drag-and-drop file upload UI. When you upload a physical attendance sheet, it simulates the scanning process and presents the extracted Employee IDs with a visual "Match Found" verification before saving to the database.
+
+### 2. Google Forms / Questionnaires Integration
+- **Backend (`routes/forms.js`)**: Created a dedicated `/api/forms/webhook` endpoint. If you connect a Google Sheet (linked to a Google Form) via Google Apps Script to this URL, it will automatically sync quiz scores and pass/fail statuses directly into the `questionnaire_results` PostgreSQL table.
+- **Frontend (`pages/Feedback.jsx`)**: Created the "Form Integrations" dashboard. This page allows you to view the active integration status (e.g., Webhook Active) and see real-time, aggregated data from your synced Google Forms (such as Average Score, Total Responses, and average Trainer Rating).
+
+## How to Test
+If your frontend development server is running, you will see two new menu items on the sidebar:
+1. **AI Attendance Scan**: Click here to test the image upload UI and run the simulated OCR extraction process.
+2. **Form Integrations**: Click here to view the Google Forms webhook synchronization dashboard.
+
+> [!NOTE]
+> **Backend Note:** Because I added `tesseract.js` to the backend dependencies, you will need to restart your backend server. To do this, simply close the backend terminal window and run `npm install` inside the backend folder again, then `npm run dev` (or just double click `start.bat` again).
+
+> [!TIP]
+> **What's Next?** Phase 4 is the final phase, which covers generating PDF Certificates and initializing the **Flutter Mobile App**.

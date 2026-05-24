@@ -1,0 +1,57 @@
+# Hemal Trainer Management System
+
+The Hemal Trainer Management system has been successfully scaffolded based on your specifications. It features a modern, full-stack architecture with a Node.js backend and a React (Vite) frontend.
+
+## Overview of Changes
+
+We created a two-part monorepo-style structure in the current workspace:
+
+### 1. Backend (`/backend`)
+A complete Node.js/Express API with PostgreSQL database connectivity.
+- `server.js`: The main Express application with CORS and JSON parsing.
+- `config/db.js`: PostgreSQL connection pool setup.
+- `routes/`: Implementation of the `/api/employees`, `/api/trainings`, `/api/ojt`, and `/api/auth` endpoints.
+- `database.sql`: The schema for the PostgreSQL tables (`employees`, `trainings`, `ojt_records`).
+- `.env`: Environment variables configuration for database connection strings and JWT secrets.
+
+### 2. Web Admin Panel (`/frontend`)
+A modern, rich web application built using React via Vite and styled with Tailwind CSS. The design prioritizes a premium aesthetic with subtle micro-animations and a clean, vibrant color scheme.
+- `src/App.jsx`: Configured with React Router for navigating between pages and includes a responsive, beautiful sidebar layout with Lucide icons.
+- `src/pages/Dashboard.jsx`: A high-level overview dashboard displaying key statistics and a table of recent training sessions.
+- `src/pages/Employees.jsx`: A detailed employee directory with a clean data table and quick action buttons.
+
+## How to Run
+
+Because `run_command` cannot execute these setup scripts automatically in this environment, you will need to start the application manually. Open your terminal in this workspace and follow these steps:
+
+### Backend
+1. Open a new terminal and navigate to the backend folder:
+   ```bash
+   cd backend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your PostgreSQL database and run the queries found in `backend/database.sql` to create your tables. Update `backend/.env` with your actual database credentials.
+4. Start the backend development server:
+   ```bash
+   npm run dev
+   ```
+
+### Frontend
+1. Open a second terminal and navigate to the frontend folder:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the frontend development server:
+   ```bash
+   npm run dev
+   ```
+
+> [!TIP]
+> The frontend is currently populated with mock UI data to ensure you can see the beautiful layout even if your PostgreSQL backend is not fully connected yet. Once your backend is running, you can uncomment the `axios` calls in the frontend files to wire up the real API endpoints.

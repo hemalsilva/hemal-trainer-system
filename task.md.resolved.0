@@ -1,0 +1,11 @@
+- `[/]` Initialize Project Structure
+  - `[ ]` Setup Backend (Node.js/Express)
+  - `[ ]` Setup Frontend (Vite/React)
+- `[ ]` Implement Backend API
+  - `[ ]` Database Connection
+  - `[ ]` API Routes (Employees, Trainings, Auth)
+- `[ ]` Implement Frontend
+  - `[ ]` Tailwind CSS Setup
+  - `[ ]` Dashboard Page
+  - `[ ]` Employees Page
+- `[ ]` Final Verification

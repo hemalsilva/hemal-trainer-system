@@ -1,0 +1,9 @@
+# Phase 4: Mobile App & Certificates
+
+- `[x]` Backend & Web Output
+  - `[x]` PDF Certificate Generator Route (`pdfmake`)
+  - `[x]` Certificates Management Page (React)
+- `[x]` Flutter Mobile App Initialization
+  - `[x]` Setup Flutter `pubspec.yaml`
+  - `[x]` Create `main.dart` with Luxury Dark Theme
+  - `[x]` Create API Service for connections
