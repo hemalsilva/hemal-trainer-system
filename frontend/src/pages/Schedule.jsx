@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight, Plus, X, Upload, Printer, CheckCircle, Save, CalendarDays, Filter, UserMinus, Trash2, MessageCircle, BookOpen, RefreshCw } from 'lucide-react';
 
-const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'General'];
+const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
 const DEPT_COLORS = {
   'Rooms':       'bg-blue-500/20 text-blue-300 border-blue-500/30',
