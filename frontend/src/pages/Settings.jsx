@@ -98,19 +98,12 @@ function FormCard({ link, onDelete }) {
 }
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState('certificates');
+  const [activeTab, setActiveTab] = useState('photos');
   
-  // Certificate Calibration State
-  const [template, setTemplate] = useState(localStorage.getItem('cert_template') || null);
-  const [activeTag, setActiveTag] = useState(null);
-  const [coords, setCoords] = useState(JSON.parse(localStorage.getItem('cert_coords')) || {
-    name: { x: 50, y: 40 },
-    topic: { x: 50, y: 55 },
-    date: { x: 50, y: 70 }
-  });
-  const [saveStatus, setSaveStatus] = useState('');
-  
-  const imageRef = useRef(null);
+  // Bulk Photos State
+  const [photosToUpload, setPhotosToUpload] = useState([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [photoUploadStatus, setPhotoUploadStatus] = useState('');
 
   // Form Integrations State
   const attendance = useFormLinks(STORAGE_KEYS.attendance);
@@ -167,39 +160,38 @@ export default function Settings() {
     setIsBackingUp(false);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTemplate(reader.result);
-        localStorage.setItem('cert_template', reader.result);
-      };
-      reader.readAsDataURL(file);
+  const handlePhotoSelect = (e) => {
+    if (e.target.files) {
+      setPhotosToUpload(Array.from(e.target.files));
     }
   };
 
-  const handleImageClick = (e) => {
-    if (!activeTag || !imageRef.current) return;
-    
-    const rect = imageRef.current.getBoundingClientRect();
-    const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
-    const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+  const handleBulkPhotoUpload = async () => {
+    if (photosToUpload.length === 0) return;
+    setUploadingPhotos(true);
+    setPhotoUploadStatus('');
 
-    const newCoords = {
-      ...coords,
-      [activeTag]: { x: xPercent, y: yPercent }
-    };
-    
-    setCoords(newCoords);
-    localStorage.setItem('cert_coords', JSON.stringify(newCoords));
-    setActiveTag(null);
-  };
+    const formData = new FormData();
+    photosToUpload.forEach(file => {
+      formData.append('photos', file);
+    });
 
-  const saveConfig = () => {
-    localStorage.setItem('cert_coords', JSON.stringify(coords));
-    setSaveStatus('Template configuration saved successfully!');
-    setTimeout(() => setSaveStatus(''), 3000);
+    try {
+      const res = await fetch('http://localhost:5000/api/employees/bulk-photos', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPhotoUploadStatus(`Successfully mapped ${data.processed} photos to employees!`);
+        setPhotosToUpload([]);
+      } else {
+        setPhotoUploadStatus('Upload failed: ' + data.error);
+      }
+    } catch (err) {
+      setPhotoUploadStatus('Network error during upload.');
+    }
+    setUploadingPhotos(false);
   };
 
   return (
@@ -214,13 +206,13 @@ export default function Settings() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800 mb-8 overflow-x-auto">
-        {['certificates', 'integrations', 'backups', 'general'].map((tab) => (
+        {['photos', 'integrations', 'backups', 'general'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-gold border-b-2 border-brand-gold bg-brand-gold/5' : 'text-gray-400 hover:text-white'}`}
           >
-            {tab === 'certificates' ? 'Certificate Template Manager' : tab === 'integrations' ? 'Form Integrations' : tab === 'backups' ? 'Backups & Storage' : 'General Preferences'}
+            {tab === 'photos' ? 'Bulk Staff Photos' : tab === 'integrations' ? 'Form Integrations' : tab === 'backups' ? 'Backups & Storage' : 'General Preferences'}
           </button>
         ))}
       </div>

@@ -109,5 +109,38 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+
+// POST bulk upload photos
+router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: 'No photos uploaded' });
+  }
+
+  try {
+    let processedCount = 0;
+    
+    for (const file of req.files) {
+      const extIndex = file.originalname.lastIndexOf('.');
+      const emp_no = extIndex > 0 ? file.originalname.substring(0, extIndex) : file.originalname;
+      
+      const photo_url = file.path.replace(/\\/g, '/');
+      
+      const result = await pool.query(
+        'UPDATE employees SET photo_url = $1 WHERE UPPER(emp_no) = UPPER($2)',
+        [photo_url, emp_no]
+      );
+      
+      if (result.rowCount > 0) {
+        processedCount++;
+      }
+    }
+
+    res.json({ message: 'Photos uploaded', processed: processedCount, totalFiles: req.files.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
 
