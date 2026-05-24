@@ -1,3 +1,4 @@
+import * as XLSX from 'xlsx';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight, Plus, X, Upload, Printer, CheckCircle, Save, CalendarDays, Filter, UserMinus, Trash2, MessageCircle, BookOpen, RefreshCw } from 'lucide-react';
@@ -152,15 +153,32 @@ export default function Schedule() {
     const file = e.target.files[0];
     if (!file) return;
     setUploadingCal(true);
-    const data = new FormData();
-    data.append('file', file);
-    data.append('department', calUploadDept);
+
     try {
+      let csvContent = '';
+      if (file.name.endsWith('.csv')) {
+        csvContent = await file.text();
+      } else {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        csvContent = XLSX.utils.sheet_to_csv(worksheet);
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const data = new FormData();
+      data.append('file', blob, 'upload.csv');
+      data.append('department', calUploadDept);
+
       await axios.post('http://localhost:5000/api/trainings/upload', data);
       alert('Monthly Calendar imported successfully!');
       setShowCalUploadModal(false);
       fetchSchedules();
-    } catch (err) { alert('Error uploading calendar CSV'); }
+    } catch (err) { 
+      console.error(err);
+      alert('Error uploading calendar file'); 
+    }
     finally { setUploadingCal(false); }
   };
 
@@ -518,6 +536,56 @@ export default function Schedule() {
             </div>
           );
         })}
+      </div>
+
+      
+      {/* Detailed Training Schedule List */}
+      <div className="mt-12 bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden">
+        <div className="p-6 border-b border-gray-800 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2"><BookOpen className="text-brand-gold w-6 h-6" /> Detailed Training Schedule</h2>
+            <p className="text-gray-400 mt-1">Detailed list view for the selected month and department.</p>
+          </div>
+          <button onClick={() => window.print()} className="print:hidden bg-gray-800 hover:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700">
+            <Printer className="w-5 h-5" /> Print Detailed Schedule
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[#1a1a1a] border-b border-gray-800 text-gray-400 text-sm uppercase tracking-wider">
+                <th className="p-4 font-semibold">Date & Time</th>
+                <th className="p-4 font-semibold">Department</th>
+                <th className="p-4 font-semibold">Topic</th>
+                <th className="p-4 font-semibold">Trainer</th>
+                <th className="p-4 font-semibold text-right">Venue</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-800">
+              {filteredSchedules.filter(s => new Date(s.training_date).getMonth() === currentMonth && new Date(s.training_date).getFullYear() === currentYear).length === 0 ? (
+                <tr><td colSpan="5" className="p-8 text-center text-gray-500">No training sessions scheduled for this month.</td></tr>
+              ) : (
+                filteredSchedules.filter(s => new Date(s.training_date).getMonth() === currentMonth && new Date(s.training_date).getFullYear() === currentYear)
+                .sort((a,b) => new Date(a.training_date) - new Date(b.training_date))
+                .map(session => (
+                  <tr key={session.id} className="hover:bg-[#1a1a1a] transition-colors">
+                    <td className="p-4 text-gray-300 font-medium whitespace-nowrap">
+                      {new Date(session.training_date).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${DEPT_COLORS[session.department] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>
+                        {session.department}
+                      </span>
+                    </td>
+                    <td className="p-4 font-bold text-white">{session.topic}</td>
+                    <td className="p-4 text-gray-400">{session.trainer_name || 'TBD'}</td>
+                    <td className="p-4 text-right text-gray-400">{session.venue || 'N/A'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Session View Modal */}
@@ -895,7 +963,7 @@ export default function Schedule() {
           <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-md w-full p-8 relative">
             <button onClick={() => setShowCalUploadModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2"><CalendarDays className="text-brand-gold" /> Import Calendar</h2>
-            <p className="text-gray-400 text-sm mb-6">Upload a monthly CSV schedule for a specific department.</p>
+            <p className="text-gray-400 text-sm mb-6">Upload a monthly Excel (.xlsx) or CSV schedule for a specific department.</p>
             <div className="space-y-5">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Target Department</label>
@@ -905,7 +973,7 @@ export default function Schedule() {
               </div>
               <div className="bg-gray-900 border border-dashed border-gray-700 rounded-xl p-6 text-center">
                 <p className="text-xs text-gray-500 mb-4 text-left font-mono">Format: Date(YYYY-MM-DD), Time(HH:MM), Topic, Venue, Trainer</p>
-                <input type="file" accept=".csv" ref={calFileInputRef} onChange={handleCalendarUpload} className="hidden" />
+                <input type="file" accept=".csv, .xlsx, .xls" ref={calFileInputRef} onChange={handleCalendarUpload} className="hidden" />
                 <button onClick={() => calFileInputRef.current?.click()} disabled={uploadingCal} className="bg-brand-gold text-black px-6 py-2.5 rounded-lg font-bold hover:bg-brand-goldHover transition-colors w-full">
                   {uploadingCal ? 'Uploading...' : 'Select CSV File'}
                 </button>
