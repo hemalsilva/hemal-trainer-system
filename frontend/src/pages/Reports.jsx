@@ -8,6 +8,9 @@ export default function Reports() {
   const [selectedReportTab, setSelectedReportTab] = useState('overview');
   const [employees, setEmployees] = useState([]);
   const [birthdayMonth, setBirthdayMonth] = useState(new Date().getMonth());
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+
+  const departments = [...new Set(employees.map(e => e.department).filter(Boolean))];
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -134,6 +137,15 @@ export default function Reports() {
           <div>
             <label className="block text-sm text-gray-400 mb-1">End Date</label>
             <input type="date" value={dateRange.end} onChange={(e) => setDateRange({...dateRange, end: e.target.value})} className="bg-[#181818] border border-gray-700 rounded-lg p-2 text-white focus:border-brand-gold outline-none" style={{colorScheme:'dark'}}/>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Department</label>
+            <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none">
+              <option value="">All Departments</option>
+              {departments.map((dept, i) => (
+                <option key={i} value={dept}>{dept}</option>
+              ))}
+            </select>
           </div>
           <div className="flex gap-3">
             <button className="bg-brand-gold/10 text-brand-gold hover:bg-brand-gold/20 border border-brand-gold/30 px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
