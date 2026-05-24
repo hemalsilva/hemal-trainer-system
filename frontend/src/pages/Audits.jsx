@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Trophy, Calendar as CalendarIcon, Loader2, ArrowUpRight, ArrowDownRight, Award, History, LayoutDashboard } from 'lucide-react';
+import { CheckCircle, Trophy, Calendar as CalendarIcon, Loader2, ArrowUpRight, ArrowDownRight, Award, History, LayoutDashboard , X} from 'lucide-react';
 import axios from 'axios';
 
 export default function Audits() {
@@ -10,18 +10,28 @@ export default function Audits() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [activeTab, setActiveTab] = useState('overview');
+  const [department, setDepartment] = useState('All');
+  const [selectedType, setSelectedType] = useState(null);
+  const [employeeMap, setEmployeeMap] = useState({});
+  const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
   const fetchAudits = async () => {
     setLoading(true);
     try {
-      const [auditsRes, topRes, balRes] = await Promise.all([
+      const [auditsRes, topRes, balRes, empRes] = await Promise.all([
         axios.get('http://localhost:5000/api/audits'),
         axios.get(`http://localhost:5000/api/audits/top-performers?month=${month}&year=${year}`),
-        axios.get(`http://localhost:5000/api/audits/balances?month=${month}&year=${year}`)
+        axios.get(`http://localhost:5000/api/audits/balances?month=${month}&year=${year}`),
+        axios.get('http://localhost:5000/api/employees')
       ]);
       setAudits(auditsRes.data);
       setTopPerformers(topRes.data);
       setBalances(balRes.data);
+      if (empRes && empRes.data) {
+        const map = {};
+        empRes.data.forEach(e => map[e.emp_no] = e.department);
+        setEmployeeMap(map);
+      }
     } catch (err) {
       console.error('Error fetching audits:', err);
     } finally {
@@ -39,7 +49,24 @@ export default function Audits() {
     const medals = ['text-yellow-400', 'text-gray-300', 'text-amber-600'];
     const bgColors = ['bg-yellow-400/10 border-yellow-400/30', 'bg-gray-300/10 border-gray-300/30', 'bg-amber-600/10 border-amber-600/30'];
     
-    return (
+    
+  const filteredAudits = audits.filter(a => {
+    if (department !== 'All' && employeeMap[a.emp_no] !== department) return false;
+    if (selectedType && a.audit_type !== selectedType) return false;
+    return true;
+  });
+
+  const filteredTopPerformers = filteredTopPerformers.filter(p => {
+    if (department !== 'All' && employeeMap[p.emp_no] !== department) return false;
+    return true;
+  });
+
+  const filteredBalances = balances.filter(b => {
+    if (department !== 'All' && b.department !== department) return false;
+    return true;
+  });
+
+  return (
       <div key={`${performer.emp_no}-${performer.audit_type}-${index}`} className={`flex items-center justify-between p-4 rounded-xl border ${bgColors[index] || 'bg-gray-800/50 border-gray-700'}`}>
         <div className="flex items-center gap-4">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${index < 3 ? medals[index] : 'text-gray-400'}`}>
@@ -90,7 +117,15 @@ export default function Audits() {
         </div>
       </header>
 
-      {/* Tabs */}
+      <select 
+            value={department} 
+            onChange={(e) => setDepartment(e.target.value)}
+            className="bg-transparent text-white font-semibold outline-none cursor-pointer border-l border-gray-700 pl-3"
+          >
+            <option value="All" className="bg-gray-900">All Departments</option>
+            {DEPARTMENTS.map(d => <option key={d} value={d} className="bg-gray-900">{d}</option>)}
+          </select>
+        {/* Tabs */}
       <div className="flex items-center gap-4 border-b border-gray-800 mb-8 pb-4">
         <button 
           onClick={() => setActiveTab('overview')}
@@ -118,7 +153,7 @@ export default function Audits() {
           {/* Top Performers Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {auditTypes.map((type, idx) => {
-              const top = topPerformers.filter(t => t.audit_type === type).slice(0, 3);
+              const top = filteredTopPerformers.filter(t => t.audit_type === type).slice(0, 3);
               const colors = [
                 { bg: 'bg-blue-500/20', text: 'text-blue-400' },
                 { bg: 'bg-purple-500/20', text: 'text-purple-400' },
@@ -130,7 +165,7 @@ export default function Audits() {
               const color = colors[idx % colors.length];
 
               return (
-                <div key={type} className="bg-brand-card border border-gray-800 rounded-2xl p-6 shadow-lg flex flex-col">
+                <div key={type} className="bg-brand-card border border-gray-800 rounded-2xl p-6 shadow-lg flex flex-col cursor-pointer hover:border-brand-gold transition-colors" onClick={() => setSelectedType(selectedType === type ? null : type)}>
                   <div className="flex items-center gap-3 mb-6">
                     <div className={`w-10 h-10 rounded-full ${color.bg} flex items-center justify-center`}>
                       <ArrowUpRight className={`w-5 h-5 ${color.text}`} />
@@ -169,14 +204,14 @@ export default function Audits() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
-                  {audits.length === 0 ? (
+                  {filteredAudits.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="p-8 text-center text-gray-500">
                         No recent audits found. Audits submitted via Google Forms will appear here automatically.
                       </td>
                     </tr>
                   ) : (
-                    audits.map((audit) => (
+                    filteredAudits.map((audit) => (
                       <tr key={audit.id} className="hover:bg-[#1a1a1a] transition-colors">
                         <td className="p-4 whitespace-nowrap text-gray-300">
                           {new Date(audit.audit_date).toLocaleDateString()}
@@ -230,14 +265,14 @@ export default function Audits() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {balances.length === 0 ? (
+                {filteredBalances.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="p-8 text-center text-gray-500">
                       No employees found.
                     </td>
                   </tr>
                 ) : (
-                  balances.map(b => (
+                  filteredBalances.map(b => (
                     <tr key={b.emp_no} className="hover:bg-[#1a1a1a] transition-colors">
                       <td className="p-4">
                         <div className="font-bold text-white">{b.emp_name}</div>
