@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: hemal-trainer-system
+    env: node
+    buildCommand: "cd frontend && npm install && npm run build && cd ../backend && npm install"
+    startCommand: "cd backend && npm start"
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_dvm1yAkENnO8@ep-shiny-tooth-aqfpdhtk.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
