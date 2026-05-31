@@ -27,7 +27,7 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-brand-dark flex flex-col justify-center items-center p-4 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-brand-dark flex flex-col justify-center items-center p-4 relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-brand-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
       
