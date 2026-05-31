@@ -11,6 +11,7 @@ import AttendancePortal from './pages/AttendancePortal';
 import Settings from './pages/Settings';
 import Audits from './pages/Audits';
 import Login from './pages/Login';
+import ErrorBoundary from './ErrorBoundary';
 import { LayoutDashboard, Users, BookOpen, Settings as SettingsIcon, LogOut, Award, Calendar, ClipboardCheck, ScanLine, FormInput, PieChart, CheckCircle } from 'lucide-react';
 
 function Sidebar() {
@@ -96,6 +97,7 @@ function App() {
               <Login onLogin={setIsAuthenticated} />
             ) : (
               <>
+                <ErrorBoundary>
                 <Sidebar />
                 <main className="flex-1 overflow-auto relative w-full">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-64 bg-brand-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -114,6 +116,7 @@ function App() {
                     </Routes>
                   </div>
                 </main>
+                </ErrorBoundary>
               </>
             )
           } />
