@@ -20,7 +20,7 @@ export default function Login({ onLogin }) {
         onLogin(true);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid username or password');
+      const eData = err.response?.data?.error; setError(typeof eData === 'string' ? eData : (eData?.message || 'Invalid username or password'));
     } finally {
       setLoading(false);
     }
@@ -102,3 +102,4 @@ export default function Login({ onLogin }) {
     </div>
   );
 }
+
