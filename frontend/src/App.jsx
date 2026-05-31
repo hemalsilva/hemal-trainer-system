@@ -85,7 +85,7 @@ function App() {
 
   return (
     <HashRouter>
-      <div className="flex h-screen bg-brand-dark text-white font-sans selection:bg-brand-gold selection:text-black">
+      <div className="flex w-full h-screen bg-brand-dark text-white font-sans selection:bg-brand-gold selection:text-black">
         <Routes>
           {/* Public Route - Employee Attendance Scanning */}
           <Route path="/attendance/:id" element={<AttendancePortal />} />
