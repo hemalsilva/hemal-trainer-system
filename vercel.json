@@ -21,6 +21,13 @@
     {
       "src": "/(.*)",
       "dest": "/frontend/dist/"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/dist/index.html"
     }
   ]
 }
