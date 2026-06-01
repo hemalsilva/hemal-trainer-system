@@ -7,15 +7,15 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 
 // Ensure uploads directories exist
-const uploadsDir = 'uploads/photos';
+const uploadsDir = '/tmp/photos';
 try { if (!fs.existsSync(uploadsDir)){ fs.mkdirSync(uploadsDir, { recursive: true }); } } catch(e) {}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === 'photo') {
-      cb(null, 'uploads/photos/');
+      cb(null, '/tmp/photos/');
     } else {
-      cb(null, 'uploads/');
+      cb(null, '/tmp/');
     }
   },
   filename: function (req, file, cb) {

@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const Tesseract = require('tesseract.js');
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: '/tmp/' });
 
 // POST endpoint for OCR extraction
 router.post('/extract', upload.single('image'), async (req, res) => {
