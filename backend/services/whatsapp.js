@@ -1,5 +1,5 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+// const { Client, LocalAuth } = require('whatsapp-web.js');
+// const qrcode = require('qrcode-terminal');
 
 let client;
 let isReady = false;
@@ -80,3 +80,4 @@ module.exports = {
   sendWhatsAppMessage,
   isReady: () => isReady
 };
+
