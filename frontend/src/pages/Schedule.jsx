@@ -481,11 +481,11 @@ export default function Schedule() {
             <CalendarDays className="w-5 h-5" /> Import Calendar
           </button>
           <button onClick={openRosterModal} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
-            <Upload className="w-5 h-5" /> Auto-Allocate Roster
+            <Upload className="w-5 h-5" /> Daily Staff Allocation
           </button>
           {/* NEW Monthly Roster Button */}
           <button onClick={openMonthlyRosterModal} className="bg-gradient-to-r from-brand-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg shadow-brand-gold/20">
-            <RefreshCw className="w-5 h-5" /> Monthly Roster Sync
+            <RefreshCw className="w-5 h-5" /> Monthly Staff Allocation
           </button>
           <button onClick={() => setShowModal(true)} className="bg-brand-gold hover:bg-brand-goldHover text-black px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-lg">
             <Plus className="w-5 h-5" /> Add Session
