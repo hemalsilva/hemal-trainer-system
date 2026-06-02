@@ -1,8 +1,9 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-// const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode');
 
 let client;
 let isReady = false;
+let qrCodeData = null;
 
 const initializeWhatsApp = () => {
   console.log('\n=============================================');
@@ -10,54 +11,59 @@ const initializeWhatsApp = () => {
   console.log('=============================================\n');
 
   try {
-  client = new Client({
-    authStrategy: new LocalAuth(), // Saves the session locally so you don't have to scan every time
-    puppeteer: {
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu'
-      ]
-    }
-  });
+    client = new Client({
+      authStrategy: new LocalAuth(),
+      puppeteer: {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu'
+        ]
+      }
+    });
 
-  client.on('qr', (qr) => {
-    console.log('>>> ACTION REQUIRED: Scan this QR Code with your WhatsApp app to link the system!\n');
-    qrcode.generate(qr, { small: true });
-  });
+    client.on('qr', async (qr) => {
+      console.log('>>> ACTION REQUIRED: Scan the QR Code in the Settings page!\n');
+      try {
+        qrCodeData = await qrcode.toDataURL(qr);
+      } catch (err) {
+        console.error('Failed to generate QR code data URL', err);
+      }
+    });
 
-  client.on('ready', () => {
-    isReady = true;
-    console.log('\n✅ WHATSAPP ENGINE IS READY!');
-    console.log('The system is now securely linked to your phone number and ready to send schedules.\n');
-  });
+    client.on('ready', () => {
+      isReady = true;
+      qrCodeData = null;
+      console.log('\n✅ WHATSAPP ENGINE IS READY!');
+      console.log('The system is now securely linked to your phone number and ready to send schedules.\n');
+    });
 
-  client.on('authenticated', () => {
-    console.log('WhatsApp Authenticated Successfully!');
-  });
+    client.on('authenticated', () => {
+      console.log('WhatsApp Authenticated Successfully!');
+    });
 
-  client.on('auth_failure', msg => {
-    console.error('WhatsApp Authentication failed:', msg);
-  });
+    client.on('auth_failure', msg => {
+      console.error('WhatsApp Authentication failed:', msg);
+    });
 
-  client.on('disconnected', (reason) => {
-    console.log('WhatsApp Client was disconnected', reason);
-    isReady = false;
-    // Attempt to reconnect after 5 seconds
-    setTimeout(initializeWhatsApp, 5000);
-  });
+    client.on('disconnected', (reason) => {
+      console.log('WhatsApp Client was disconnected', reason);
+      isReady = false;
+      qrCodeData = null;
+      setTimeout(initializeWhatsApp, 5000);
+    });
 
-  client.initialize().catch(err => {
-    console.error('Failed to initialize WhatsApp client:', err);
-  });
-} catch (e) {
-  console.log('WhatsApp disabled on this environment');
-}
+    client.initialize().catch(err => {
+      console.error('Failed to initialize WhatsApp client:', err);
+    });
+  } catch (e) {
+    console.log('WhatsApp disabled on this environment');
+  }
 };
 
 const sendWhatsAppMessage = async (phoneNumber, message) => {
@@ -82,6 +88,7 @@ const sendWhatsAppMessage = async (phoneNumber, message) => {
 module.exports = {
   initializeWhatsApp,
   sendWhatsAppMessage,
-  isReady: () => isReady
+  isReady: () => isReady,
+  getQrCode: () => qrCodeData
 };
 

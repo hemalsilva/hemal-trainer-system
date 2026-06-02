@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight, Plus, X, Upload, Printer, CheckCircle, Save, CalendarDays, Filter, UserMinus, Trash2, MessageCircle, BookOpen, RefreshCw } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight, Plus, X, Upload, Printer, CheckCircle, Save, CalendarDays, Filter, UserMinus, Trash2, MessageCircle, BookOpen, RefreshCw, Edit3 } from 'lucide-react';
 
 const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
@@ -27,6 +27,8 @@ export default function Schedule() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarFilter, setCalendarFilter] = useState('All');
   const [viewSessionModal, setViewSessionModal] = useState({ show: false, session: null, allocations: [] });
+  const [isEditingSession, setIsEditingSession] = useState(false);
+  const [editSessionData, setEditSessionData] = useState({});
 
   // Calendar Upload State
   const [showCalUploadModal, setShowCalUploadModal] = useState(false);
@@ -139,6 +141,24 @@ export default function Schedule() {
       setViewSessionModal({ show: true, session, allocations: res.data });
     } catch (err) { alert('Failed to load allocated employees'); }
   };
+  
+  const handleUpdateSession = async () => {
+    try {
+      const payload = {
+        ...editSessionData,
+        duration: editSessionData.duration_minutes,
+        trainer: editSessionData.trainer_name
+      };
+      await axios.put(`/api/trainings/${editSessionData.id}`, payload);
+      setViewSessionModal(prev => ({ ...prev, session: { ...prev.session, ...payload, duration_minutes: payload.duration, trainer_name: payload.trainer } }));
+      setIsEditingSession(false);
+      fetchSchedules();
+      alert('Session updated successfully!');
+    } catch (err) {
+      alert('Error updating session: ' + err.message);
+    }
+  };
+  
   const handleSendWhatsApp = async () => {
     const phone = prompt("Enter WhatsApp number (with country code, e.g. 94771234567):");
     if (!phone) return;
@@ -599,17 +619,54 @@ export default function Schedule() {
 
       {/* Session View Modal */}
       {viewSessionModal.show && viewSessionModal.session && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden" onClick={() => setViewSessionModal({ show: false, session: null, allocations: [] })}>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden" onClick={() => { setViewSessionModal({ show: false, session: null, allocations: [] }); setIsEditingSession(false); }}>
           <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-lg w-full p-8 relative shadow-2xl" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setViewSessionModal({ show: false, session: null, allocations: [] })} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
+            <button onClick={() => { setViewSessionModal({ show: false, session: null, allocations: [] }); setIsEditingSession(false); }} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
             <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 border ${DEPT_COLORS[viewSessionModal.session.department] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>{viewSessionModal.session.department}</div>
-            <h2 className="text-2xl font-bold text-white mb-1">{viewSessionModal.session.topic}</h2>
+            
+            {isEditingSession ? (
+              <input value={editSessionData.topic} onChange={e => setEditSessionData({...editSessionData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2 text-white text-2xl font-bold mb-2 focus:border-brand-gold outline-none" />
+            ) : (
+              <h2 className="text-2xl font-bold text-white mb-1 flex items-center justify-between">
+                <span>{viewSessionModal.session.topic}</span>
+                <button onClick={() => {setIsEditingSession(true); setEditSessionData(viewSessionModal.session);}} className="text-gray-500 hover:text-brand-gold p-2 rounded-lg hover:bg-gray-800 transition-colors" title="Edit Session"><Edit3 className="w-5 h-5"/></button>
+              </h2>
+            )}
+
             <p className="text-brand-gold text-sm font-medium mb-6">{viewSessionModal.session.category}</p>
             <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-              <div className="bg-gray-900 rounded-xl p-3"><p className="text-gray-500 text-xs mb-1">Date & Time</p><p className="text-white font-semibold">{new Date(viewSessionModal.session.training_date).toLocaleString()}</p></div>
-              <div className="bg-gray-900 rounded-xl p-3"><p className="text-gray-500 text-xs mb-1">Venue</p><p className="text-white font-semibold">{viewSessionModal.session.venue || 'N/A'}</p></div>
-              <div className="bg-gray-900 rounded-xl p-3"><p className="text-gray-500 text-xs mb-1">Trainer</p><p className="text-white font-semibold">{viewSessionModal.session.trainer_name || 'TBD'}</p></div>
-              <div className="bg-gray-900 rounded-xl p-3"><p className="text-gray-500 text-xs mb-1">Duration</p><p className="text-white font-semibold">{viewSessionModal.session.duration_minutes || 60} mins</p></div>
+              <div className="bg-gray-900 rounded-xl p-3">
+                <p className="text-gray-500 text-xs mb-1">Date & Time</p>
+                {isEditingSession ? (
+                  <input type="datetime-local" value={editSessionData.training_date ? new Date(new Date(editSessionData.training_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,16) : ''} onChange={e => setEditSessionData({...editSessionData, training_date: new Date(e.target.value).toISOString()})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" style={{ colorScheme: 'dark' }} />
+                ) : (
+                  <p className="text-white font-semibold">{new Date(viewSessionModal.session.training_date).toLocaleString()}</p>
+                )}
+              </div>
+              <div className="bg-gray-900 rounded-xl p-3">
+                <p className="text-gray-500 text-xs mb-1">Venue</p>
+                {isEditingSession ? (
+                  <input value={editSessionData.venue} onChange={e => setEditSessionData({...editSessionData, venue: e.target.value})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" />
+                ) : (
+                  <p className="text-white font-semibold">{viewSessionModal.session.venue || 'N/A'}</p>
+                )}
+              </div>
+              <div className="bg-gray-900 rounded-xl p-3">
+                <p className="text-gray-500 text-xs mb-1">Trainer</p>
+                {isEditingSession ? (
+                  <input value={editSessionData.trainer_name} onChange={e => setEditSessionData({...editSessionData, trainer_name: e.target.value})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" />
+                ) : (
+                  <p className="text-white font-semibold">{viewSessionModal.session.trainer_name || 'TBD'}</p>
+                )}
+              </div>
+              <div className="bg-gray-900 rounded-xl p-3">
+                <p className="text-gray-500 text-xs mb-1">Duration</p>
+                {isEditingSession ? (
+                  <input type="number" value={editSessionData.duration_minutes} onChange={e => setEditSessionData({...editSessionData, duration_minutes: e.target.value})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" />
+                ) : (
+                  <p className="text-white font-semibold">{viewSessionModal.session.duration_minutes || 60} mins</p>
+                )}
+              </div>
             </div>
             {viewSessionModal.allocations.length > 0 && (
               <div className="mb-6">
@@ -620,8 +677,17 @@ export default function Schedule() {
               </div>
             )}
             <div className="flex gap-3">
-              <button onClick={handleSendWhatsApp} className="flex-1 bg-green-700 hover:bg-green-600 text-white py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors"><MessageCircle className="w-4 h-4" /> Send WhatsApp</button>
-              <button onClick={() => window.print()} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700"><Printer className="w-4 h-4" /> Print</button>
+              {isEditingSession ? (
+                <>
+                  <button onClick={() => setIsEditingSession(false)} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-lg font-bold transition-colors">Cancel</button>
+                  <button onClick={handleUpdateSession} className="flex-1 bg-brand-gold hover:bg-brand-goldHover text-black py-2.5 rounded-lg font-bold transition-colors shadow-lg">Save Changes</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={handleSendWhatsApp} className="flex-1 bg-green-700 hover:bg-green-600 text-white py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors"><MessageCircle className="w-4 h-4" /> Send WhatsApp</button>
+                  <button onClick={() => window.print()} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700"><Printer className="w-4 h-4" /> Print</button>
+                </>
+              )}
             </div>
           </div>
         </div>

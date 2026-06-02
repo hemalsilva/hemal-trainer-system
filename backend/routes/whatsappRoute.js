@@ -23,9 +23,7 @@ router.post('/send', async (req, res) => {
   }
 });
 
-router.get('/status', (req, res) => {
-  res.json({ ready: isReady() });
-});
+
 
 
 // Send today's training schedule to a WhatsApp number/group

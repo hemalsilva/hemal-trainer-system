@@ -156,6 +156,35 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+
+// Update a training session
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    topic,
+    category,
+    venue,
+    duration,
+    trainer,
+    training_date,
+    department
+  } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE trainings
+       SET topic = $1, category = $2, venue = $3, duration_minutes = $4, trainer_name = $5, training_date = $6, department = $7
+       WHERE id = $8 RETURNING *`,
+      [topic, category, venue, duration, trainer, training_date, department, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Training not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating training:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Delete Training
 router.delete('/:id', async (req, res) => {
   try {
