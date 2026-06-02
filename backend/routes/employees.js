@@ -11,14 +11,7 @@ const uploadsDir = '/tmp/photos';
 try { if (!fs.existsSync(uploadsDir)){ fs.mkdirSync(uploadsDir, { recursive: true }); } } catch(e) {}
 
 const os = require('os');
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, os.tmpdir());
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // GET all employees (supports ?search=EMP001 for OJT auto-lookup)
@@ -69,7 +62,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 
   try {
-    const workbook = xlsx.readFile(req.file.path);
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     
@@ -78,19 +71,24 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     let insertedCount = 0;
     const errors = [];
 
-    for (const row of data) {
-      try {
-        await pool.query(
-          `INSERT INTO employees (emp_no, full_name, designation, email) 
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (emp_no) DO UPDATE 
-           SET full_name = EXCLUDED.full_name, designation = EXCLUDED.designation, email = EXCLUDED.email`,
-          [row['Emp No'], row['Name'], row['Designation'], row['Email']]
-        );
-        insertedCount++;
-      } catch (err) {
-        errors.push({ emp_no: row['Emp No'], error: err.message });
-      }
+    // Process in chunks of 20 to avoid overwhelming connection pool while keeping it fast
+    const chunkSize = 20;
+    for (let i = 0; i < data.length; i += chunkSize) {
+      const chunk = data.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(async (row) => {
+        try {
+          await pool.query(
+            `INSERT INTO employees (emp_no, full_name, designation, email) 
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (emp_no) DO UPDATE 
+             SET full_name = EXCLUDED.full_name, designation = EXCLUDED.designation, email = EXCLUDED.email`,
+            [row['Emp No'], row['Name'], row['Designation'], row['Email']]
+          );
+          insertedCount++;
+        } catch (err) {
+          errors.push({ emp_no: row['Emp No'], error: err.message });
+        }
+      }));
     }
 
     res.json({ 
