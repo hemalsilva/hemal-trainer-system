@@ -10,13 +10,10 @@ const fs = require('fs');
 const uploadsDir = '/tmp/photos';
 try { if (!fs.existsSync(uploadsDir)){ fs.mkdirSync(uploadsDir, { recursive: true }); } } catch(e) {}
 
+const os = require('os');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    if (file.fieldname === 'photo') {
-      cb(null, '/tmp/photos/');
-    } else {
-      cb(null, '/tmp/');
-    }
+    cb(null, os.tmpdir());
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
