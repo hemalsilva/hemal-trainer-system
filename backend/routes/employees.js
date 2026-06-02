@@ -133,5 +133,25 @@ router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
   }
 });
 
+
+// PUT single employee
+router.put('/:emp_no', upload.single('photo'), async (req, res) => {
+  const { full_name, department, designation, join_date, date_of_birth, contact_number, email } = req.body;
+  const emp_no = req.params.emp_no;
+
+  try {
+    const result = await pool.query(
+      `UPDATE employees
+      SET full_name = $1, department = $2, designation = $3, join_date = $4, date_of_birth = $5, contact_number = $6, email = $7
+      WHERE emp_no = $8
+      RETURNING *`,
+      [full_name, department, designation, join_date, date_of_birth, contact_number, email, emp_no]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
 

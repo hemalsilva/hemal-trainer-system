@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X } from 'lucide-react';
+import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X, Edit } from 'lucide-react';
 
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
@@ -8,11 +8,24 @@ export default function Employees() {
   const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedDept, setSelectedDept] = useState('All');
   const [formData, setFormData] = useState({
     emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null
   });
   const fileInputRef = useRef(null);
+
+  
+  const handleEdit = (emp) => {
+    setFormData({
+      ...emp,
+      join_date: emp.join_date ? new Date(emp.join_date).toISOString().split('T')[0] : '',
+      date_of_birth: emp.date_of_birth ? new Date(emp.date_of_birth).toISOString().split('T')[0] : '',
+      photo: null
+    });
+    setIsEditing(true);
+    setShowModal(true);
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -57,10 +70,17 @@ export default function Employees() {
         if (formData[key]) data.append(key, formData[key]);
       });
 
-      await axios.post('/api/employees', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      if (isEditing) {
+        await axios.put(`/api/employees/${formData.emp_no}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        await axios.post('/api/employees', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
       setShowModal(false);
+      setIsEditing(false);
       setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });
       fetchEmployees();
     } catch (err) {
@@ -161,6 +181,7 @@ export default function Employees() {
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">POSITION</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF JOINED</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF BIRTH</th>
+<th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-right"></th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-800/50">
@@ -205,6 +226,11 @@ export default function Employees() {
                     <td className="p-4">
                       <p className="text-gray-300 text-sm">{emp.date_of_birth ? new Date(emp.date_of_birth).toLocaleDateString() : '—'}</p>
                     </td>
+                    <td className="p-4 text-right">
+                      <button onClick={() => handleEdit(emp)} className="text-gray-500 hover:text-brand-gold p-1.5 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                   ));
                 })()}
@@ -218,26 +244,26 @@ export default function Employees() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative">
-            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });}} className="absolute top-4 right-4 text-gray-400 hover:text-white">
               <X className="w-5 h-5" />
             </button>
-            <h2 className="text-xl font-bold text-white mb-6">Add New Staff</h2>
+            <h2 className="text-xl font-bold text-white mb-6">{isEditing ? 'Edit Staff' : 'Add New Staff'}</h2>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee No</label>
-                <input required type="text" value={formData.emp_no} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
+                <input required type="text" disabled={isEditing} value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Full Name</label>
-                <input required type="text" value={formData.full_name} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
+                <input required type="text" value={formData.full_name || ''} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Designation</label>
-                <input required type="text" value={formData.designation} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
+                <input required type="text" value={formData.designation || ''} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Department</label>
-                <select required value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none">
+                <select required value={formData.department || ''} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none">
                   <option value="">Select Department</option>
                   <option value="Rooms">Rooms</option>
                   <option value="Public Area">Public Area</option>
