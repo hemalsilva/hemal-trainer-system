@@ -375,31 +375,38 @@ export default function Schedule() {
         // Skip trainer days off
         if (isDayOff(dateObj)) continue;
 
-        // Get employees available (W or S) on this day
-        const availableEmps = roster.employees.filter(emp => {
-          const status = emp.days[day] || 'O';
-          return status === 'W' || status === 'S';
-        });
+        // Get employees available
+        const morningEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === '8');
+        const afternoonEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === '13');
 
-        if (availableEmps.length === 0) continue;
-
-        // Split into batches
         const bSize = parseInt(rosterBatchSize) || 15;
-        for (let i = 0; i < availableEmps.length; i += bSize) {
-          const batch = availableEmps.slice(i, i + bSize);
-          const slotHour = (Math.floor(i / bSize) % 2 === 0) ? 9 : 15;
-          const sessionDate = new Date(roster.year, roster.month, day, slotHour, 0, 0);
 
-          sessions.push({
-            dept,
-            topic: rosterTrainingTopic,
-            trainer: rosterTrainerName || 'TBD',
-            venue: rosterVenue || 'Main Training Room',
-            training_date: sessionDate.toISOString(),
-            employees: batch,
-            dateLabel: sessionDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
-            timeLabel: slotHour === 9 ? '9:00 AM' : '3:00 PM',
-          });
+        // Process morning shift -> 9 AM slots
+        if (morningEmps.length > 0) {
+          for (let i = 0; i < morningEmps.length; i += bSize) {
+            const batch = morningEmps.slice(i, i + bSize);
+            const sessionDate = new Date(roster.year, roster.month, day, 9, 0, 0);
+            sessions.push({
+              dept, topic: rosterTrainingTopic, trainer: rosterTrainerName || 'TBD', venue: rosterVenue || 'Main Training Room',
+              training_date: sessionDate.toISOString(), employees: batch,
+              dateLabel: sessionDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
+              timeLabel: '9:00 AM',
+            });
+          }
+        }
+
+        // Process afternoon shift -> 3 PM slots
+        if (afternoonEmps.length > 0) {
+          for (let i = 0; i < afternoonEmps.length; i += bSize) {
+            const batch = afternoonEmps.slice(i, i + bSize);
+            const sessionDate = new Date(roster.year, roster.month, day, 15, 0, 0);
+            sessions.push({
+              dept, topic: rosterTrainingTopic, trainer: rosterTrainerName || 'TBD', venue: rosterVenue || 'Main Training Room',
+              training_date: sessionDate.toISOString(), employees: batch,
+              dateLabel: sessionDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
+              timeLabel: '3:00 PM',
+            });
+          }
         }
       }
     }
@@ -463,7 +470,7 @@ export default function Schedule() {
     const r = monthlyRosters[dept];
     if (!r) return null;
     const totalDays = Object.values(r.employees[0]?.days || {}).length;
-    const workingDaysPerEmp = r.employees.map(e => Object.values(e.days).filter(d => d === 'W' || d === 'S').length);
+    const workingDaysPerEmp = r.employees.map(e => Object.values(e.days).filter(d => String(d).trim() === '8' || String(d).trim() === '13').length);
     const avgWorkDays = workingDaysPerEmp.length > 0 ? Math.round(workingDaysPerEmp.reduce((a,b) => a+b, 0) / workingDaysPerEmp.length) : 0;
     return { empCount: r.employees.length, avgWorkDays };
   };
@@ -693,7 +700,8 @@ export default function Schedule() {
                       <div>E002,Mary Jane,13,DO,6,6,8,13,...</div>
                     </div>
                     <div className="flex gap-4 mt-3 text-xs">
-                      <span className="text-green-400 font-bold">W = Working</span>
+                      <span className="text-green-400 font-bold">8 = Morning Shift</span>
+                      <span className="text-blue-400 font-bold">13 = Afternoon Shift</span>
                       <span className="text-red-400 font-bold">O = Day Off</span>
                       <span className="text-yellow-400 font-bold">L = Leave</span>
                       <span className="text-blue-400 font-bold">H = Holiday</span>
@@ -737,7 +745,7 @@ export default function Schedule() {
                           <thead><tr className="border-b border-gray-800"><th className="text-left py-2 pr-3">Emp No</th><th className="text-left py-2 pr-3">Name</th><th className="text-center py-2 pr-2 text-green-400">Working Days</th><th className="text-center py-2 text-red-400">Off Days</th></tr></thead>
                           <tbody>
                             {monthlyRosters[activeRosterDept].employees.slice(0, 5).map((e, i) => {
-                              const wDays = Object.values(e.days).filter(d => d === 'W' || d === 'S').length;
+                              const wDays = Object.values(e.days).filter(d => String(d).trim() === '8' || String(d).trim() === '13').length;
                               const oDays = Object.values(e.days).filter(d => d === 'O').length;
                               return <tr key={i} className="border-b border-gray-800/50"><td className="py-1.5 pr-3 font-mono">{e.emp_no}</td><td className="py-1.5 pr-3">{e.name}</td><td className="py-1.5 text-center text-green-400 font-bold">{wDays}</td><td className="py-1.5 text-center text-red-400">{oDays}</td></tr>;
                             })}
@@ -793,7 +801,7 @@ export default function Schedule() {
                   <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
                     <h4 className="text-brand-gold font-semibold text-sm mb-3">📅 Schedule Logic</h4>
                     <ul className="text-gray-400 text-sm space-y-1.5">
-                      <li>• Sessions will be created for each day employees are marked <span className="text-green-400 font-semibold">W (Working)</span></li>
+                      <li>• Sessions will be created for each day employees are marked <span className="text-green-400 font-semibold">8 (Morning Shift)</span> or <span className="text-blue-400 font-semibold">13 (Afternoon Shift)</span></li>
                       <li>• Employees grouped into batches of <strong className="text-white">{rosterBatchSize}</strong> per session</li>
                       <li>• Batch 1 = <strong className="text-white">9:00 AM</strong>, Batch 2 = <strong className="text-white">3:00 PM</strong>, next day continues</li>
                       <li>• Trainer Days Off dates are automatically <span className="text-red-400 font-semibold">skipped</span></li>
