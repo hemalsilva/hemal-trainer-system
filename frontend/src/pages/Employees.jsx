@@ -156,11 +156,11 @@ export default function Employees() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#181818] border-b border-gray-800 text-xs uppercase tracking-wider text-gray-400 font-semibold">
-                  <th className="p-4 pl-6">Employee No</th>
-                  <th className="p-4">Name</th>
-                  <th className="p-4">Department</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right pr-6">Action</th>
+                  <th className="p-4 pl-6 text-[11px] text-gray-400 font-bold tracking-wider">EMP NO</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">NAME</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">POSITION</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">FLOOR NO</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">SECTION</th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-800/50">
@@ -193,28 +193,19 @@ export default function Employees() {
                         )}
                         <div>
                           <p className="font-medium text-white">{emp.full_name}</p>
-                          <p className="text-gray-500 text-xs mt-0.5">{emp.designation || 'Staff'}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-gray-300 text-sm font-medium">{emp.designation || 'Staff'}</p>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-gray-400 text-sm">—</p>
                     </td>
                     <td className="p-4">
                       <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-gold/10 text-brand-gold border border-brand-gold/20">
                         {emp.department || emp.department_id || 'N/A'}
                       </span>
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        emp.status === 'Active' 
-                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
-                          : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                      }`}>
-                        {emp.status || 'Active'}
-                      </span>
-                    </td>
-                    <td className="p-4 pr-6 text-right">
-                      <button className="text-gray-500 hover:text-brand-gold p-2 rounded-md hover:bg-gray-800 transition-colors opacity-0 group-hover:opacity-100">
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
                     </td>
                   </tr>
                   ));
