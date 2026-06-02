@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
   const {
     emp_no,
     emp_name,
-    department,
+    department = 'General',
     assessment_date,
     topic,
     trainer_name,

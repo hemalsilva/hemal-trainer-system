@@ -47,7 +47,7 @@ export default function OJT() {
       setFormData({ topic: '', location: '', assessment_notes: '' });
     } catch (err) {
       console.error(err);
-      alert('Error saving assessment');
+      alert('Error saving assessment: ' + (err.response?.data?.error || err.message));
     }
   };
 

@@ -1,4 +1,4 @@
-// const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 // const qrcode = require('qrcode-terminal');
 
 let client;
@@ -9,6 +9,7 @@ const initializeWhatsApp = () => {
   console.log('INITIALIZING WHATSAPP WEB ENGINE...');
   console.log('=============================================\n');
 
+  try {
   client = new Client({
     authStrategy: new LocalAuth(), // Saves the session locally so you don't have to scan every time
     puppeteer: {
@@ -54,6 +55,9 @@ const initializeWhatsApp = () => {
   client.initialize().catch(err => {
     console.error('Failed to initialize WhatsApp client:', err);
   });
+} catch (e) {
+  console.log('WhatsApp disabled on this environment');
+}
 };
 
 const sendWhatsAppMessage = async (phoneNumber, message) => {
