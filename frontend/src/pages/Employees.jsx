@@ -159,8 +159,8 @@ export default function Employees() {
                   <th className="p-4 pl-6 text-[11px] text-gray-400 font-bold tracking-wider">EMP NO</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">NAME</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">POSITION</th>
-                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">FLOOR NO</th>
-                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">SECTION</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF JOINED</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF BIRTH</th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-800/50">
@@ -200,12 +200,10 @@ export default function Employees() {
                       <p className="text-gray-300 text-sm font-medium">{emp.designation || 'Staff'}</p>
                     </td>
                     <td className="p-4">
-                      <p className="text-gray-400 text-sm">—</p>
+                      <p className="text-gray-300 text-sm">{emp.join_date ? new Date(emp.join_date).toLocaleDateString() : '—'}</p>
                     </td>
                     <td className="p-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-gold/10 text-brand-gold border border-brand-gold/20">
-                        {emp.department || emp.department_id || 'N/A'}
-                      </span>
+                      <p className="text-gray-300 text-sm">{emp.date_of_birth ? new Date(emp.date_of_birth).toLocaleDateString() : '—'}</p>
                     </td>
                   </tr>
                   ));
