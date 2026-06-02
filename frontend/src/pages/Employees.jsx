@@ -84,7 +84,7 @@ export default function Employees() {
       setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });
       fetchEmployees();
     } catch (err) {
-      alert('Error adding employee');
+      alert('Error adding employee: ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -243,7 +243,7 @@ export default function Employees() {
       {/* Add Staff Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative">
+          <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });}} className="absolute top-4 right-4 text-gray-400 hover:text-white">
               <X className="w-5 h-5" />
             </button>

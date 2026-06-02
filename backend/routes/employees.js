@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     }
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err); console.error(err); res.status(500).json({ error: err.message });
   }
 });
 
