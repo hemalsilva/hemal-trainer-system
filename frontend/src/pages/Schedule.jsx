@@ -46,6 +46,7 @@ export default function Schedule() {
   const [pendingRosters, setPendingRosters] = useState({ Rooms: null, 'Public Area': null, Laundry: null, Flower: null, Stores: null, Coordinator: null });
   const [allocations, setAllocations] = useState([]);
   const [savingAllocations, setSavingAllocations] = useState(false);
+  const [allocConfig, setAllocConfig] = useState({ frequency: 'Daily', startDate: '', endDate: '' });
 
   // ── NEW: Monthly Roster State ──
   const [showMonthlyRosterModal, setShowMonthlyRosterModal] = useState(false);
@@ -280,6 +281,7 @@ export default function Schedule() {
   const openRosterModal = () => {
     setRosterStep(1); setAllocations([]);
     setPendingRosters({ Rooms: null, 'Public Area': null, Laundry: null, Flower: null, Stores: null, Coordinator: null });
+    setAllocConfig({ frequency: 'Daily', startDate: '', endDate: '' });
     setShowRosterModal(true);
   };
 
@@ -887,9 +889,28 @@ export default function Schedule() {
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><Users className="text-brand-gold" /> Smart Roster Auto-Allocator</h2>
             <p className="text-gray-400 text-sm mb-6">Upload staff lists (EmpNo, Name CSV) per department. System will batch them into 15-person training slots.</p>
 
+            
             {rosterStep === 1 && (
               <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Allocation Type</label>
+                    <select value={allocConfig.frequency} onChange={e => setAllocConfig({...allocConfig, frequency: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none">
+                      <option value="Daily">Daily</option>
+                      <option value="Monthly">Monthly</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Start Date</label>
+                    <input type="date" value={allocConfig.startDate} onChange={e => setAllocConfig({...allocConfig, startDate: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">End Date</label>
+                    <input type="date" value={allocConfig.endDate} onChange={e => setAllocConfig({...allocConfig, endDate: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} />
+                  </div>
+                </div>
                 <div className="space-y-4 mb-8">
+
                   {['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator'].map(dept => {
                     const fileRef = React.createRef();
                     return (
