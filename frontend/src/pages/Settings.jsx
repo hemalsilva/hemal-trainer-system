@@ -99,6 +99,33 @@ function FormCard({ link, onDelete }) {
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('photos');
+  const [waStatus, setWaStatus] = useState({ isReady: false, hasQr: false });
+  const [waQrCode, setWaQrCode] = useState(null);
+
+  const fetchWaStatus = async () => {
+    try {
+      const res = await fetch('/api/whatsapp/status');
+      const data = await res.json();
+      setWaStatus(data);
+      if (!data.isReady && data.hasQr) {
+        const qrRes = await fetch('/api/whatsapp/qr');
+        const qrData = await qrRes.json();
+        if (qrData.qrCodeData) setWaQrCode(qrData.qrCodeData);
+      } else if (data.isReady) {
+        setWaQrCode(null);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'whatsapp') {
+      fetchWaStatus();
+      const interval = setInterval(fetchWaStatus, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
   
   // Bulk Photos State
   const [photosToUpload, setPhotosToUpload] = useState([]);
@@ -206,13 +233,13 @@ export default function Settings() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800 mb-8 overflow-x-auto">
-        {['photos', 'integrations', 'backups', 'general'].map((tab) => (
+        {['photos', 'integrations', 'whatsapp', 'backups', 'general'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-gold border-b-2 border-brand-gold bg-brand-gold/5' : 'text-gray-400 hover:text-white'}`}
           >
-            {tab === 'photos' ? 'Bulk Staff Photos' : tab === 'integrations' ? 'Form Integrations' : tab === 'backups' ? 'Backups & Storage' : 'General Preferences'}
+            {tab === 'photos' ? 'Bulk Staff Photos' : tab === 'integrations' ? 'Form Integrations' : tab === 'whatsapp' ? 'WhatsApp Setup' : tab === 'backups' ? 'Backups & Storage' : 'General Preferences'}
           </button>
         ))}
       </div>
@@ -437,6 +464,39 @@ export default function Settings() {
           )}
         </div>
       )}
+
+      
+      {activeTab === 'whatsapp' && (
+        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <section className="bg-brand-card border border-gray-800 rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><MessageSquare className="text-brand-gold w-6 h-6" /> WhatsApp Business Setup</h2>
+            <p className="text-gray-400 mb-6">Connect your WhatsApp account to automatically send schedules and updates directly to your staff's phones. <br/><span className="text-brand-gold">Note: This feature requires the backend to be running locally or on a VPS (not Serverless).</span></p>
+            
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 flex flex-col items-center">
+              {waStatus.isReady ? (
+                 <div className="text-center">
+                   <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
+                   <h3 className="text-xl font-bold text-emerald-400">WhatsApp is Connected!</h3>
+                   <p className="text-gray-400 mt-2">The system is actively linked to your account and ready to send messages.</p>
+                 </div>
+              ) : waQrCode ? (
+                 <div className="text-center">
+                   <img src={waQrCode} alt="WhatsApp QR Code" className="mx-auto border-4 border-white rounded-xl mb-4 w-64 h-64 bg-white" />
+                   <h3 className="text-lg font-bold text-white">Scan to Connect</h3>
+                   <p className="text-gray-400 mt-2">Open WhatsApp on your phone &gt; Linked Devices &gt; Link a Device.</p>
+                 </div>
+              ) : (
+                 <div className="text-center">
+                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-gold mx-auto mb-4"></div>
+                   <h3 className="text-lg font-bold text-white">Starting WhatsApp Engine...</h3>
+                   <p className="text-gray-400 mt-2">Generating QR Code... Please wait (this can take 10-20 seconds).</p>
+                 </div>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+
 
       {/* ─── BACKUPS TAB ─── */}
       {activeTab === 'backups' && (

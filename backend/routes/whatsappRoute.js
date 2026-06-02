@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendWhatsAppMessage, isReady } = require('../services/whatsapp');
+const { sendWhatsAppMessage, isReady, getQrCode } = require('../services/whatsapp');
 
 router.post('/send', async (req, res) => {
   const { phone, message } = req.body;
@@ -42,7 +42,7 @@ router.post('/send-schedule', async (req, res) => {
 
   try {
     const dateStr = date || new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-    const deptStr = department && department !== 'All' ? ` — ${department} Dept` : '';
+    const deptStr = department && department !== 'All' ? ` ï¿½ ${department} Dept` : '';
 
     let message = `?? *HK Training Portal${deptStr}*\n`;
     message += `?? *Today's Training Schedule*\n`;
@@ -86,7 +86,7 @@ router.post('/broadcast-schedule', async (req, res) => {
   for (const phone of phones) {
     try {
       const dateStr = date || new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-      const deptStr = department && department !== 'All' ? ` — ${department} Dept` : '';
+      const deptStr = department && department !== 'All' ? ` ï¿½ ${department} Dept` : '';
       let message = `?? *HK Training Portal${deptStr}*\n?? *Today's Training Schedule*\n${dateStr}\n????????????????????\n\n`;
       schedules.forEach((s, i) => {
         const time = s.training_date ? new Date(s.training_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '';
@@ -104,6 +104,25 @@ router.post('/broadcast-schedule', async (req, res) => {
     }
   }
   res.json({ results });
+});
+
+
+router.get('/status', (req, res) => {
+  res.json({
+    isReady: isReady(),
+    hasQr: !!getQrCode()
+  });
+});
+
+router.get('/qr', (req, res) => {
+  if (isReady()) {
+    return res.status(400).json({ error: 'Already authenticated and ready' });
+  }
+  const qrCodeData = getQrCode();
+  if (!qrCodeData) {
+    return res.status(404).json({ error: 'QR code not generated yet. Please wait.' });
+  }
+  res.json({ qrCodeData });
 });
 
 module.exports = router;

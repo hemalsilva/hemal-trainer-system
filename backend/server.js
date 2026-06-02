@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const { initializeWhatsApp } = require('./services/whatsapp');
 
 // Initialize the WhatsApp Web Engine on server boot
-// initializeWhatsApp();
+initializeWhatsApp();
 
 dotenv.config();
 
