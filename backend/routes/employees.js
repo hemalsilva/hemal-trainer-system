@@ -35,19 +35,17 @@ router.get('/', async (req, res) => {
 
 // POST single employee
 router.post('/', upload.single('photo'), async (req, res) => {
-  const {
-    emp_no, full_name, department_id, designation, join_date, date_of_birth, contact_number, email
-  } = req.body;
+  const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email } = req.body;
 
-  const photo_url = req.file ? req.file.path.replace(/\\/g, '/') : null; // Normalize slashes for DB
+  const photo_url = null; // Photo upload not supported on serverless // Normalize slashes for DB
 
   try {
     const result = await pool.query(
       `INSERT INTO employees
-      (emp_no, full_name, department_id, designation, join_date, date_of_birth, contact_number, email, photo_url)
+      (emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *`,
-      [emp_no, full_name, department_id, designation, join_date, date_of_birth, contact_number, email, photo_url]
+      [emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url]
     );
     res.json(result.rows[0]);
   } catch (err) {
