@@ -50,17 +50,13 @@ export default function Schedule() {
   const [savingAllocations, setSavingAllocations] = useState(false);
   const [allocConfig, setAllocConfig] = useState({ frequency: 'Daily', startDate: '', endDate: '' });
 
-  // ── NEW: Monthly Roster State ──
+  // ── NEW: Monthly Roster & Sync State ──
   const [showMonthlyRosterModal, setShowMonthlyRosterModal] = useState(false);
-  const [monthlyRosterStep, setMonthlyRosterStep] = useState(1); // 1=upload, 2=config, 3=preview
   const [monthlyRosters, setMonthlyRosters] = useState({}); // { 'Rooms': { month, year, employees: [{emp_no, name, days:{1:'W',2:'O',...}}] } }
-  const [rosterUploadDept, setRosterUploadDept] = useState('Rooms');
-  const [rosterTrainingTopic, setRosterTrainingTopic] = useState('');
-  const [rosterTrainerName, setRosterTrainerName] = useState('');
-  const [rosterVenue, setRosterVenue] = useState('Main Training Room');
   const [rosterBatchSize, setRosterBatchSize] = useState(15);
-  const [autoSchedulePreview, setAutoSchedulePreview] = useState([]);
-  const [savingAutoSchedule, setSavingAutoSchedule] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncPreview, setSyncPreview] = useState([]);
+  const [savingSync, setSavingSync] = useState(false);
   const rosterFileInputRef = useRef(null);
   const [activeRosterDept, setActiveRosterDept] = useState('Rooms');
 
@@ -366,120 +362,82 @@ export default function Schedule() {
     e.target.value = '';
   };
 
-  /**
-   * Auto-generate training schedule from monthly roster
-   * - Find days when ≥ batchSize employees are working
-   * - Or group all available employees per day into batches
-   * - Skip trainer days off
-   * - Slot at 9 AM and 3 PM
-   */
-  const generateAutoSchedule = () => {
-    if (!rosterTrainingTopic.trim()) { alert('Please enter a Training Topic first.'); return; }
-
+  const handleGenerateAllocations = () => {
     const uploadedDepts = Object.keys(monthlyRosters);
-    if (uploadedDepts.length === 0) { alert('Please upload at least one department roster first.'); return; }
-
-    const sessions = [];
-
-    for (const dept of uploadedDepts) {
-      const roster = monthlyRosters[dept];
-      if (!roster) continue;
-
-      const daysInRosterMonth = getDaysInMonth(roster.year, roster.month);
-
-      // For each day of the month, collect available employees
-      for (let day = 1; day <= daysInRosterMonth; day++) {
-        const dateObj = new Date(roster.year, roster.month, day);
-        const dateKey = dateObj.toISOString().split('T')[0];
-
-        // Skip trainer days off
-        if (isDayOff(dateObj)) continue;
-
-        // Get employees available
-        const morningEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === '8');
-        const afternoonEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === '13');
-
-        const bSize = parseInt(rosterBatchSize) || 15;
-
-        // Process morning shift -> 9 AM slots
-        if (morningEmps.length > 0) {
-          for (let i = 0; i < morningEmps.length; i += bSize) {
-            const batch = morningEmps.slice(i, i + bSize);
-            const sessionDate = new Date(roster.year, roster.month, day, 9, 0, 0);
-            sessions.push({
-              dept, topic: rosterTrainingTopic, trainer: rosterTrainerName || 'TBD', venue: rosterVenue || 'Main Training Room',
-              training_date: sessionDate.toISOString(), employees: batch,
-              dateLabel: sessionDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
-              timeLabel: '9:00 AM',
-            });
-          }
-        }
-
-        // Process afternoon shift -> 3 PM slots
-        if (afternoonEmps.length > 0) {
-          for (let i = 0; i < afternoonEmps.length; i += bSize) {
-            const batch = afternoonEmps.slice(i, i + bSize);
-            const sessionDate = new Date(roster.year, roster.month, day, 15, 0, 0);
-            sessions.push({
-              dept, topic: rosterTrainingTopic, trainer: rosterTrainerName || 'TBD', venue: rosterVenue || 'Main Training Room',
-              training_date: sessionDate.toISOString(), employees: batch,
-              dateLabel: sessionDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
-              timeLabel: '3:00 PM',
-            });
-          }
-        }
-      }
-    }
-
-    if (sessions.length === 0) {
-      alert('No available training slots found. Check if employees have working days marked in the roster.');
+    if (uploadedDepts.length === 0) {
+      alert('Please upload at least one department roster first.');
       return;
     }
 
-    setAutoSchedulePreview(sessions);
-    setMonthlyRosterStep(3);
+    const preview = [];
+    
+    // Look at all sessions in the current month
+    const currentMonthSessions = filteredSchedules.filter(s => new Date(s.training_date).getMonth() === currentMonth && new Date(s.training_date).getFullYear() === currentYear);
+
+    currentMonthSessions.forEach(session => {
+      const roster = monthlyRosters[session.department];
+      if (!roster) return; // No roster for this dept, skip
+
+      const dateObj = new Date(session.training_date);
+      const day = dateObj.getDate();
+      const hour = dateObj.getHours();
+
+      if (isDayOff(dateObj)) return;
+
+      // Determine required shift based on hour (before 12 PM = 8, else 13)
+      const requiredShift = hour < 12 ? '8' : '13';
+
+      const eligibleEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === requiredShift);
+
+      if (eligibleEmps.length > 0) {
+        // Cap to rosterBatchSize
+        const batch = eligibleEmps.slice(0, parseInt(rosterBatchSize) || 15);
+        preview.push({
+          session, // The master session object
+          employees: batch,
+          dept: session.department,
+          topic: session.topic,
+          dateLabel: dateObj.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
+          timeLabel: dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        });
+      }
+    });
+
+    if (preview.length === 0) {
+      alert('No eligible staff found for the scheduled sessions. Please check the rosters and the Master Calendar.');
+      return;
+    }
+
+    setSyncPreview(preview);
+    setShowSyncModal(true);
   };
 
-  const handleSaveAutoSchedule = async () => {
-    setSavingAutoSchedule(true);
+  const handleSaveSync = async () => {
+    setSavingSync(true);
     try {
       let saved = 0;
-      for (const session of autoSchedulePreview) {
-        const res = await axios.post('/api/trainings', {
-          topic: session.topic,
-          category: 'Mandatory',
-          venue: session.venue,
-          duration: 120,
-          trainer: session.trainer,
-          training_date: session.training_date,
-          department: session.dept,
-        });
-        if (session.employees.length > 0) {
-          await axios.post(`/api/trainings/${res.data.id}/allocations`, {
-            employees: session.employees.map(e => ({ emp_no: e.emp_no, name: e.name })),
+      for (const item of syncPreview) {
+        if (item.employees.length > 0) {
+          await axios.post(`/api/trainings/${item.session.id}/allocations`, {
+            employees: item.employees.map(e => ({ emp_no: e.emp_no, name: e.name })),
           });
+          saved++;
         }
-        saved++;
       }
-      alert(`✅ ${saved} training sessions saved to the Master Calendar!`);
-      setShowMonthlyRosterModal(false);
-      setMonthlyRosters({});
-      setAutoSchedulePreview([]);
-      setMonthlyRosterStep(1);
+      alert(`✅ Staff allocated successfully to ${saved} sessions!`);
+      setShowSyncModal(false);
+      setSyncPreview([]);
       fetchSchedules();
     } catch (err) {
       console.error(err);
-      alert('Failed to save schedule: ' + (err?.response?.data?.error || err.message));
-    } finally { setSavingAutoSchedule(false); }
+      alert('Failed to save allocations: ' + (err?.response?.data?.error || err.message));
+    } finally {
+      setSavingSync(false);
+    }
   };
 
   const openMonthlyRosterModal = () => {
-    setMonthlyRosterStep(1);
     setMonthlyRosters({});
-    setAutoSchedulePreview([]);
-    setRosterTrainingTopic('');
-    setRosterTrainerName('');
-    setRosterVenue('Main Training Room');
     setRosterBatchSize(15);
     setActiveRosterDept('Rooms');
     setShowMonthlyRosterModal(true);
@@ -513,8 +471,11 @@ export default function Schedule() {
             <Upload className="w-5 h-5" /> Daily Staff Allocation
           </button>
           {/* NEW Monthly Roster Button */}
-          <button onClick={openMonthlyRosterModal} className="bg-gradient-to-r from-brand-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg shadow-brand-gold/20">
-            <RefreshCw className="w-5 h-5" /> Monthly Staff Allocation
+          <button onClick={openMonthlyRosterModal} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg border border-gray-700">
+            <Upload className="w-5 h-5" /> Upload Rosters
+          </button>
+          <button onClick={handleGenerateAllocations} className="bg-gradient-to-r from-brand-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg shadow-brand-gold/20">
+            <RefreshCw className="w-5 h-5" /> Generate Allocations
           </button>
           <button onClick={() => setShowModal(true)} className="bg-brand-gold hover:bg-brand-goldHover text-black px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-lg">
             <Plus className="w-5 h-5" /> Add Session
@@ -719,238 +680,149 @@ export default function Schedule() {
       )}
 
       {/* ════════════════════════════════════════════════════════════ */}
-      {/* MONTHLY ROSTER SYNC MODAL — NEW FEATURE */}
+      {/* MONTHLY ROSTER UPLOAD MODAL */}
       {/* ════════════════════════════════════════════════════════════ */}
       {showMonthlyRosterModal && (
         <div className="fixed inset-0 bg-black/90 flex items-start justify-center z-50 p-4 overflow-y-auto print:hidden">
           <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-5xl my-4 relative">
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <div>
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <RefreshCw className="text-brand-gold w-6 h-6" />
-                  Monthly Roster Sync
+                  <Upload className="text-brand-gold w-6 h-6" />
+                  Upload Department Rosters
                 </h2>
-                <p className="text-gray-400 text-sm mt-1">Upload department rosters → auto-schedule trainings based on employee availability</p>
+                <p className="text-gray-400 text-sm mt-1">Upload rosters to sync with the Master Calendar.</p>
               </div>
               <button onClick={() => setShowMonthlyRosterModal(false)} className="text-gray-400 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
             </div>
 
-            {/* Step Indicator */}
-            <div className="flex items-center gap-0 px-6 pt-6">
-              {[{n:1,label:'Upload Rosters'},{n:2,label:'Configure'},{n:3,label:'Preview & Save'}].map((s, idx) => (
-                <React.Fragment key={s.n}>
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${monthlyRosterStep === s.n ? 'bg-brand-gold text-black' : monthlyRosterStep > s.n ? 'text-green-400' : 'text-gray-500'}`}>
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${monthlyRosterStep === s.n ? 'bg-black/20' : monthlyRosterStep > s.n ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-500'}`}>
-                      {monthlyRosterStep > s.n ? '✓' : s.n}
-                    </span>
-                    {s.label}
-                  </div>
-                  {idx < 2 && <div className="flex-1 h-px bg-gray-800 mx-2" />}
-                </React.Fragment>
-              ))}
-            </div>
-
             <div className="p-6">
+              {/* CSV Format Guide */}
+              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
+                <h3 className="text-brand-gold font-bold text-sm mb-2">📋 Required CSV Format</h3>
+                <div className="font-mono text-xs text-gray-300 bg-black/40 rounded-lg p-3 overflow-x-auto">
+                  <div className="text-gray-500 mb-1"># Row 1: Header with day numbers</div>
+                  <div>EmpNo,Name,01,02,03,04,05,...,31</div>
+                  <div>E001,John Smith,6,8,DO,13,22,AL,...</div>
+                  <div>E002,Mary Jane,13,DO,6,6,8,13,...</div>
+                </div>
+                <div className="flex gap-4 mt-3 text-xs">
+                  <span className="text-green-400 font-bold">8 = Morning Shift</span>
+                  <span className="text-blue-400 font-bold">13 = Afternoon Shift</span>
+                  <span className="text-red-400 font-bold">O = Day Off</span>
+                </div>
+              </div>
 
-              {/* STEP 1: Upload Rosters */}
-              {monthlyRosterStep === 1 && (
-                <div>
-                  {/* CSV Format Guide */}
-                  <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
-                    <h3 className="text-brand-gold font-bold text-sm mb-2">📋 Required CSV Format</h3>
-                    <div className="font-mono text-xs text-gray-300 bg-black/40 rounded-lg p-3 overflow-x-auto">
-                      <div className="text-gray-500 mb-1"># Row 1: Header with day numbers</div>
-                      <div>EmpNo,Name,01,02,03,04,05,...,31</div>
-                      <div>E001,John Smith,6,8,DO,13,22,AL,...</div>
-                      <div>E002,Mary Jane,13,DO,6,6,8,13,...</div>
-                    </div>
-                    <div className="flex gap-4 mt-3 text-xs">
-                      <span className="text-green-400 font-bold">8 = Morning Shift</span>
-                      <span className="text-blue-400 font-bold">13 = Afternoon Shift</span>
-                      <span className="text-red-400 font-bold">O = Day Off</span>
-                      <span className="text-yellow-400 font-bold">L = Leave</span>
-                      <span className="text-blue-400 font-bold">H = Holiday</span>
-                      <span className="text-purple-400 font-bold">S = Split Shift</span>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-4 mb-4 bg-gray-900/50 p-3 rounded-xl border border-gray-800">
+                <label className="text-sm text-gray-400">Batch Size Limit (Staff per session)</label>
+                <input type="number" min={1} max={100} value={rosterBatchSize} onChange={e => setRosterBatchSize(e.target.value)} className="w-24 bg-[#181818] border border-gray-700 rounded-lg p-2 text-white focus:border-brand-gold outline-none text-center" />
+              </div>
 
-                  {/* Department Tabs */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {DEPARTMENTS.map(dept => (
-                      <button key={dept} onClick={() => setActiveRosterDept(dept)}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${activeRosterDept === dept ? 'bg-brand-gold text-black border-brand-gold' : monthlyRosters[dept] ? 'bg-green-900/30 text-green-400 border-green-700' : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-500'}`}>
-                        {monthlyRosters[dept] ? '✓ ' : ''}{dept}
-                      </button>
-                    ))}
-                  </div>
+              {/* Department Tabs */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {DEPARTMENTS.map(dept => (
+                  <button key={dept} onClick={() => setActiveRosterDept(dept)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${activeRosterDept === dept ? 'bg-brand-gold text-black border-brand-gold' : monthlyRosters[dept] ? 'bg-green-900/30 text-green-400 border-green-700' : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-500'}`}>
+                    {monthlyRosters[dept] ? '✓ ' : ''}{dept}
+                  </button>
+                ))}
+              </div>
 
-                  {/* Upload Card for Active Dept */}
-                  <div className="bg-gray-900 border border-dashed border-gray-600 rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-white font-bold text-lg">{activeRosterDept} Department</h3>
-                        {monthlyRosters[activeRosterDept] ? (
-                          <p className="text-green-400 text-sm mt-1">
-                            ✅ {monthlyRosters[activeRosterDept].employees.length} employees loaded · Avg {getRosterStats(activeRosterDept)?.avgWorkDays} working days/person
-                          </p>
-                        ) : (
-                          <p className="text-gray-500 text-sm mt-1">No roster uploaded yet</p>
-                        )}
-                      </div>
-                      <input type="file" accept=".csv" ref={rosterFileInputRef} onChange={(e) => handleMonthlyRosterUpload(e, activeRosterDept)} className="hidden" />
-                      <button onClick={() => rosterFileInputRef.current?.click()} className="bg-brand-gold text-black px-5 py-2.5 rounded-lg font-bold hover:bg-brand-goldHover transition-colors flex items-center gap-2">
-                        <Upload className="w-4 h-4" /> Upload CSV
-                      </button>
-                    </div>
-
-                    {/* Show employee preview */}
-                    {monthlyRosters[activeRosterDept] && (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs text-gray-400">
-                          <thead><tr className="border-b border-gray-800"><th className="text-left py-2 pr-3">Emp No</th><th className="text-left py-2 pr-3">Name</th><th className="text-center py-2 pr-2 text-green-400">Working Days</th><th className="text-center py-2 text-red-400">Off Days</th></tr></thead>
-                          <tbody>
-                            {monthlyRosters[activeRosterDept].employees.slice(0, 5).map((e, i) => {
-                              const wDays = Object.values(e.days).filter(d => String(d).trim() === '8' || String(d).trim() === '13').length;
-                              const oDays = Object.values(e.days).filter(d => d === 'O').length;
-                              return <tr key={i} className="border-b border-gray-800/50"><td className="py-1.5 pr-3 font-mono">{e.emp_no}</td><td className="py-1.5 pr-3">{e.name}</td><td className="py-1.5 text-center text-green-400 font-bold">{wDays}</td><td className="py-1.5 text-center text-red-400">{oDays}</td></tr>;
-                            })}
-                            {monthlyRosters[activeRosterDept].employees.length > 5 && <tr><td colSpan={4} className="py-2 text-gray-600 text-center">... and {monthlyRosters[activeRosterDept].employees.length - 5} more employees</td></tr>}
-                          </tbody>
-                        </table>
-                      </div>
+              {/* Upload Card for Active Dept */}
+              <div className="bg-gray-900 border border-dashed border-gray-600 rounded-xl p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-white font-bold text-lg">{activeRosterDept} Department</h3>
+                    {monthlyRosters[activeRosterDept] ? (
+                      <p className="text-green-400 text-sm mt-1">
+                        ✅ {monthlyRosters[activeRosterDept].employees.length} employees loaded · Avg {getRosterStats(activeRosterDept)?.avgWorkDays} working days/person
+                      </p>
+                    ) : (
+                      <p className="text-gray-500 text-sm mt-1">No roster uploaded yet</p>
                     )}
                   </div>
-
-                  {/* Uploaded summary */}
-                  {Object.keys(monthlyRosters).length > 0 && (
-                    <div className="mt-4 flex items-center justify-between">
-                      <p className="text-gray-400 text-sm">{Object.keys(monthlyRosters).length} department(s) roster uploaded</p>
-                      <button onClick={() => setMonthlyRosterStep(2)} className="bg-brand-gold text-black px-6 py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors flex items-center gap-2">
-                        Next: Configure <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
+                  <input type="file" accept=".csv" ref={rosterFileInputRef} onChange={(e) => handleMonthlyRosterUpload(e, activeRosterDept)} className="hidden" />
+                  <button onClick={() => rosterFileInputRef.current?.click()} className="bg-brand-gold text-black px-5 py-2.5 rounded-lg font-bold hover:bg-brand-goldHover transition-colors flex items-center gap-2">
+                    <Upload className="w-4 h-4" /> Upload CSV
+                  </button>
                 </div>
-              )}
 
-              {/* STEP 2: Configure Training */}
-              {monthlyRosterStep === 2 && (
-                <div className="space-y-5">
-                  <h3 className="text-white font-bold text-lg mb-4">Training Configuration</h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Training Topic *</label>
-                      <input required value={rosterTrainingTopic} onChange={e => setRosterTrainingTopic(e.target.value)}
-                        placeholder="e.g. Monthly SOP Review, Fire Safety..."
-                        className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Trainer Name</label>
-                      <input value={rosterTrainerName} onChange={e => setRosterTrainerName(e.target.value)}
-                        placeholder="e.g. Ms. Priya Silva"
-                        className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Venue</label>
-                      <input value={rosterVenue} onChange={e => setRosterVenue(e.target.value)}
-                        className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Batch Size (max employees per session)</label>
-                      <input type="number" min={1} max={50} value={rosterBatchSize} onChange={e => setRosterBatchSize(e.target.value)}
-                        className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" />
-                    </div>
+                {monthlyRosters[activeRosterDept] && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-gray-400">
+                      <thead><tr className="border-b border-gray-800"><th className="text-left py-2 pr-3">Emp No</th><th className="text-left py-2 pr-3">Name</th><th className="text-center py-2 pr-2 text-green-400">Working Days</th><th className="text-center py-2 text-red-400">Off Days</th></tr></thead>
+                      <tbody>
+                        {monthlyRosters[activeRosterDept].employees.slice(0, 5).map((e, i) => {
+                          const wDays = Object.values(e.days).filter(d => String(d).trim() === '8' || String(d).trim() === '13').length;
+                          const oDays = Object.values(e.days).filter(d => d === 'O').length;
+                          return <tr key={i} className="border-b border-gray-800/50"><td className="py-1.5 pr-3 font-mono">{e.emp_no}</td><td className="py-1.5 pr-3">{e.name}</td><td className="py-1.5 text-center text-green-400 font-bold">{wDays}</td><td className="py-1.5 text-center text-red-400">{oDays}</td></tr>;
+                        })}
+                        {monthlyRosters[activeRosterDept].employees.length > 5 && <tr><td colSpan={4} className="py-2 text-gray-600 text-center">... and {monthlyRosters[activeRosterDept].employees.length - 5} more employees</td></tr>}
+                      </tbody>
+                    </table>
                   </div>
-
-                  <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                    <h4 className="text-brand-gold font-semibold text-sm mb-3">📅 Schedule Logic</h4>
-                    <ul className="text-gray-400 text-sm space-y-1.5">
-                      <li>• Sessions will be created for each day employees are marked <span className="text-green-400 font-semibold">8 (Morning Shift)</span> or <span className="text-blue-400 font-semibold">13 (Afternoon Shift)</span></li>
-                      <li>• Employees grouped into batches of <strong className="text-white">{rosterBatchSize}</strong> per session</li>
-                      <li>• Batch 1 = <strong className="text-white">9:00 AM</strong>, Batch 2 = <strong className="text-white">3:00 PM</strong>, next day continues</li>
-                      <li>• Trainer Days Off dates are automatically <span className="text-red-400 font-semibold">skipped</span></li>
-                      <li>• All sessions saved to the Master Training Calendar</li>
-                    </ul>
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <button onClick={() => setMonthlyRosterStep(1)} className="px-6 py-2.5 rounded-xl border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors">← Back</button>
-                    <button onClick={generateAutoSchedule} disabled={!rosterTrainingTopic.trim()}
-                      className="flex-1 bg-brand-gold text-black py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                      <RefreshCw className="w-5 h-5" /> Generate Schedule Preview
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: Preview & Save */}
-              {monthlyRosterStep === 3 && (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white flex items-center gap-2"><CheckCircle className="text-green-500 w-7 h-7" /> Schedule Generated</h3>
-                      <p className="text-gray-400 mt-1">{autoSchedulePreview.length} training sessions across {Object.keys(monthlyRosters).length} department(s)</p>
-                    </div>
-                    <div className="flex gap-3">
-                      <button onClick={() => setMonthlyRosterStep(2)} className="px-4 py-2 rounded-lg border border-gray-700 text-gray-400 hover:text-white transition-colors text-sm">← Back</button>
-                      <button onClick={handleSaveAutoSchedule} disabled={savingAutoSchedule}
-                        className="bg-brand-gold text-black px-6 py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors shadow-lg flex items-center gap-2">
-                        {savingAutoSchedule ? 'Saving...' : <><Save className="w-4 h-4" /> Push to Calendar</>}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Summary Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
-                      <p className="text-3xl font-bold text-brand-gold">{autoSchedulePreview.length}</p>
-                      <p className="text-gray-500 text-sm mt-1">Total Sessions</p>
-                    </div>
-                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
-                      <p className="text-3xl font-bold text-green-400">{autoSchedulePreview.reduce((a,s) => a + s.employees.length, 0)}</p>
-                      <p className="text-gray-500 text-sm mt-1">Employee Slots</p>
-                    </div>
-                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
-                      <p className="text-3xl font-bold text-blue-400">{[...new Set(autoSchedulePreview.map(s => s.training_date.split('T')[0]))].length}</p>
-                      <p className="text-gray-500 text-sm mt-1">Training Days</p>
-                    </div>
-                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center">
-                      <p className="text-3xl font-bold text-purple-400">{Object.keys(monthlyRosters).length}</p>
-                      <p className="text-gray-500 text-sm mt-1">Departments</p>
-                    </div>
-                  </div>
-
-                  {/* Session List */}
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                    {autoSchedulePreview.map((session, idx) => (
-                      <div key={idx} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-                          <div className="flex items-center gap-3">
-                            <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${DEPT_COLORS[session.dept] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>{session.dept}</span>
-                            <div>
-                              <p className="text-white font-semibold">{session.topic}</p>
-                              <p className="text-gray-400 text-xs mt-0.5">📅 {session.dateLabel} &nbsp; ⏰ {session.timeLabel} &nbsp; 📍 {session.venue}</p>
-                            </div>
-                          </div>
-                          <span className="text-brand-gold font-bold text-sm bg-brand-gold/10 px-3 py-1 rounded-full">{session.employees.length} staff</span>
-                        </div>
-                        <div className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
-                          {session.employees.map((emp, i) => (
-                            <div key={i} className="text-xs text-gray-300 flex items-center gap-1.5 bg-[#181818] px-2 py-1.5 rounded border border-gray-800">
-                              <span className="text-gray-500 font-mono">{emp.emp_no}</span>
-                              <span className="truncate">{emp.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+                )}
+              </div>
+              
+              <div className="flex justify-end pt-4 border-t border-gray-800">
+                 <button onClick={() => setShowMonthlyRosterModal(false)} className="bg-brand-gold text-black px-8 py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors">Done</button>
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════ */}
+      {/* SYNC CALENDAR / GENERATE ALLOCATIONS PREVIEW MODAL */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      {showSyncModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-start justify-center z-50 p-4 overflow-y-auto print:hidden">
+          <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-5xl my-4 relative">
+             <div className="flex items-center justify-between p-6 border-b border-gray-800">
+                <div>
+                  <h3 className="text-2xl font-bold text-white flex items-center gap-2"><CheckCircle className="text-green-500 w-7 h-7" /> Allocations Generated</h3>
+                  <p className="text-gray-400 mt-1">Found staff for {syncPreview.length} master calendar sessions.</p>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setShowSyncModal(false)} className="px-4 py-2 rounded-lg border border-gray-700 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
+                  <button onClick={handleSaveSync} disabled={savingSync} className="bg-brand-gold text-black px-6 py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors shadow-lg flex items-center gap-2">
+                    {savingSync ? 'Saving...' : <><Save className="w-4 h-4" /> Save Allocations</>}
+                  </button>
+                </div>
+             </div>
+
+             <div className="p-6">
+               <div className="grid grid-cols-3 gap-4 mb-6">
+                 <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-brand-gold">{syncPreview.length}</p><p className="text-gray-500 text-sm mt-1">Sessions Matched</p></div>
+                 <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-green-400">{syncPreview.reduce((a,s) => a + s.employees.length, 0)}</p><p className="text-gray-500 text-sm mt-1">Employees Allocated</p></div>
+                 <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-purple-400">{[...new Set(syncPreview.map(s => s.dept))].length}</p><p className="text-gray-500 text-sm mt-1">Departments Syncing</p></div>
+               </div>
+
+               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                 {syncPreview.map((session, idx) => (
+                   <div key={idx} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+                     <div className="flex items-center justify-between p-4 border-b border-gray-800">
+                       <div className="flex items-center gap-3">
+                         <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${DEPT_COLORS[session.dept] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>{session.dept}</span>
+                         <div>
+                           <p className="text-white font-semibold">{session.topic}</p>
+                           <p className="text-gray-400 text-xs mt-0.5">📅 {session.dateLabel} &nbsp; ⏰ {session.timeLabel}</p>
+                         </div>
+                       </div>
+                       <span className="text-brand-gold font-bold text-sm bg-brand-gold/10 px-3 py-1 rounded-full">{session.employees.length} staff</span>
+                     </div>
+                     <div className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
+                       {session.employees.map((emp, i) => (
+                         <div key={i} className="text-xs text-gray-300 flex items-center gap-1.5 bg-[#181818] px-2 py-1.5 rounded border border-gray-800">
+                           <span className="text-gray-500 font-mono">{emp.emp_no}</span>
+                           <span className="truncate">{emp.name}</span>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </div>
           </div>
         </div>
       )}
