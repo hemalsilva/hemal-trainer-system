@@ -7,6 +7,7 @@ import OJT from './pages/OJT';
 import OCRScan from './pages/OCRScan';
 import Certificates from './pages/Certificates';
 import Reports from './pages/Reports';
+import TrainingAttendance from './pages/TrainingAttendance';
 import AttendancePortal from './pages/AttendancePortal';
 import Settings from './pages/Settings';
 import Audits from './pages/Audits';
@@ -29,6 +30,7 @@ function Sidebar() {
     { path: '/ojt', label: 'OJT Assessment', icon: ClipboardCheck },
     { path: '/audits', label: 'Room Audits', icon: CheckCircle },
     { path: '/reports', label: 'Reports & Analytics', icon: PieChart },
+    { path: '/attendance-records', label: 'Attendance', icon: FormInput },
     ];
 
   return (
@@ -109,6 +111,7 @@ function App() {
                       <Route path="/ojt" element={<OJT />} />
                       <Route path="/audits" element={<Audits />} />
                       <Route path="/reports" element={<Reports />} />
+                      <Route path="/attendance-records" element={<TrainingAttendance />} />
                       <Route path="/ocr" element={<OCRScan />} />
                       <Route path="/certificates" element={<Certificates />} />
                       <Route path="/settings" element={<Settings />} />
