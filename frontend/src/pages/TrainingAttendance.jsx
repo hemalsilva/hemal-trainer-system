@@ -3,8 +3,8 @@ import axios from 'axios';
 import Tesseract from 'tesseract.js';
 import { Calendar, Search, FileText, CheckCircle, XCircle, Link as LinkIcon, Upload, Users, Save } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-axios.defaults.baseURL = API_URL;
+
+
 
 export default function TrainingAttendance() {
   const [trainings, setTrainings] = useState([]);
@@ -30,7 +30,7 @@ export default function TrainingAttendance() {
 
   const fetchTrainings = async () => {
     try {
-      const res = await axios.get('/trainings');
+      const res = await axios.get('/api/trainings');
       setTrainings(res.data);
     } catch (err) {
       console.error(err);
@@ -55,7 +55,7 @@ export default function TrainingAttendance() {
   const fetchAttendanceSummary = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/trainings/' + selectedTrainingId + '/attendance-summary');
+      const res = await axios.get('/api/trainings/' + selectedTrainingId + '/attendance-summary');
       setAttended(res.data.attended || []);
       setAbsent(res.data.absent || []);
     } catch (err) {
@@ -76,7 +76,7 @@ export default function TrainingAttendance() {
     if (!tr) return;
 
     try {
-      await axios.put('/trainings/' + selectedTrainingId, {
+      await axios.put('/api/trainings/' + selectedTrainingId, {
         ...tr,
         google_form_link: googleFormLink
       });
@@ -109,7 +109,7 @@ export default function TrainingAttendance() {
         return;
       }
 
-      const res = await axios.post('/trainings/' + selectedTrainingId + '/attendance/bulk', {
+      const res = await axios.post('/api/trainings/' + selectedTrainingId + '/attendance/bulk', {
         emp_nos: uniqueNumbers
       });
 
