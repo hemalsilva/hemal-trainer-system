@@ -77,6 +77,7 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  const currentMonth = new Date().getMonth();
   const upcomingBirthdays = employees.filter(emp => {
     if (!emp.date_of_birth) return false;
     // Safely parse YYYY-MM-DD to avoid timezone shifts
