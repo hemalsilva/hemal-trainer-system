@@ -22,6 +22,7 @@ export default function Audits() {
     audit_date: new Date().toISOString().split('T')[0]
   });
   const [savingAudit, setSavingAudit] = useState(false);
+  const [empSearchText, setEmpSearchText] = useState('');
 
   const [activeTab, setActiveTab] = useState('overview');
   const [department, setDepartment] = useState('All');
@@ -97,6 +98,7 @@ export default function Audits() {
         room_number: '',
         audit_date: new Date().toISOString().split('T')[0]
       });
+      setEmpSearchText('');
       fetchAudits();
     } catch (err) {
       console.error(err);
@@ -359,20 +361,28 @@ export default function Audits() {
             <form onSubmit={handleAddAudit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee *</label>
-                <select 
+                <input 
+                  type="text"
                   required
-                  value={newAudit.emp_no}
+                  list="employee-options"
+                  value={empSearchText}
+                  placeholder="Type to search employee..."
                   onChange={(e) => {
-                    const emp = employees.find(em => em.emp_no === e.target.value);
-                    setNewAudit({...newAudit, emp_no: e.target.value, emp_name: emp ? emp.full_name : ''});
+                    setEmpSearchText(e.target.value);
+                    const emp = employees.find(em => `${em.emp_no} - ${em.full_name}` === e.target.value);
+                    if (emp) {
+                      setNewAudit({...newAudit, emp_no: emp.emp_no, emp_name: emp.full_name});
+                    } else {
+                      setNewAudit({...newAudit, emp_no: '', emp_name: ''});
+                    }
                   }}
                   className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
-                >
-                  <option value="">Select Employee</option>
+                />
+                <datalist id="employee-options">
                   {employees.map(emp => (
-                    <option key={emp.emp_no} value={emp.emp_no}>{emp.emp_no} - {emp.full_name}</option>
+                    <option key={emp.emp_no} value={`${emp.emp_no} - ${emp.full_name}`} />
                   ))}
-                </select>
+                </datalist>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
