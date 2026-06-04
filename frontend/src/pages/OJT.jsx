@@ -9,6 +9,7 @@ export default function OJT() {
   const [empDetails, setEmpDetails] = useState({
     emp_no: '',
     emp_name: '',
+    department: '',
     assessment_date: new Date().toISOString().split('T')[0]
   });
   const [selectedTrainer, setSelectedTrainer] = useState('');
@@ -52,6 +53,7 @@ export default function OJT() {
     const payload = {
       emp_no: empDetails.emp_no,
       emp_name: empDetails.emp_name,
+      department: empDetails.department,
       assessment_date: empDetails.assessment_date,
       topic: formData.topic,
       trainer_name: selectedTrainer,
@@ -66,7 +68,7 @@ export default function OJT() {
       await axios.post('/api/ojt', payload);
       alert('OJT Assessment Saved Successfully!');
       // Reset form
-      setEmpDetails({ emp_no: '', emp_name: '', assessment_date: new Date().toISOString().split('T')[0] });
+      setEmpDetails({ emp_no: '', emp_name: '', department: '', assessment_date: new Date().toISOString().split('T')[0] });
       setSelectedTrainer('');
       setRating(0);
       setPassFail(null);
@@ -117,7 +119,7 @@ export default function OJT() {
             <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <User className="w-5 h-5 text-brand-primary" /> Trainee Details
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Employee Number</label>
                 <div className="relative">
@@ -142,6 +144,26 @@ export default function OJT() {
                     placeholder="Full Name"
                     className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
                   />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Department</label>
+                <div className="relative">
+                  <select 
+                    value={empDetails.department}
+                    onChange={(e) => setEmpDetails({...empDetails, department: e.target.value})}
+                    className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all appearance-none"
+                  >
+                    <option value="" disabled>Select Dept...</option>
+                    <option value="Front Office">Front Office</option>
+                    <option value="Housekeeping">Housekeeping</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Security">Security</option>
+                    <option value="HR & Admin">HR & Admin</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
               <div>
