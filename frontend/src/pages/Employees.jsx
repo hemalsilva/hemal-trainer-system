@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import Tesseract from 'tesseract.js';
 import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X, Edit, Trash2 } from 'lucide-react';
 
 export default function Employees() {
@@ -59,17 +60,47 @@ export default function Employees() {
     if (!file) return;
 
     setUploading(true);
-    const data = new FormData();
-    data.append('file', file);
-
     try {
-      await axios.post('/api/employees/upload', data);
-      alert('Excel file processed successfully');
+      // Run OCR on the image
+      const { data: { text } } = await Tesseract.recognize(file, 'eng');
+      
+      // Basic parsing logic: Look for lines with EMP-XXX and a name
+      // E.g., "EMP-001 John Doe" or "John Doe EMP-001"
+      const lines = text.split('\n');
+      const employeesToUpdate = [];
+      
+      const empRegex = /EMP-\d+/i;
+      
+      lines.forEach(line => {
+        const match = line.match(empRegex);
+        if (match) {
+          const empNo = match[0].toUpperCase();
+          // Remove the emp number from the line to try and isolate the name
+          let name = line.replace(empRegex, '').trim();
+          // Clean up weird OCR artifacts
+          name = name.replace(/[^a-zA-Z\s]/g, '').trim();
+          
+          if (name.length > 2) {
+             employeesToUpdate.push({ emp_no: empNo, full_name: name });
+          }
+        }
+      });
+      
+      if (employeesToUpdate.length === 0) {
+         alert('No employee numbers (e.g. EMP-001) could be found in this image.');
+         setUploading(false);
+         return;
+      }
+
+      await axios.post('/api/employees/bulk-json', { employees: employeesToUpdate });
+      alert(`Successfully extracted and processed ${employeesToUpdate.length} employees from image!`);
       fetchEmployees();
     } catch (err) {
-      alert('Error uploading file');
+      console.error(err);
+      alert('Error processing image');
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -139,7 +170,7 @@ export default function Employees() {
             type="file" 
             ref={fileInputRef} 
             onChange={handleFileUpload} 
-            accept=".xlsx, .xls, .csv" 
+            accept="image/*" 
             className="hidden" 
           />
           
@@ -152,8 +183,8 @@ export default function Employees() {
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
             ) : (
               <>
-                <FileSpreadsheet className="w-5 h-5 text-green-400" />
-                Import Excel
+                <FileSpreadsheet className="w-5 h-5 text-brand-primary" />
+                Scan Sign Sheet
               </>
             )}
           </button>
@@ -172,8 +203,8 @@ export default function Employees() {
       <div className="mb-6 bg-brand-primaryLight border border-brand-primary/20 rounded-xl p-4 flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-brand-primary flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-brand-primary font-medium">Excel Bulk Import Available</h4>
-          <p className="text-sm text-gray-300 mt-1">You can now import massive staff directories via Excel. Ensure columns are named: Emp No, Name, Designation, Email.</p>
+          <h4 className="text-brand-primary font-medium">AI Smart Scan Available</h4>
+          <p className="text-sm text-gray-300 mt-1">You can now upload photos of manual sign-in sheets. The AI will automatically extract Employee Numbers and Names to update the directory.</p>
         </div>
       </div>
 

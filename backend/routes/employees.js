@@ -185,4 +185,43 @@ router.delete('/:emp_no', async (req, res) => {
   }
 });
 
+
+// POST bulk update via JSON (from OCR)
+router.post('/bulk-json', async (req, res) => {
+  const { employees } = req.body;
+  if (!employees || !Array.isArray(employees)) {
+    return res.status(400).json({ error: 'Invalid payload. Expected array of employees.' });
+  }
+
+  try {
+    let insertedCount = 0;
+    const errors = [];
+
+    await Promise.all(employees.map(async (emp) => {
+      try {
+        if (!emp.emp_no || !emp.full_name) return;
+        await pool.query(
+          `INSERT INTO employees (emp_no, full_name, designation, email) 
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (emp_no) DO UPDATE 
+           SET full_name = EXCLUDED.full_name`,
+          [emp.emp_no, emp.full_name, emp.designation || 'Staff', emp.email || '']
+        );
+        insertedCount++;
+      } catch (err) {
+        errors.push({ emp_no: emp.emp_no, error: err.message });
+      }
+    }));
+
+    res.json({ 
+      message: 'Upload processing complete', 
+      processed: employees.length,
+      success: insertedCount,
+      errors: errors 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
