@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import Tesseract from 'tesseract.js';
-import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X, Edit, Trash2, Lock } from 'lucide-react';
 
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
@@ -10,6 +10,9 @@ export default function Employees() {
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [showEncryptedModal, setShowEncryptedModal] = useState(false);
+  const [excelPassword, setExcelPassword] = useState('');
+  const [excelFile, setExcelFile] = useState(null);
   const [selectedDept, setSelectedDept] = useState('All');
   const [formData, setFormData] = useState({
     emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null
@@ -101,6 +104,35 @@ export default function Employees() {
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  
+  const handleEncryptedUpload = async (e) => {
+    e.preventDefault();
+    if (!excelFile || !excelPassword) {
+      alert('Please select a file and enter the password.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', excelFile);
+      formData.append('password', excelPassword);
+      
+      const res = await axios.post('/api/employees/bulk-encrypted-excel', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      alert(res.data.message + '. Processed: ' + res.data.processed + ' Success: ' + res.data.success);
+      setShowEncryptedModal(false);
+      setExcelFile(null);
+      setExcelPassword('');
+      fetchEmployees();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Error decrypting or uploading file.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -224,7 +256,7 @@ export default function Employees() {
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF JOINED</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF BIRTH</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-center">TRAINING HOURS</th>
-                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-right"></th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-right">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-800/50">

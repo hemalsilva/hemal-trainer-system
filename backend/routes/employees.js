@@ -3,6 +3,8 @@ const router = express.Router();
 const pool = require('../config/db');
 const multer = require('multer');
 const xlsx = require('xlsx');
+const OfficeCrypto = require('officecrypto-tool');
+const ExcelJS = require('exceljs');
 
 const fs = require('fs');
 
@@ -224,4 +226,76 @@ router.post('/bulk-json', async (req, res) => {
   }
 });
 
+
+// POST bulk upload encrypted excel
+router.post('/bulk-encrypted-excel', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const password = req.body.password;
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+
+  try {
+    // Decrypt the file in memory
+    const officecrypto = new OfficeCrypto(req.file.buffer);
+    officecrypto.setPassword(password);
+    const decryptedBuffer = officecrypto.decrypt();
+
+    // Parse with exceljs
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(decryptedBuffer);
+    const worksheet = workbook.worksheets[0];
+    
+    const data = [];
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) { // Skip header
+        data.push({
+          'Emp No': row.getCell(1).value?.toString(),
+          'Name': row.getCell(2).value?.toString(),
+          'Designation': row.getCell(3).value?.toString(),
+          'Email': row.getCell(4).value?.toString(),
+          'Department': row.getCell(5).value?.toString(),
+          'Join Date': row.getCell(6).value
+        });
+      }
+    });
+
+    let insertedCount = 0;
+    const errors = [];
+    const chunkSize = 20;
+
+    for (let i = 0; i < data.length; i += chunkSize) {
+      const chunk = data.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(async (row) => {
+        try {
+          if (!row['Emp No']) return;
+          await pool.query(
+            `INSERT INTO employees (emp_no, full_name, designation, email, department) 
+             VALUES ($1, $2, $3, $4, $5)
+             ON CONFLICT (emp_no) DO UPDATE 
+             SET full_name = EXCLUDED.full_name, designation = EXCLUDED.designation, email = EXCLUDED.email, department = EXCLUDED.department`,
+            [row['Emp No'], row['Name'], row['Designation'] || 'Staff', row['Email'] || '', row['Department'] || '']
+          );
+          insertedCount++;
+        } catch (err) {
+          errors.push({ emp_no: row['Emp No'], error: err.message });
+        }
+      }));
+    }
+
+    res.json({ 
+      message: 'Encrypted Upload processing complete', 
+      processed: data.length,
+      success: insertedCount,
+      errors: errors 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Decryption or parsing failed. Check password or file format.' });
+  }
+});
+
 module.exports = router;
+
