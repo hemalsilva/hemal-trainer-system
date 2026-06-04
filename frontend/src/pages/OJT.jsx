@@ -155,14 +155,14 @@ export default function OJT() {
                     className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all appearance-none"
                   >
                     <option value="" disabled>Select Dept...</option>
-                    <option value="Front Office">Front Office</option>
-                    <option value="Housekeeping">Housekeeping</option>
-                    <option value="Food & Beverage">Food & Beverage</option>
-                    <option value="Kitchen">Kitchen</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Security">Security</option>
-                    <option value="HR & Admin">HR & Admin</option>
-                    <option value="Other">Other</option>
+                    <option value="Rooms">Rooms</option>
+                    <option value="Public Area">Public Area</option>
+                    <option value="Laundry">Laundry</option>
+                    <option value="Flower">Flower</option>
+                    <option value="Stores">Stores</option>
+                    <option value="Coordinator">Coordinator</option>
+                    <option value="Hotel School">Hotel School</option>
+                    <option value="Cinnamon Hotel Academy">Cinnamon Hotel Academy</option>
                   </select>
                 </div>
               </div>
