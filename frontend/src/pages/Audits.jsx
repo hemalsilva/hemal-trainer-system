@@ -359,30 +359,49 @@ export default function Audits() {
             </div>
             
             <form onSubmit={handleAddAudit} className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Employee *</label>
-                <input 
-                  type="text"
-                  required
-                  list="employee-options"
-                  value={empSearchText}
-                  placeholder="Type to search employee..."
-                  onChange={(e) => {
-                    setEmpSearchText(e.target.value);
-                    const emp = employees.find(em => `${em.emp_no} - ${em.full_name}` === e.target.value);
-                    if (emp) {
-                      setNewAudit({...newAudit, emp_no: emp.emp_no, emp_name: emp.full_name});
-                    } else {
-                      setNewAudit({...newAudit, emp_no: '', emp_name: ''});
-                    }
-                  }}
-                  className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
-                />
-                <datalist id="employee-options">
-                  {employees.map(emp => (
-                    <option key={emp.emp_no} value={`${emp.emp_no} - ${emp.full_name}`} />
-                  ))}
-                </datalist>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Employee No *</label>
+                  <input 
+                    type="text"
+                    required
+                    value={newAudit.emp_no}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewAudit({...newAudit, emp_no: val});
+                      const emp = employees.find(em => em.emp_no === val);
+                      if (emp) {
+                         setNewAudit(prev => ({...prev, emp_name: emp.full_name, emp_no: emp.emp_no}));
+                      }
+                    }}
+                    placeholder="e.g. EMP-001"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Employee Name *</label>
+                  <input 
+                    type="text"
+                    required
+                    list="employee-options"
+                    value={newAudit.emp_name}
+                    placeholder="Search by name..."
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewAudit({...newAudit, emp_name: val});
+                      const emp = employees.find(em => em.full_name === val);
+                      if (emp) {
+                        setNewAudit(prev => ({...prev, emp_no: emp.emp_no, emp_name: emp.full_name}));
+                      }
+                    }}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                  />
+                  <datalist id="employee-options">
+                    {employees.map(emp => (
+                      <option key={emp.emp_no} value={emp.full_name} />
+                    ))}
+                  </datalist>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
