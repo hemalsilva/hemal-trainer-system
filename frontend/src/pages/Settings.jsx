@@ -39,23 +39,23 @@ function AddFormModal({ type, onAdd, onClose }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Training Topic *</label>
-            <input required value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Fire Safety Protocol" className="w-full bg-[#181818] border border-gray-700 rounded-xl p-3 text-white focus:border-brand-gold outline-none" />
+            <input required value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Fire Safety Protocol" className="w-full bg-[#181818] border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Department</label>
-            <select value={dept} onChange={e => setDept(e.target.value)} className="w-full bg-[#181818] border border-gray-700 rounded-xl p-3 text-white focus:border-brand-gold outline-none">
+            <select value={dept} onChange={e => setDept(e.target.value)} className="w-full bg-[#181818] border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none">
               <option value="">All Departments</option>
               {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1.5">Google Form / Sheet URL *</label>
-            <input required type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://forms.google.com/..." className="w-full bg-[#181818] border border-gray-700 rounded-xl p-3 text-white focus:border-brand-gold outline-none font-mono text-sm" />
+            <input required type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://forms.google.com/..." className="w-full bg-[#181818] border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none font-mono text-sm" />
             <p className="text-gray-600 text-xs mt-1">Paste the Google Form link (to share with staff) or Google Sheets link (for auto-sync of results)</p>
           </div>
           <div className="pt-2 flex gap-3">
             <button type="button" onClick={onClose} className="flex-1 border border-gray-700 text-gray-400 hover:text-white py-3 rounded-xl font-semibold">Cancel</button>
-            <button type="submit" className="flex-1 bg-brand-gold text-black py-3 rounded-xl font-bold hover:bg-brand-goldHover">Save Link</button>
+            <button type="submit" className="flex-1 bg-brand-primary text-black py-3 rounded-xl font-bold hover:bg-brand-primaryHover">Save Link</button>
           </div>
         </form>
       </div>
@@ -66,7 +66,7 @@ function AddFormModal({ type, onAdd, onClose }) {
 function HowToStep({ num, text }) {
   return (
     <div className="flex gap-3">
-      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-gold text-black text-xs font-bold flex items-center justify-center">{num}</span>
+      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-primary text-black text-xs font-bold flex items-center justify-center">{num}</span>
       <p className="text-gray-300 text-sm leading-relaxed">{text}</p>
     </div>
   );
@@ -90,7 +90,7 @@ function FormCard({ link, onDelete }) {
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <button onClick={copyUrl} title="Copy link" className="p-2 text-gray-400 hover:text-white bg-gray-800 rounded-lg transition-colors"><Copy className="w-4 h-4" /></button>
-        <a href={link.url} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-brand-gold bg-gray-800 rounded-lg transition-colors"><ExternalLink className="w-4 h-4" /></a>
+        <a href={link.url} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-brand-primary bg-gray-800 rounded-lg transition-colors"><ExternalLink className="w-4 h-4" /></a>
         <button onClick={() => onDelete(link.id)} className="p-2 text-gray-400 hover:text-red-400 bg-gray-800 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
       </div>
     </div>
@@ -225,7 +225,7 @@ export default function Settings() {
     <div className="p-8 w-full max-w-7xl mx-auto pb-24">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight flex items-center gap-3">
-          <SettingsIcon className="w-8 h-8 text-brand-gold" />
+          <SettingsIcon className="w-8 h-8 text-brand-primary" />
           System Settings
         </h1>
         <p className="text-gray-400">Configure your global preferences, form integrations, and templates.</p>
@@ -237,7 +237,7 @@ export default function Settings() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-gold border-b-2 border-brand-gold bg-brand-gold/5' : 'text-gray-400 hover:text-white'}`}
+            className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-primary border-b-2 border-brand-primary bg-brand-primary/5' : 'text-gray-400 hover:text-white'}`}
           >
             {tab === 'photos' ? 'Bulk Staff Photos' : tab === 'integrations' ? 'Form Integrations' : tab === 'whatsapp' ? 'WhatsApp Setup' : tab === 'backups' ? 'Backups & Storage' : 'General Preferences'}
           </button>
@@ -247,17 +247,17 @@ export default function Settings() {
       {activeTab === 'photos' && (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <section className="bg-brand-card border border-gray-800 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><ImageIcon className="text-brand-gold w-6 h-6" /> Bulk Staff Photo Upload</h2>
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><ImageIcon className="text-brand-primary w-6 h-6" /> Bulk Staff Photo Upload</h2>
             <p className="text-gray-400 mb-6">Upload multiple staff photos at once. Ensure the image files are named with the exact Employee Number (e.g., <strong className="text-white">E1024.jpg</strong> or <strong className="text-white">E1024.png</strong>). The system will automatically map the photo to the correct employee profile.</p>
             
-            <div className="bg-gray-900 border-2 border-dashed border-gray-700 hover:border-brand-gold transition-colors rounded-2xl p-10 text-center relative cursor-pointer group">
+            <div className="bg-gray-900 border-2 border-dashed border-gray-700 hover:border-brand-primary transition-colors rounded-2xl p-10 text-center relative cursor-pointer group">
               <input type="file" multiple accept="image/*" onChange={handlePhotoSelect} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-              <Upload className="w-12 h-12 text-gray-500 group-hover:text-brand-gold transition-colors mx-auto mb-4" />
+              <Upload className="w-12 h-12 text-gray-500 group-hover:text-brand-primary transition-colors mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Drag & Drop photos here</h3>
               <p className="text-gray-500 text-sm">or click to browse from your computer</p>
               {photosToUpload.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-800">
-                  <p className="text-brand-gold font-bold">{photosToUpload.length} files selected ready for upload.</p>
+                  <p className="text-brand-primary font-bold">{photosToUpload.length} files selected ready for upload.</p>
                 </div>
               )}
             </div>
@@ -272,7 +272,7 @@ export default function Settings() {
               <button 
                 onClick={handleBulkPhotoUpload} 
                 disabled={uploadingPhotos || photosToUpload.length === 0}
-                className="bg-brand-gold text-black px-8 py-3 rounded-xl font-bold hover:bg-brand-goldHover transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="bg-brand-primary text-black px-8 py-3 rounded-xl font-bold hover:bg-brand-primaryHover transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 {uploadingPhotos ? 'Uploading...' : 'Upload Photos'}
               </button>
@@ -283,7 +283,7 @@ export default function Settings() {
         <div className="max-w-4xl mx-auto space-y-10">
           <header className="mb-4">
             <h2 className="text-2xl font-bold text-white mb-2 tracking-tight flex items-center gap-3">
-              <FormInput className="w-6 h-6 text-brand-gold" /> Google Forms Manager
+              <FormInput className="w-6 h-6 text-brand-primary" /> Google Forms Manager
             </h2>
             <p className="text-gray-400 text-sm">Link your Google Forms to training topics — for attendance tracking and post-training questionnaires.</p>
           </header>
@@ -310,11 +310,31 @@ export default function Settings() {
                 <div className="px-6 pb-6 space-y-3 border-t border-blue-500/20 pt-4">
                   <HowToStep num="1" text='Go to forms.google.com → Create a new form titled with the training topic (e.g. "Fire Safety Attendance").' />
                   <HowToStep num="2" text='Add fields: Employee Number (Short answer), Full Name (Short answer), Department (Short answer), Date (Date).' />
-                  <HowToStep num="3" text='Click the "Send" button → Copy the form link.' />
-                  <HowToStep num="4" text='Come back here → Click "Add Attendance Form" → Paste the link and select the training topic.' />
-                  <HowToStep num="5" text='Share this link with your staff via WhatsApp or print a QR code. When they complete it, responses go to the linked Google Sheet automatically.' />
-                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mt-2">
-                    <p className="text-blue-300 text-xs font-semibold">💡 Tip: To share as QR code — open the form, click Send → Link icon → copy → paste into any QR code generator (e.g. qr-code-generator.com)</p>
+                  <HowToStep num="3" text='In your Google Form, go to the top right menu (3 dots) → Script editor.' />
+                  <HowToStep num="4" text='Copy the webhook script (provided below), paste it into the editor, and change "YOUR_TRAINING_TOPIC" to the actual topic you created (e.g. "Fire Safety"). Save it.' />
+                  <HowToStep num="5" text='Set up a Trigger in Apps Script (Clock icon) to run on "On form submit".' />
+                  <HowToStep num="6" text='Come back here → Click "Add Attendance Form" → Paste the form link to keep track of it.' />
+                  <HowToStep num="7" text='Share the form link with your staff. When they submit, attendance will automatically sync to your dashboard!' />
+                  <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-3">
+                    <p className="text-gray-400 text-xs font-bold mb-2">Webhook Apps Script (Copy & Paste):</p>
+                    <pre className="text-blue-300 text-[10px] overflow-x-auto whitespace-pre-wrap font-mono leading-relaxed bg-black p-3 rounded border border-gray-800">
+{`function onSubmit(e) {
+  var responses = e.namedValues;
+  var payload = {
+    emp_no: responses['Employee Number'] ? responses['Employee Number'][0] : '',
+    emp_name: responses['Full Name'] ? responses['Full Name'][0] : '',
+    training_topic: 'YOUR_TRAINING_TOPIC', // IMPORTANT: CHANGE THIS!
+    date: new Date().toISOString()
+  };
+  
+  var options = {
+    'method' : 'post',
+    'contentType': 'application/json',
+    'payload' : JSON.stringify(payload)
+  };
+  UrlFetchApp.fetch('http://YOUR_SERVER_IP:5000/api/forms/attendance-webhook', options);
+}`}
+                    </pre>
                   </div>
                 </div>
               )}
@@ -469,8 +489,8 @@ export default function Settings() {
       {activeTab === 'whatsapp' && (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <section className="bg-brand-card border border-gray-800 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><MessageSquare className="text-brand-gold w-6 h-6" /> WhatsApp Business Setup</h2>
-            <p className="text-gray-400 mb-6">Connect your WhatsApp account to automatically send schedules and updates directly to your staff's phones. <br/><span className="text-brand-gold">Note: This feature requires the backend to be running locally or on a VPS (not Serverless).</span></p>
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><MessageSquare className="text-brand-primary w-6 h-6" /> WhatsApp Business Setup</h2>
+            <p className="text-gray-400 mb-6">Connect your WhatsApp account to automatically send schedules and updates directly to your staff's phones. <br/><span className="text-brand-primary">Note: This feature requires the backend to be running locally or on a VPS (not Serverless).</span></p>
             
             <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 flex flex-col items-center">
               {waStatus.isReady ? (
@@ -487,7 +507,7 @@ export default function Settings() {
                  </div>
               ) : (
                  <div className="text-center">
-                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-gold mx-auto mb-4"></div>
+                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
                    <h3 className="text-lg font-bold text-white">Starting WhatsApp Engine...</h3>
                    <p className="text-gray-400 mt-2">Generating QR Code... Please wait (this can take 10-20 seconds).</p>
                  </div>
@@ -512,9 +532,9 @@ export default function Settings() {
                     value={oneDrivePath} 
                     onChange={e => setOneDrivePath(e.target.value)} 
                     placeholder="e.g., C:\Users\User\OneDrive\HK_Backups" 
-                    className="flex-1 bg-[#1a1a1a] border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold"
+                    className="flex-1 bg-[#1a1a1a] border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-primary"
                   />
-                  <button onClick={saveOneDriveConfig} disabled={isSavingConfig} className="bg-brand-gold hover:bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold transition-colors disabled:opacity-50">
+                  <button onClick={saveOneDriveConfig} disabled={isSavingConfig} className="bg-brand-primary hover:bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold transition-colors disabled:opacity-50">
                     {isSavingConfig ? 'Saving...' : 'Save Path'}
                   </button>
                 </div>

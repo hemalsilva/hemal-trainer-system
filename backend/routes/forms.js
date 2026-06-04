@@ -33,6 +33,50 @@ router.post('/webhook', async (req, res) => {
   }
 });
 
+// Webhook for Attendance Forms
+router.post('/attendance-webhook', async (req, res) => {
+  const { emp_no, emp_name, training_topic, date } = req.body;
+
+  try {
+    // Try to find the most recent training with this topic
+    const trainingResult = await pool.query(
+      `SELECT id FROM trainings 
+       WHERE topic ILIKE $1 
+       ORDER BY training_date DESC LIMIT 1`,
+      [`%${training_topic}%`]
+    );
+
+    if (trainingResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Matching training topic not found' });
+    }
+
+    const training_id = trainingResult.rows[0].id;
+
+    // Check if attendance already exists
+    const existing = await pool.query(
+      `SELECT * FROM attendance_records WHERE training_id = $1 AND emp_no = $2`,
+      [training_id, emp_no]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.json({ success: true, message: 'Attendance already recorded', record: existing.rows[0] });
+    }
+
+    // Insert attendance
+    const result = await pool.query(
+      `INSERT INTO attendance_records (training_id, emp_no, emp_name)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [training_id, emp_no, emp_name || '']
+    );
+
+    res.json({ success: true, record: result.rows[0] });
+  } catch (err) {
+    console.error('Attendance webhook error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Endpoint to fetch results for a training
 router.get('/results/:training_id', async (req, res) => {
   const { training_id } = req.params;
