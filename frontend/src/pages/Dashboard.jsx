@@ -57,6 +57,7 @@ export default function Dashboard() {
   const [trainings, setTrainings] = useState([]);
   const [ojtRecords, setOjtRecords] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,12 +77,20 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const currentMonth = new Date().getMonth();
   const upcomingBirthdays = employees.filter(emp => {
     if (!emp.date_of_birth) return false;
-    const dob = new Date(emp.date_of_birth);
-    return dob.getMonth() === currentMonth;
+    // Safely parse YYYY-MM-DD to avoid timezone shifts
+    let monthIndex;
+    if (typeof emp.date_of_birth === 'string' && emp.date_of_birth.includes('-')) {
+        monthIndex = parseInt(emp.date_of_birth.split('T')[0].split('-')[1], 10) - 1;
+    } else {
+        monthIndex = new Date(emp.date_of_birth).getMonth();
+    }
+    return monthIndex === selectedMonth;
   });
+  
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 
   // Calculate dynamic data
   const totalEmployees = employees.length;
@@ -376,14 +385,25 @@ export default function Dashboard() {
 
       {/* Birthday Widget */}
       <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 mb-10 border-t-4 border-t-pink-500 shadow-[0_10px_30px_rgba(236,72,153,0.1)]">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-pink-500/10 rounded-xl text-pink-500">
-            <Gift className="w-6 h-6" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-pink-500/10 rounded-xl text-pink-500">
+              <Gift className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-blue-200">Team Birthdays</h2>
+              <p className="text-sm text-gray-400">Celebrate with your team!</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-blue-200">This Month's Birthdays</h2>
-            <p className="text-sm text-gray-400">Celebrate with your team!</p>
-          </div>
+          <select 
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className="bg-[#181818] border border-gray-800 rounded-lg text-blue-200 px-4 py-2 focus:outline-none focus:border-pink-500 max-w-xs"
+          >
+            {monthNames.map((m, i) => (
+              <option key={i} value={i}>{m}</option>
+            ))}
+          </select>
         </div>
         
         {upcomingBirthdays.length === 0 ? (
