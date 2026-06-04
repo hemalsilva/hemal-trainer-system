@@ -29,15 +29,15 @@ export default function Login({ onLogin }) {
   return (
     <div className="min-h-screen w-full bg-brand-dark flex flex-col justify-center items-center p-4 relative overflow-hidden">
       {/* Background Ambience */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-brand-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
       
       <div className="w-full max-w-md bg-brand-card border border-gray-800 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative z-10">
         
         <div className="p-8 border-b border-gray-800 flex flex-col items-center text-center bg-[#181818]">
-          <div className="w-16 h-16 rounded-full bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(212,175,55,0.1)]">
-            <Award className="w-8 h-8 text-brand-gold" />
+          <div className="w-16 h-16 rounded-full bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(212,175,55,0.1)]">
+            <Award className="w-8 h-8 text-brand-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-wide">HK Training Portal</h1>
+          <h1 className="text-2xl font-bold text-blue-200 tracking-wide">HK Training Portal</h1>
           <p className="text-sm text-gray-400 mt-2">Sign in to manage training schedules and analytics.</p>
         </div>
 
@@ -58,7 +58,7 @@ export default function Login({ onLogin }) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter administrator username"
-                  className="w-full bg-[#121212] border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-gold focus:ring-1 focus:ring-brand-gold outline-none transition-all shadow-inner"
+                  className="w-full bg-[#121212] border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all shadow-inner"
                   required
                 />
               </div>
@@ -73,7 +73,7 @@ export default function Login({ onLogin }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#121212] border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-gold focus:ring-1 focus:ring-brand-gold outline-none transition-all shadow-inner"
+                  className="w-full bg-[#121212] border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all shadow-inner"
                   required
                 />
               </div>
@@ -82,7 +82,7 @@ export default function Login({ onLogin }) {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-brand-gold hover:bg-brand-goldHover text-black py-3.5 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-3.5 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? 'Authenticating...' : (
                 <>

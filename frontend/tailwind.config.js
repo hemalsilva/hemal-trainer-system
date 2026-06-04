@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         brand: {
-          dark: '#121212',
-          card: '#1E1E1E',
-          gold: '#D4AF37',
-          goldHover: '#B5952F',
-          goldLight: 'rgba(212, 175, 55, 0.1)',
+          dark: '#000000',
+          card: '#1e293b',
+          primary: '#3b82f6',
+          primaryHover: '#2563eb',
+          primaryLight: 'rgba(59, 130, 246, 0.1)',
         }
       },
       fontFamily: {

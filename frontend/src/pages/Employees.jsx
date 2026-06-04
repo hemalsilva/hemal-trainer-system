@@ -103,7 +103,7 @@ export default function Employees() {
     <div className="p-8 w-full max-w-7xl mx-auto pb-24">
       <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Staff Directory</h1>
+          <h1 className="text-3xl font-bold text-blue-200 mb-2 tracking-tight">Staff Directory</h1>
           <p className="text-gray-400">Manage your luxury hotel staff, roles, and training records.</p>
         </div>
         
@@ -115,14 +115,14 @@ export default function Employees() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search staff..." 
-              className="pl-10 pr-4 py-2 bg-brand-card border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary w-full md:w-48 lg:w-64 transition-all"
+              className="pl-10 pr-4 py-2 bg-brand-card border border-gray-800 rounded-lg text-blue-200 placeholder-gray-500 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary w-full md:w-48 lg:w-64 transition-all"
             />
           </div>
           
           <select 
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="bg-brand-card border border-gray-800 rounded-lg text-white px-4 py-2 focus:outline-none focus:border-brand-primary"
+            className="bg-brand-card border border-gray-800 rounded-lg text-blue-200 px-4 py-2 focus:outline-none focus:border-brand-primary"
           >
             <option value="All">All Departments</option>
             <option value="Rooms">Rooms</option>
@@ -146,7 +146,7 @@ export default function Employees() {
           <button 
             onClick={() => fileInputRef.current.click()}
             disabled={uploading}
-            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-700 transition-colors"
+            className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-700 transition-colors"
           >
             {uploading ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -225,7 +225,7 @@ export default function Employees() {
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-white">{emp.full_name}</p>
+                          <p className="font-medium text-blue-200">{emp.full_name}</p>
                         </div>
                       </div>
                     </td>
@@ -264,26 +264,26 @@ export default function Employees() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });}} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });}} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200">
               <X className="w-5 h-5" />
             </button>
-            <h2 className="text-xl font-bold text-white mb-6">{isEditing ? 'Edit Staff' : 'Add New Staff'}</h2>
+            <h2 className="text-xl font-bold text-blue-200 mb-6">{isEditing ? 'Edit Staff' : 'Add New Staff'}</h2>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee No</label>
-                <input required type="text" disabled={isEditing} value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                <input required type="text" disabled={isEditing} value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Full Name</label>
-                <input required type="text" value={formData.full_name || ''} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" />
+                <input required type="text" value={formData.full_name || ''} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Designation</label>
-                <input required type="text" value={formData.designation || ''} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" />
+                <input required type="text" value={formData.designation || ''} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Department</label>
-                <select required value={formData.department || ''} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none">
+                <select required value={formData.department || ''} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
                   <option value="">Select Department</option>
                   <option value="Rooms">Rooms</option>
                   <option value="Public Area">Public Area</option>
@@ -298,15 +298,15 @@ export default function Employees() {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Date of Join</label>
-                <input required type="date" value={formData.join_date} onChange={(e) => setFormData({...formData, join_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
+                <input required type="date" value={formData.join_date} onChange={(e) => setFormData({...formData, join_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
-                <input type="date" value={formData.date_of_birth} onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
+                <input type="date" value={formData.date_of_birth} onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee Photo (Optional)</label>
-                <input type="file" accept="image/*" onChange={(e) => setFormData({...formData, photo: e.target.files[0]})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none text-sm" />
+                <input type="file" accept="image/*" onChange={(e) => setFormData({...formData, photo: e.target.files[0]})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none text-sm" />
               </div>
               <div className="pt-4">
                 <button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors">

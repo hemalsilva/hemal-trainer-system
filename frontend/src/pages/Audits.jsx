@@ -72,12 +72,12 @@ export default function Audits() {
             {index === 0 ? <Trophy className="w-6 h-6" /> : `#${index + 1}`}
           </div>
           <div>
-            <h4 className="text-white font-bold">{performer.emp_name}</h4>
+            <h4 className="text-blue-200 font-bold">{performer.emp_name}</h4>
             <p className="text-gray-400 text-sm font-mono">{performer.emp_no}</p>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-white">{performer.max_score}<span className="text-sm text-gray-500 font-normal">/100</span></div>
+          <div className="text-2xl font-bold text-blue-200">{performer.max_score}<span className="text-sm text-gray-500 font-normal">/100</span></div>
           <div className="text-xs text-gray-400 uppercase tracking-wide">Top Score</div>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function Audits() {
     <div className="p-8 w-full max-w-7xl mx-auto pb-24">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-blue-200 mb-2 tracking-tight flex items-center gap-3">
             <CheckCircle className="w-8 h-8 text-emerald-400" />
             Room Audits
           </h1>
@@ -136,7 +136,7 @@ export default function Audits() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowAddModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-blue-200 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors">
             <Plus className="w-5 h-5" /> Add Manual Audit
           </button>
           <div className="flex items-center gap-3 bg-brand-card p-2 rounded-xl border border-gray-800">
@@ -149,12 +149,12 @@ export default function Audits() {
                   setSelectedDate(e.target.value);
                 }
               }}
-              className="bg-transparent text-white font-semibold outline-none cursor-pointer [color-scheme:dark]"
+              className="bg-transparent text-blue-200 font-semibold outline-none cursor-pointer [color-scheme:dark]"
             />
             <select 
               value={department} 
               onChange={(e) => setDepartment(e.target.value)}
-              className="bg-transparent text-white font-semibold outline-none cursor-pointer border-l border-gray-700 pl-3"
+              className="bg-transparent text-blue-200 font-semibold outline-none cursor-pointer border-l border-gray-700 pl-3"
             >
               <option value="All" className="bg-gray-900">All Departments</option>
               {DEPARTMENTS.map(d => <option key={d} value={d} className="bg-gray-900">{d}</option>)}
@@ -167,14 +167,14 @@ export default function Audits() {
       <div className="flex items-center gap-4 border-b border-gray-800 mb-8 pb-4">
         <button 
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-colors ${activeTab === 'overview' ? 'bg-brand-primary text-white' : 'text-gray-400 hover:text-white'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-colors ${activeTab === 'overview' ? 'bg-brand-primary text-blue-200' : 'text-gray-400 hover:text-blue-200'}`}
         >
           <LayoutDashboard className="w-5 h-5" />
           Overview
         </button>
         <button 
           onClick={() => setActiveTab('balances')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-colors ${activeTab === 'balances' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-colors ${activeTab === 'balances' ? 'bg-emerald-500 text-blue-200' : 'text-gray-400 hover:text-blue-200'}`}
         >
           <CheckCircle className="w-5 h-5" />
           Audit Balances
@@ -209,7 +209,7 @@ export default function Audits() {
                       <ArrowUpRight className={`w-5 h-5 ${color.text}`} />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">{type} Top Performers</h2>
+                      <h2 className="text-xl font-bold text-blue-200">{type} Top Performers</h2>
                       <p className="text-sm text-gray-500">Highest scores this month</p>
                     </div>
                   </div>
@@ -227,7 +227,7 @@ export default function Audits() {
           <div className="bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden">
             <div className="p-6 border-b border-gray-800 flex items-center gap-3">
               <History className="w-5 h-5 text-brand-primary" />
-              <h2 className="text-xl font-bold text-white">Recent Audits</h2>
+              <h2 className="text-xl font-bold text-blue-200">Recent Audits</h2>
             </div>
             
             <div className="overflow-x-auto">
@@ -255,7 +255,7 @@ export default function Audits() {
                           {new Date(audit.audit_date).toLocaleDateString()}
                         </td>
                         <td className="p-4">
-                          <div className="font-bold text-white">{audit.emp_name}</div>
+                          <div className="font-bold text-blue-200">{audit.emp_name}</div>
                           <div className="text-xs text-gray-500 font-mono">{audit.emp_no}</div>
                         </td>
                         <td className="p-4">
@@ -271,7 +271,7 @@ export default function Audits() {
                           {audit.room_number || 'N/A'}
                         </td>
                         <td className="p-4 text-right">
-                          <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800 text-white font-bold border border-gray-700">
+                          <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800 text-blue-200 font-bold border border-gray-700">
                             {audit.score}
                           </div>
                         </td>
@@ -287,7 +287,7 @@ export default function Audits() {
       ) : (
         <div className="bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-800">
-            <h2 className="text-xl font-bold text-white">Employee Audit Balances</h2>
+            <h2 className="text-xl font-bold text-blue-200">Employee Audit Balances</h2>
             <p className="text-sm text-gray-400 mt-1">Track monthly audit completion progress (Target: 60/month)</p>
           </div>
           <div className="overflow-x-auto">
@@ -313,7 +313,7 @@ export default function Audits() {
                   filteredBalances.map(b => (
                     <tr key={b.emp_no} className="hover:bg-[#1a1a1a] transition-colors">
                       <td className="p-4">
-                        <div className="font-bold text-white">{b.emp_name}</div>
+                        <div className="font-bold text-blue-200">{b.emp_name}</div>
                         <div className="text-xs text-gray-500">{b.emp_no}</div>
                       </td>
                       <td className="p-4 text-gray-300">{b.designation || 'N/A'}</td>
@@ -323,13 +323,13 @@ export default function Audits() {
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        <div className="text-white font-bold">{b.stayoverCompleted} <span className="text-gray-500 font-normal">/ {b.stayoverTarget}</span></div>
+                        <div className="text-blue-200 font-bold">{b.stayoverCompleted} <span className="text-gray-500 font-normal">/ {b.stayoverTarget}</span></div>
                         <div className={`text-xs font-bold mt-1 ${b.stayoverPending > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                           {b.stayoverPending > 0 ? `${b.stayoverPending} Pending` : 'Completed'}
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <div className="text-white font-bold">{b.departureCompleted} <span className="text-gray-500 font-normal">/ {b.departureTarget}</span></div>
+                        <div className="text-blue-200 font-bold">{b.departureCompleted} <span className="text-gray-500 font-normal">/ {b.departureTarget}</span></div>
                         <div className={`text-xs font-bold mt-1 ${b.departurePending > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                           {b.departurePending > 0 ? `${b.departurePending} Pending` : 'Completed'}
                         </div>
@@ -352,10 +352,10 @@ export default function Audits() {
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
           <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-lg p-6 relative">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <h2 className="text-xl font-bold text-blue-200 flex items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-emerald-400" /> Add Manual Audit
               </h2>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
+              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
             </div>
             
             <form onSubmit={handleAddAudit} className="space-y-4">
@@ -375,7 +375,7 @@ export default function Audits() {
                       }
                     }}
                     placeholder="e.g. EMP-001"
-                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   />
                 </div>
                 <div>
@@ -394,7 +394,7 @@ export default function Audits() {
                         setNewAudit(prev => ({...prev, emp_no: emp.emp_no, emp_name: emp.full_name}));
                       }
                     }}
-                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   />
                   <datalist id="employee-options">
                     {employees.map(emp => (
@@ -411,7 +411,7 @@ export default function Audits() {
                     required
                     value={newAudit.audit_type}
                     onChange={(e) => setNewAudit({...newAudit, audit_type: e.target.value})}
-                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   >
                     {auditTypes.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -423,7 +423,7 @@ export default function Audits() {
                     required
                     value={newAudit.audit_date}
                     onChange={(e) => setNewAudit({...newAudit, audit_date: e.target.value})}
-                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none [color-scheme:dark]"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -438,7 +438,7 @@ export default function Audits() {
                     required
                     value={newAudit.score}
                     onChange={(e) => setNewAudit({...newAudit, score: e.target.value})}
-                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   />
                 </div>
                 <div>
@@ -448,14 +448,14 @@ export default function Audits() {
                     value={newAudit.room_number}
                     onChange={(e) => setNewAudit({...newAudit, room_number: e.target.value})}
                     placeholder="e.g. 102"
-                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-white outline-none"
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   />
                 </div>
               </div>
 
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-3 border border-gray-700 rounded-xl text-gray-400 font-bold hover:text-white transition-colors">Cancel</button>
-                <button type="submit" disabled={savingAudit} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-3 border border-gray-700 rounded-xl text-gray-400 font-bold hover:text-blue-200 transition-colors">Cancel</button>
+                <button type="submit" disabled={savingAudit} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-blue-200 rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                   {savingAudit ? 'Saving...' : 'Save Audit'}
                 </button>
               </div>

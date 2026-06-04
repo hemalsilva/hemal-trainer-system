@@ -35,17 +35,17 @@ export default function OCRScan() {
   return (
     <div className="p-8 w-full max-w-5xl mx-auto pb-24">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">AI Attendance Scanner</h1>
+        <h1 className="text-3xl font-bold text-blue-200 mb-2 tracking-tight">AI Attendance Scanner</h1>
         <p className="text-gray-400">Upload physical attendance sheets. Our OCR engine will automatically extract attendees.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Upload Section */}
         <div className="bg-brand-card rounded-2xl border border-gray-800 p-8 flex flex-col">
-          <h2 className="text-xl font-bold text-white mb-6">Upload Document</h2>
+          <h2 className="text-xl font-bold text-blue-200 mb-6">Upload Document</h2>
           
           <div 
-            className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-8 transition-colors ${preview ? 'border-brand-gold/50 bg-brand-gold/5' : 'border-gray-700 hover:border-gray-500 hover:bg-gray-800/50 cursor-pointer'}`}
+            className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-8 transition-colors ${preview ? 'border-brand-primary/50 bg-brand-primary/5' : 'border-gray-700 hover:border-gray-500 hover:bg-gray-800/50 cursor-pointer'}`}
             onClick={() => !preview && fileInputRef.current.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleFileDrop}
@@ -71,9 +71,9 @@ export default function OCRScan() {
             ) : (
               <div className="text-center">
                 <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UploadCloud className="w-8 h-8 text-brand-gold" />
+                  <UploadCloud className="w-8 h-8 text-brand-primary" />
                 </div>
-                <p className="text-white font-medium mb-1">Click to upload or drag and drop</p>
+                <p className="text-blue-200 font-medium mb-1">Click to upload or drag and drop</p>
                 <p className="text-sm text-gray-500">JPG, PNG, or TIFF (Max 10MB)</p>
               </div>
             )}
@@ -84,7 +84,7 @@ export default function OCRScan() {
             disabled={!file || scanning}
             className={`mt-6 w-full py-3 rounded-lg font-bold text-black transition-all ${
               !file ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 
-              scanning ? 'bg-brand-gold/50' : 'bg-brand-gold hover:bg-brand-goldHover shadow-[0_0_15px_rgba(212,175,55,0.3)]'
+              scanning ? 'bg-brand-primary/50' : 'bg-brand-primary hover:bg-brand-primaryHover shadow-[0_0_15px_rgba(212,175,55,0.3)]'
             }`}
           >
             {scanning ? 'Scanning Document...' : 'Run OCR Extraction'}
@@ -93,7 +93,7 @@ export default function OCRScan() {
 
         {/* Results Section */}
         <div className="bg-brand-card rounded-2xl border border-gray-800 p-8">
-          <h2 className="text-xl font-bold text-white mb-6">Extraction Results</h2>
+          <h2 className="text-xl font-bold text-blue-200 mb-6">Extraction Results</h2>
           
           {!result && !scanning && (
             <div className="h-full flex flex-col items-center justify-center text-gray-500">
@@ -106,12 +106,12 @@ export default function OCRScan() {
             <div className="h-full flex flex-col items-center justify-center space-y-6">
               <div className="relative w-24 h-24">
                 <div className="absolute inset-0 border-4 border-gray-700 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-brand-gold rounded-full border-t-transparent animate-spin"></div>
+                <div className="absolute inset-0 border-4 border-brand-primary rounded-full border-t-transparent animate-spin"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs font-bold text-brand-gold">AI</span>
+                  <span className="text-xs font-bold text-brand-primary">AI</span>
                 </div>
               </div>
-              <p className="text-brand-gold animate-pulse">Running Tesseract.js Engine...</p>
+              <p className="text-brand-primary animate-pulse">Running Tesseract.js Engine...</p>
             </div>
           )}
 
@@ -121,13 +121,13 @@ export default function OCRScan() {
                 <CheckCircle2 className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
                   <h4 className="text-green-400 font-bold">Extraction Successful</h4>
-                  <p className="text-sm text-gray-400 mt-1">Confidence Score: <span className="text-white">{result.confidence}</span></p>
+                  <p className="text-sm text-gray-400 mt-1">Confidence Score: <span className="text-blue-200">{result.confidence}</span></p>
                 </div>
               </div>
 
               <div>
                 <h4 className="text-sm text-gray-400 uppercase tracking-wider font-bold mb-2">Detected Topic</h4>
-                <div className="bg-[#181818] border border-gray-800 p-3 rounded-lg text-white font-medium">
+                <div className="bg-[#181818] border border-gray-800 p-3 rounded-lg text-blue-200 font-medium">
                   {result.topic}
                 </div>
               </div>

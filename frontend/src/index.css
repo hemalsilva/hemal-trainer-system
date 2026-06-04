@@ -4,7 +4,7 @@
 
 @layer base {
   html { font-family: 'Inter', system-ui, sans-serif; }
-  body { @apply text-gray-800 antialiased bg-gray-50; }
+  body { @apply text-blue-200 antialiased bg-black; }
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }

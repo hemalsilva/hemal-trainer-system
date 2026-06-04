@@ -140,4 +140,28 @@ router.get('/balances', async (req, res) => {
   }
 });
 
+
+// POST /api/audits
+// Manually add an audit
+router.post('/', async (req, res) => {
+  const { emp_no, emp_name, audit_type, score, audit_date, room_number } = req.body;
+  
+  if (!emp_no || !audit_type || score === undefined || !audit_date) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO room_audits (emp_no, emp_name, audit_type, score, audit_date, room_number)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [emp_no, emp_name, audit_type, score, audit_date, room_number]
+    );
+    
+    res.status(201).json({ message: 'Audit saved successfully', audit: result.rows[0] });
+  } catch (err) {
+    console.error('Error saving manual audit:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 module.exports = router;

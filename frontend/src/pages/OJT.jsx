@@ -88,7 +88,7 @@ export default function OJT() {
     <div className="p-8 w-full max-w-5xl mx-auto pb-24">
       <header className="mb-8 border-b border-gray-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-blue-200 mb-2 tracking-tight flex items-center gap-3">
             <ClipboardCheck className="w-8 h-8 text-brand-primary" />
             OJT Assessments
           </h1>
@@ -99,13 +99,13 @@ export default function OJT() {
         <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
           <button 
             onClick={() => setActiveTab('record')} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-colors ${activeTab === 'record' ? 'bg-brand-primary text-black' : 'text-gray-400 hover:text-white'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-colors ${activeTab === 'record' ? 'bg-brand-primary text-black' : 'text-gray-400 hover:text-blue-200'}`}
           >
             <PenTool className="w-4 h-4" /> Record Assessment
           </button>
           <button 
             onClick={() => setActiveTab('view')} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-colors ${activeTab === 'view' ? 'bg-brand-primary text-black' : 'text-gray-400 hover:text-white'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-colors ${activeTab === 'view' ? 'bg-brand-primary text-black' : 'text-gray-400 hover:text-blue-200'}`}
           >
             <List className="w-4 h-4" /> View Records
           </button>
@@ -116,7 +116,7 @@ export default function OJT() {
         <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Trainee Details Header */}
           <div className="p-8 border-b border-gray-800 bg-[#181818]">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-blue-200 mb-6 flex items-center gap-2">
               <User className="w-5 h-5 text-brand-primary" /> Trainee Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -129,7 +129,7 @@ export default function OJT() {
                     value={empDetails.emp_no} 
                     onChange={(e) => setEmpDetails({...empDetails, emp_no: e.target.value})} 
                     placeholder="e.g. EMP-001"
-                    className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
+                    className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
                   />
                 </div>
               </div>
@@ -142,7 +142,7 @@ export default function OJT() {
                     value={empDetails.emp_name} 
                     onChange={(e) => setEmpDetails({...empDetails, emp_name: e.target.value})} 
                     placeholder="Full Name"
-                    className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
+                    className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
                   />
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function OJT() {
                   <select 
                     value={empDetails.department}
                     onChange={(e) => setEmpDetails({...empDetails, department: e.target.value})}
-                    className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all appearance-none"
+                    className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all appearance-none"
                   >
                     <option value="" disabled>Select Dept...</option>
                     <option value="Rooms">Rooms</option>
@@ -174,7 +174,7 @@ export default function OJT() {
                     type="date" 
                     value={empDetails.assessment_date} 
                     onChange={(e) => setEmpDetails({...empDetails, assessment_date: e.target.value})} 
-                    className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-white focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
+                    className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
                     style={{ colorScheme: 'dark' }}
                   />
                 </div>
@@ -187,23 +187,23 @@ export default function OJT() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-6">
-                <h3 className="text-white font-bold text-lg border-b border-gray-800 pb-2">Session Details</h3>
+                <h3 className="text-blue-200 font-bold text-lg border-b border-gray-800 pb-2">Session Details</h3>
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Topic</label>
-                  <input type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none transition-all" placeholder="e.g. Room Service Etiquette" />
+                  <input type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-blue-200 focus:border-brand-primary outline-none transition-all" placeholder="e.g. Room Service Etiquette" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Location / Venue</label>
-                  <input type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none transition-all" placeholder="e.g. Suite 401" />
+                  <input type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-blue-200 focus:border-brand-primary outline-none transition-all" placeholder="e.g. Suite 401" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Trainer Name</label>
-                  <input type="text" value={selectedTrainer} onChange={(e) => setSelectedTrainer(e.target.value)} placeholder="Evaluating Trainer" className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary outline-none transition-all" />
+                  <input type="text" value={selectedTrainer} onChange={(e) => setSelectedTrainer(e.target.value)} placeholder="Evaluating Trainer" className="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-blue-200 focus:border-brand-primary outline-none transition-all" />
                 </div>
               </div>
 
               <div>
-                <h3 className="text-white font-bold text-lg border-b border-gray-800 pb-2 mb-6">Skill Checklist</h3>
+                <h3 className="text-blue-200 font-bold text-lg border-b border-gray-800 pb-2 mb-6">Skill Checklist</h3>
                 <div className="space-y-3">
                   {['Presentation', 'Proper technique', 'Knowledge of SOP', 'Timing'].map((skill, i) => (
                     <label key={i} className="flex items-center gap-4 p-4 rounded-xl border border-gray-800 bg-gray-900/50 hover:bg-gray-800/80 cursor-pointer transition-colors shadow-sm">
@@ -218,7 +218,7 @@ export default function OJT() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {/* Performance Rating */}
               <div className="bg-gray-900/30 p-6 rounded-2xl border border-gray-800">
-                <h3 className="text-white font-bold mb-4 text-lg">Performance Rating</h3>
+                <h3 className="text-blue-200 font-bold mb-4 text-lg">Performance Rating</h3>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button 
@@ -242,17 +242,17 @@ export default function OJT() {
 
               {/* Final Verdict */}
               <div className="bg-gray-900/30 p-6 rounded-2xl border border-gray-800">
-                <h3 className="text-white font-bold mb-4 text-lg">Final Verdict</h3>
+                <h3 className="text-blue-200 font-bold mb-4 text-lg">Final Verdict</h3>
                 <div className="flex gap-4">
                   <button 
                     onClick={() => setPassFail(true)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${passFail === true ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.3)] scale-[1.02]' : 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${passFail === true ? 'bg-green-500 text-blue-200 shadow-[0_0_15px_rgba(34,197,94,0.3)] scale-[1.02]' : 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20'}`}
                   >
                     <CheckCircle className="w-5 h-5" /> PASS
                   </button>
                   <button 
                     onClick={() => setPassFail(false)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${passFail === false ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)] scale-[1.02]' : 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${passFail === false ? 'bg-red-500 text-blue-200 shadow-[0_0_15px_rgba(239,68,68,0.3)] scale-[1.02]' : 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'}`}
                   >
                     <XCircle className="w-5 h-5" /> FAIL
                   </button>
@@ -262,12 +262,12 @@ export default function OJT() {
 
             {/* Notes */}
             <div>
-              <h3 className="text-white font-bold text-lg border-b border-gray-800 pb-2 mb-6">Assessment Notes</h3>
+              <h3 className="text-blue-200 font-bold text-lg border-b border-gray-800 pb-2 mb-6">Assessment Notes</h3>
               <textarea 
                 rows="4" 
                 value={formData.assessment_notes}
                 onChange={(e) => setFormData({...formData, assessment_notes: e.target.value})}
-                className="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-blue-200 placeholder-gray-500 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors"
                 placeholder="Enter detailed observation notes here..."
               ></textarea>
             </div>
@@ -283,7 +283,7 @@ export default function OJT() {
       ) : (
         <div className="bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="p-6 border-b border-gray-800 flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-blue-200 flex items-center gap-2">
               <List className="w-5 h-5 text-brand-primary" /> OJT Records Directory
             </h2>
             <div className="relative w-full max-w-sm">
@@ -293,7 +293,7 @@ export default function OJT() {
                 placeholder="Search by Employee Name or ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-brand-primary outline-none"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2 text-sm text-blue-200 focus:border-brand-primary outline-none"
               />
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function OJT() {
                         {new Date(record.assessment_date).toLocaleDateString()}
                       </td>
                       <td className="p-4">
-                        <div className="font-bold text-white">{record.emp_name}</div>
+                        <div className="font-bold text-blue-200">{record.emp_name}</div>
                         <div className="text-xs text-gray-500 font-mono">{record.emp_no}</div>
                       </td>
                       <td className="p-4">

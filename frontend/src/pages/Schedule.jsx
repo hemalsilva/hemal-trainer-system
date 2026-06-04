@@ -457,27 +457,27 @@ export default function Schedule() {
     <div className="p-8 w-full max-w-[1600px] mx-auto pb-24">
       <header className="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6 print:hidden">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Master Training Calendar</h1>
+          <h1 className="text-3xl font-bold text-blue-200 mb-2 tracking-tight">Master Training Calendar</h1>
           <p className="text-gray-400">View your hotel's training schedule across all departments.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <button onClick={() => setShowTrainerModal(true)} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
+          <button onClick={() => setShowTrainerModal(true)} className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
             <UserMinus className="w-5 h-5" /> Trainer Days Off
           </button>
-          <button onClick={() => setShowCalUploadModal(true)} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
+          <button onClick={() => setShowCalUploadModal(true)} className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
             <CalendarDays className="w-5 h-5" /> Import Calendar
           </button>
-          <button onClick={openRosterModal} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
+          <button onClick={openRosterModal} className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors border border-gray-700 shadow-lg">
             <Upload className="w-5 h-5" /> Daily Staff Allocation
           </button>
           {/* NEW Monthly Roster Button */}
-          <button onClick={openMonthlyRosterModal} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg border border-gray-700">
+          <button onClick={openMonthlyRosterModal} className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg border border-gray-700">
             <Upload className="w-5 h-5" /> Upload Rosters
           </button>
-          <button onClick={handleGenerateAllocations} className="bg-gradient-to-r from-brand-gold to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg shadow-brand-gold/20">
+          <button onClick={handleGenerateAllocations} className="bg-gradient-to-r from-brand-primary to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg shadow-brand-primary/20">
             <RefreshCw className="w-5 h-5" /> Generate Allocations
           </button>
-          <button onClick={() => setShowModal(true)} className="bg-brand-gold hover:bg-brand-goldHover text-black px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-lg">
+          <button onClick={() => setShowModal(true)} className="bg-brand-primary hover:bg-brand-primaryHover text-black px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-lg">
             <Plus className="w-5 h-5" /> Add Session
           </button>
         </div>
@@ -486,13 +486,13 @@ export default function Schedule() {
       {/* Calendar Toolbar */}
       <div className="bg-brand-card border border-gray-800 rounded-t-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">
-          <button onClick={prevMonth} className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-colors"><ChevronLeft className="w-6 h-6" /></button>
-          <h2 className="text-2xl font-bold text-white w-48 text-center">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
-          <button onClick={nextMonth} className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-colors"><ChevronRight className="w-6 h-6" /></button>
+          <button onClick={prevMonth} className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-blue-200 transition-colors"><ChevronLeft className="w-6 h-6" /></button>
+          <h2 className="text-2xl font-bold text-blue-200 w-48 text-center">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+          <button onClick={nextMonth} className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-blue-200 transition-colors"><ChevronRight className="w-6 h-6" /></button>
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-5 h-5 text-gray-400" />
-          <select value={calendarFilter} onChange={(e) => setCalendarFilter(e.target.value)} className="bg-gray-900 border border-gray-700 rounded-lg text-white px-4 py-2 focus:outline-none focus:border-brand-gold font-medium">
+          <select value={calendarFilter} onChange={(e) => setCalendarFilter(e.target.value)} className="bg-gray-900 border border-gray-700 rounded-lg text-blue-200 px-4 py-2 focus:outline-none focus:border-brand-primary font-medium">
             <option value="All">All Departments</option>
             {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
@@ -511,14 +511,14 @@ export default function Schedule() {
           const daysOff = getDaysOffForDay(day);
           const isToday = new Date().getDate() === day && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
           return (
-            <div key={day} className={`bg-brand-card print:bg-white min-h-[140px] p-2 border-t border-gray-800 print:border-gray-300 transition-colors hover:bg-gray-900 ${isToday ? 'ring-2 ring-brand-gold inset-0 z-10 relative' : ''}`}>
-              <div className={`text-right text-sm font-bold mb-2 flex justify-between ${isToday ? 'text-brand-gold' : 'text-gray-500'}`}>
-                {isToday && <span className="text-xs bg-brand-gold text-black px-1.5 rounded-full font-bold">TODAY</span>}
+            <div key={day} className={`bg-brand-card print:bg-white min-h-[140px] p-2 border-t border-gray-800 print:border-gray-300 transition-colors hover:bg-gray-900 ${isToday ? 'ring-2 ring-brand-primary inset-0 z-10 relative' : ''}`}>
+              <div className={`text-right text-sm font-bold mb-2 flex justify-between ${isToday ? 'text-brand-primary' : 'text-gray-500'}`}>
+                {isToday && <span className="text-xs bg-brand-primary text-black px-1.5 rounded-full font-bold">TODAY</span>}
                 <span className="ml-auto">{day}</span>
               </div>
               {daysOff.map((off, idx) => <div key={idx} className="text-xs bg-red-900/30 text-red-400 border border-red-900/50 px-1.5 py-0.5 rounded mb-1 truncate">🚫 {off.trainer_name} Off</div>)}
               {daySessions.slice(0, 3).map((session) => (
-                <div key={session.id} onClick={() => openSessionView(session)} className={`text-xs px-2 py-1.5 rounded-md mb-1 cursor-pointer hover:opacity-80 transition-opacity border truncate font-medium ${DEPT_COLORS[session.department] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>
+                <div key={session.id} onClick={() => openSessionView(session)} className={`text-xs px-2 py-1.5 rounded-md mb-1 cursor-pointer hover:opacity-80 transition-opacity border truncate font-medium ${DEPT_COLORS[session.department] || 'bg-brand-primary/20 text-brand-primary border-brand-primary/30'}`}>
                   {new Date(session.training_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} · {session.topic}
                 </div>
               ))}
@@ -533,10 +533,10 @@ export default function Schedule() {
       <div className="mt-12 bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden">
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2"><BookOpen className="text-brand-gold w-6 h-6" /> Detailed Training Schedule</h2>
+            <h2 className="text-2xl font-bold text-blue-200 flex items-center gap-2"><BookOpen className="text-brand-primary w-6 h-6" /> Detailed Training Schedule</h2>
             <p className="text-gray-400 mt-1">Detailed list view for the selected month and department.</p>
           </div>
-          <button onClick={() => window.print()} className="print:hidden bg-gray-800 hover:bg-gray-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700">
+          <button onClick={() => window.print()} className="print:hidden bg-gray-800 hover:bg-gray-700 text-blue-200 px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700">
             <Printer className="w-5 h-5" /> Print Detailed Schedule
           </button>
         </div>
@@ -563,11 +563,11 @@ export default function Schedule() {
                       {new Date(session.training_date).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${DEPT_COLORS[session.department] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${DEPT_COLORS[session.department] || 'bg-brand-primary/20 text-brand-primary border-brand-primary/30'}`}>
                         {session.department}
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-white">{session.topic}</td>
+                    <td className="p-4 font-bold text-blue-200">{session.topic}</td>
                     <td className="p-4 text-gray-400">{session.trainer_name || 'TBD'}</td>
                     <td className="p-4 text-right text-gray-400">{session.venue || 'N/A'}</td>
                   </tr>
@@ -582,56 +582,56 @@ export default function Schedule() {
       {viewSessionModal.show && viewSessionModal.session && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden" onClick={() => { setViewSessionModal({ show: false, session: null, allocations: [] }); setIsEditingSession(false); }}>
           <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-lg w-full p-8 relative shadow-2xl" onClick={e => e.stopPropagation()}>
-            <button onClick={() => { setViewSessionModal({ show: false, session: null, allocations: [] }); setIsEditingSession(false); }} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
-            <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 border ${DEPT_COLORS[viewSessionModal.session.department] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>{viewSessionModal.session.department}</div>
+            <button onClick={() => { setViewSessionModal({ show: false, session: null, allocations: [] }); setIsEditingSession(false); }} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 border ${DEPT_COLORS[viewSessionModal.session.department] || 'bg-brand-primary/20 text-brand-primary border-brand-primary/30'}`}>{viewSessionModal.session.department}</div>
             
             {isEditingSession ? (
-              <input value={editSessionData.topic} onChange={e => setEditSessionData({...editSessionData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2 text-white text-2xl font-bold mb-2 focus:border-brand-gold outline-none" />
+              <input value={editSessionData.topic} onChange={e => setEditSessionData({...editSessionData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2 text-blue-200 text-2xl font-bold mb-2 focus:border-brand-primary outline-none" />
             ) : (
-              <h2 className="text-2xl font-bold text-white mb-1 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-blue-200 mb-1 flex items-center justify-between">
                 <span>{viewSessionModal.session.topic}</span>
-                <button onClick={() => {setIsEditingSession(true); setEditSessionData(viewSessionModal.session);}} className="text-gray-500 hover:text-brand-gold p-2 rounded-lg hover:bg-gray-800 transition-colors" title="Edit Session"><Edit3 className="w-5 h-5"/></button>
+                <button onClick={() => {setIsEditingSession(true); setEditSessionData(viewSessionModal.session);}} className="text-gray-500 hover:text-brand-primary p-2 rounded-lg hover:bg-gray-800 transition-colors" title="Edit Session"><Edit3 className="w-5 h-5"/></button>
               </h2>
             )}
 
-            <p className="text-brand-gold text-sm font-medium mb-6">{viewSessionModal.session.category}</p>
+            <p className="text-brand-primary text-sm font-medium mb-6">{viewSessionModal.session.category}</p>
             <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
               <div className="bg-gray-900 rounded-xl p-3">
                 <p className="text-gray-500 text-xs mb-1">Date & Time</p>
                 {isEditingSession ? (
-                  <input type="datetime-local" value={editSessionData.training_date ? new Date(new Date(editSessionData.training_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,16) : ''} onChange={e => setEditSessionData({...editSessionData, training_date: new Date(e.target.value).toISOString()})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" style={{ colorScheme: 'dark' }} />
+                  <input type="datetime-local" value={editSessionData.training_date ? new Date(new Date(editSessionData.training_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0,16) : ''} onChange={e => setEditSessionData({...editSessionData, training_date: new Date(e.target.value).toISOString()})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary" style={{ colorScheme: 'dark' }} />
                 ) : (
-                  <p className="text-white font-semibold">{new Date(viewSessionModal.session.training_date).toLocaleString()}</p>
+                  <p className="text-blue-200 font-semibold">{new Date(viewSessionModal.session.training_date).toLocaleString()}</p>
                 )}
               </div>
               <div className="bg-gray-900 rounded-xl p-3">
                 <p className="text-gray-500 text-xs mb-1">Venue</p>
                 {isEditingSession ? (
-                  <input value={editSessionData.venue} onChange={e => setEditSessionData({...editSessionData, venue: e.target.value})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" />
+                  <input value={editSessionData.venue} onChange={e => setEditSessionData({...editSessionData, venue: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary" />
                 ) : (
-                  <p className="text-white font-semibold">{viewSessionModal.session.venue || 'N/A'}</p>
+                  <p className="text-blue-200 font-semibold">{viewSessionModal.session.venue || 'N/A'}</p>
                 )}
               </div>
               <div className="bg-gray-900 rounded-xl p-3">
                 <p className="text-gray-500 text-xs mb-1">Trainer</p>
                 {isEditingSession ? (
-                  <input value={editSessionData.trainer_name} onChange={e => setEditSessionData({...editSessionData, trainer_name: e.target.value})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" />
+                  <input value={editSessionData.trainer_name} onChange={e => setEditSessionData({...editSessionData, trainer_name: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary" />
                 ) : (
-                  <p className="text-white font-semibold">{viewSessionModal.session.trainer_name || 'TBD'}</p>
+                  <p className="text-blue-200 font-semibold">{viewSessionModal.session.trainer_name || 'TBD'}</p>
                 )}
               </div>
               <div className="bg-gray-900 rounded-xl p-3">
                 <p className="text-gray-500 text-xs mb-1">Duration</p>
                 {isEditingSession ? (
-                  <input type="number" value={editSessionData.duration_minutes} onChange={e => setEditSessionData({...editSessionData, duration_minutes: e.target.value})} className="w-full bg-[#181818] text-white p-1 rounded border border-gray-700 outline-none focus:border-brand-gold" />
+                  <input type="number" value={editSessionData.duration_minutes} onChange={e => setEditSessionData({...editSessionData, duration_minutes: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary" />
                 ) : (
-                  <p className="text-white font-semibold">{viewSessionModal.session.duration_minutes || 60} mins</p>
+                  <p className="text-blue-200 font-semibold">{viewSessionModal.session.duration_minutes || 60} mins</p>
                 )}
               </div>
             </div>
             {viewSessionModal.allocations.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-white font-bold mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-brand-gold" /> Allocated Staff ({viewSessionModal.allocations.length})</h3>
+                <h3 className="text-blue-200 font-bold mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-brand-primary" /> Allocated Staff ({viewSessionModal.allocations.length})</h3>
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {viewSessionModal.allocations.map((emp, i) => <div key={i} className="text-sm text-gray-300 bg-gray-900 px-3 py-2 rounded-lg flex items-center gap-3"><span className="text-gray-500 font-mono text-xs w-14">{emp.emp_no}</span><span>{emp.emp_name}</span></div>)}
                 </div>
@@ -640,13 +640,13 @@ export default function Schedule() {
             <div className="flex gap-3">
               {isEditingSession ? (
                 <>
-                  <button onClick={() => setIsEditingSession(false)} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-lg font-bold transition-colors">Cancel</button>
-                  <button onClick={handleUpdateSession} className="flex-1 bg-brand-gold hover:bg-brand-goldHover text-black py-2.5 rounded-lg font-bold transition-colors shadow-lg">Save Changes</button>
+                  <button onClick={() => setIsEditingSession(false)} className="flex-1 bg-gray-800 hover:bg-gray-700 text-blue-200 py-2.5 rounded-lg font-bold transition-colors">Cancel</button>
+                  <button onClick={handleUpdateSession} className="flex-1 bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors shadow-lg">Save Changes</button>
                 </>
               ) : (
                 <>
-                  <button onClick={handleSendWhatsApp} className="flex-1 bg-green-700 hover:bg-green-600 text-white py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors"><MessageCircle className="w-4 h-4" /> Send WhatsApp</button>
-                  <button onClick={() => window.print()} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700"><Printer className="w-4 h-4" /> Print</button>
+                  <button onClick={handleSendWhatsApp} className="flex-1 bg-green-700 hover:bg-green-600 text-blue-200 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors"><MessageCircle className="w-4 h-4" /> Send WhatsApp</button>
+                  <button onClick={() => window.print()} className="flex-1 bg-gray-800 hover:bg-gray-700 text-blue-200 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors border border-gray-700"><Printer className="w-4 h-4" /> Print</button>
                 </>
               )}
             </div>
@@ -658,18 +658,18 @@ export default function Schedule() {
       {showTrainerModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden">
           <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-lg w-full p-8 relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setShowTrainerModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2"><UserMinus className="text-brand-gold" /> Trainer Days Off</h2>
+            <button onClick={() => setShowTrainerModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-blue-200 mb-2 flex items-center gap-2"><UserMinus className="text-brand-primary" /> Trainer Days Off</h2>
             <p className="text-gray-400 text-sm mb-6">Mark dates when your trainer is unavailable. The auto-scheduler will skip these dates.</p>
             <form onSubmit={handleAddDayOff} className="space-y-4 mb-6">
-              <div><label className="block text-sm text-gray-400 mb-1">Trainer Name</label><input required value={newDayOff.trainer_name} onChange={e => setNewDayOff({...newDayOff, trainer_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" /></div>
-              <div><label className="block text-sm text-gray-400 mb-1">Date Off</label><input required type="date" value={newDayOff.date_off} onChange={e => setNewDayOff({...newDayOff, date_off: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} /></div>
-              <button type="submit" className="w-full bg-brand-gold hover:bg-brand-goldHover text-black py-2.5 rounded-lg font-bold">Add Day Off</button>
+              <div><label className="block text-sm text-gray-400 mb-1">Trainer Name</label><input required value={newDayOff.trainer_name} onChange={e => setNewDayOff({...newDayOff, trainer_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+              <div><label className="block text-sm text-gray-400 mb-1">Date Off</label><input required type="date" value={newDayOff.date_off} onChange={e => setNewDayOff({...newDayOff, date_off: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} /></div>
+              <button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold">Add Day Off</button>
             </form>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {trainerDaysOff.map(t => (
                 <div key={t.id} className="flex items-center justify-between bg-gray-900 rounded-lg px-4 py-2 border border-gray-800">
-                  <div><p className="text-white font-medium text-sm">{t.trainer_name}</p><p className="text-gray-500 text-xs">{new Date(t.date_off).toLocaleDateString()}</p></div>
+                  <div><p className="text-blue-200 font-medium text-sm">{t.trainer_name}</p><p className="text-gray-500 text-xs">{new Date(t.date_off).toLocaleDateString()}</p></div>
                   <button onClick={() => handleDeleteDayOff(t.id)} className="text-red-400 hover:text-red-300 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
@@ -687,19 +687,19 @@ export default function Schedule() {
           <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-5xl my-4 relative">
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <div>
-                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <Upload className="text-brand-gold w-6 h-6" />
+                <h2 className="text-2xl font-bold text-blue-200 flex items-center gap-3">
+                  <Upload className="text-brand-primary w-6 h-6" />
                   Upload Department Rosters
                 </h2>
                 <p className="text-gray-400 text-sm mt-1">Upload rosters to sync with the Master Calendar.</p>
               </div>
-              <button onClick={() => setShowMonthlyRosterModal(false)} className="text-gray-400 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
+              <button onClick={() => setShowMonthlyRosterModal(false)} className="text-gray-400 hover:text-blue-200 transition-colors"><X className="w-6 h-6" /></button>
             </div>
 
             <div className="p-6">
               {/* CSV Format Guide */}
               <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
-                <h3 className="text-brand-gold font-bold text-sm mb-2">📋 Required CSV Format</h3>
+                <h3 className="text-brand-primary font-bold text-sm mb-2">📋 Required CSV Format</h3>
                 <div className="font-mono text-xs text-gray-300 bg-black/40 rounded-lg p-3 overflow-x-auto">
                   <div className="text-gray-500 mb-1"># Row 1: Header with day numbers</div>
                   <div>EmpNo,Name,01,02,03,04,05,...,31</div>
@@ -715,14 +715,14 @@ export default function Schedule() {
 
               <div className="flex items-center gap-4 mb-4 bg-gray-900/50 p-3 rounded-xl border border-gray-800">
                 <label className="text-sm text-gray-400">Batch Size Limit (Staff per session)</label>
-                <input type="number" min={1} max={100} value={rosterBatchSize} onChange={e => setRosterBatchSize(e.target.value)} className="w-24 bg-[#181818] border border-gray-700 rounded-lg p-2 text-white focus:border-brand-gold outline-none text-center" />
+                <input type="number" min={1} max={100} value={rosterBatchSize} onChange={e => setRosterBatchSize(e.target.value)} className="w-24 bg-[#181818] border border-gray-700 rounded-lg p-2 text-blue-200 focus:border-brand-primary outline-none text-center" />
               </div>
 
               {/* Department Tabs */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {DEPARTMENTS.map(dept => (
                   <button key={dept} onClick={() => setActiveRosterDept(dept)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${activeRosterDept === dept ? 'bg-brand-gold text-black border-brand-gold' : monthlyRosters[dept] ? 'bg-green-900/30 text-green-400 border-green-700' : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-500'}`}>
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all border ${activeRosterDept === dept ? 'bg-brand-primary text-black border-brand-primary' : monthlyRosters[dept] ? 'bg-green-900/30 text-green-400 border-green-700' : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-gray-500'}`}>
                     {monthlyRosters[dept] ? '✓ ' : ''}{dept}
                   </button>
                 ))}
@@ -732,7 +732,7 @@ export default function Schedule() {
               <div className="bg-gray-900 border border-dashed border-gray-600 rounded-xl p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-white font-bold text-lg">{activeRosterDept} Department</h3>
+                    <h3 className="text-blue-200 font-bold text-lg">{activeRosterDept} Department</h3>
                     {monthlyRosters[activeRosterDept] ? (
                       <p className="text-green-400 text-sm mt-1">
                         ✅ {monthlyRosters[activeRosterDept].employees.length} employees loaded · Avg {getRosterStats(activeRosterDept)?.avgWorkDays} working days/person
@@ -742,7 +742,7 @@ export default function Schedule() {
                     )}
                   </div>
                   <input type="file" accept=".csv" ref={rosterFileInputRef} onChange={(e) => handleMonthlyRosterUpload(e, activeRosterDept)} className="hidden" />
-                  <button onClick={() => rosterFileInputRef.current?.click()} className="bg-brand-gold text-black px-5 py-2.5 rounded-lg font-bold hover:bg-brand-goldHover transition-colors flex items-center gap-2">
+                  <button onClick={() => rosterFileInputRef.current?.click()} className="bg-brand-primary text-black px-5 py-2.5 rounded-lg font-bold hover:bg-brand-primaryHover transition-colors flex items-center gap-2">
                     <Upload className="w-4 h-4" /> Upload CSV
                   </button>
                 </div>
@@ -765,7 +765,7 @@ export default function Schedule() {
               </div>
               
               <div className="flex justify-end pt-4 border-t border-gray-800">
-                 <button onClick={() => setShowMonthlyRosterModal(false)} className="bg-brand-gold text-black px-8 py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors">Done</button>
+                 <button onClick={() => setShowMonthlyRosterModal(false)} className="bg-brand-primary text-black px-8 py-2.5 rounded-xl font-bold hover:bg-brand-primaryHover transition-colors">Done</button>
               </div>
             </div>
           </div>
@@ -780,12 +780,12 @@ export default function Schedule() {
           <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-5xl my-4 relative">
              <div className="flex items-center justify-between p-6 border-b border-gray-800">
                 <div>
-                  <h3 className="text-2xl font-bold text-white flex items-center gap-2"><CheckCircle className="text-green-500 w-7 h-7" /> Allocations Generated</h3>
+                  <h3 className="text-2xl font-bold text-blue-200 flex items-center gap-2"><CheckCircle className="text-green-500 w-7 h-7" /> Allocations Generated</h3>
                   <p className="text-gray-400 mt-1">Found staff for {syncPreview.length} master calendar sessions.</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => setShowSyncModal(false)} className="px-4 py-2 rounded-lg border border-gray-700 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
-                  <button onClick={handleSaveSync} disabled={savingSync} className="bg-brand-gold text-black px-6 py-2.5 rounded-xl font-bold hover:bg-brand-goldHover transition-colors shadow-lg flex items-center gap-2">
+                  <button onClick={() => setShowSyncModal(false)} className="px-4 py-2 rounded-lg border border-gray-700 text-gray-400 hover:text-blue-200 transition-colors text-sm">Cancel</button>
+                  <button onClick={handleSaveSync} disabled={savingSync} className="bg-brand-primary text-black px-6 py-2.5 rounded-xl font-bold hover:bg-brand-primaryHover transition-colors shadow-lg flex items-center gap-2">
                     {savingSync ? 'Saving...' : <><Save className="w-4 h-4" /> Save Allocations</>}
                   </button>
                 </div>
@@ -793,7 +793,7 @@ export default function Schedule() {
 
              <div className="p-6">
                <div className="grid grid-cols-3 gap-4 mb-6">
-                 <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-brand-gold">{syncPreview.length}</p><p className="text-gray-500 text-sm mt-1">Sessions Matched</p></div>
+                 <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-brand-primary">{syncPreview.length}</p><p className="text-gray-500 text-sm mt-1">Sessions Matched</p></div>
                  <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-green-400">{syncPreview.reduce((a,s) => a + s.employees.length, 0)}</p><p className="text-gray-500 text-sm mt-1">Employees Allocated</p></div>
                  <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 text-center"><p className="text-3xl font-bold text-purple-400">{[...new Set(syncPreview.map(s => s.dept))].length}</p><p className="text-gray-500 text-sm mt-1">Departments Syncing</p></div>
                </div>
@@ -803,13 +803,13 @@ export default function Schedule() {
                    <div key={idx} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
                      <div className="flex items-center justify-between p-4 border-b border-gray-800">
                        <div className="flex items-center gap-3">
-                         <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${DEPT_COLORS[session.dept] || 'bg-brand-gold/20 text-brand-gold border-brand-gold/30'}`}>{session.dept}</span>
+                         <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${DEPT_COLORS[session.dept] || 'bg-brand-primary/20 text-brand-primary border-brand-primary/30'}`}>{session.dept}</span>
                          <div>
-                           <p className="text-white font-semibold">{session.topic}</p>
+                           <p className="text-blue-200 font-semibold">{session.topic}</p>
                            <p className="text-gray-400 text-xs mt-0.5">📅 {session.dateLabel} &nbsp; ⏰ {session.timeLabel}</p>
                          </div>
                        </div>
-                       <span className="text-brand-gold font-bold text-sm bg-brand-gold/10 px-3 py-1 rounded-full">{session.employees.length} staff</span>
+                       <span className="text-brand-primary font-bold text-sm bg-brand-primary/10 px-3 py-1 rounded-full">{session.employees.length} staff</span>
                      </div>
                      <div className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
                        {session.employees.map((emp, i) => (
@@ -831,8 +831,8 @@ export default function Schedule() {
       {showRosterModal && (
         <div className="fixed inset-0 bg-black/90 flex items-start justify-center z-50 p-4 overflow-y-auto print:hidden">
           <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-4xl my-4 relative p-8">
-            <button onClick={() => setShowRosterModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3"><Users className="text-brand-gold" /> Smart Roster Auto-Allocator</h2>
+            <button onClick={() => setShowRosterModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-blue-200 mb-2 flex items-center gap-3"><Users className="text-brand-primary" /> Smart Roster Auto-Allocator</h2>
             <p className="text-gray-400 text-sm mb-6">Upload staff lists (EmpNo, Name CSV) per department. System will batch them into 15-person training slots.</p>
 
             
@@ -841,18 +841,18 @@ export default function Schedule() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Allocation Type</label>
-                    <select value={allocConfig.frequency} onChange={e => setAllocConfig({...allocConfig, frequency: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none">
+                    <select value={allocConfig.frequency} onChange={e => setAllocConfig({...allocConfig, frequency: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-blue-200 focus:border-brand-primary outline-none">
                       <option value="Daily">Daily</option>
                       <option value="Monthly">Monthly</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Start Date</label>
-                    <input type="date" value={allocConfig.startDate} onChange={e => setAllocConfig({...allocConfig, startDate: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} />
+                    <input type="date" value={allocConfig.startDate} onChange={e => setAllocConfig({...allocConfig, startDate: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">End Date</label>
-                    <input type="date" value={allocConfig.endDate} onChange={e => setAllocConfig({...allocConfig, endDate: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} />
+                    <input type="date" value={allocConfig.endDate} onChange={e => setAllocConfig({...allocConfig, endDate: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
                   </div>
                 </div>
                 <div className="space-y-4 mb-8">
@@ -862,12 +862,12 @@ export default function Schedule() {
                     return (
                       <div key={dept} className={`bg-gray-900 border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${pendingRosters[dept] ? 'border-green-700' : 'border-gray-800'}`}>
                         <div>
-                          <h4 className={`font-bold ${pendingRosters[dept] ? 'text-green-400' : 'text-white'}`}>{dept} {pendingRosters[dept] ? `✅ (${pendingRosters[dept].length} staff)` : ''}</h4>
+                          <h4 className={`font-bold ${pendingRosters[dept] ? 'text-green-400' : 'text-blue-200'}`}>{dept} {pendingRosters[dept] ? `✅ (${pendingRosters[dept].length} staff)` : ''}</h4>
                           <p className="text-gray-500 text-xs mt-1">CSV: EmpNo, Name (one per row)</p>
                         </div>
                         <div>
                           <input type="file" accept=".csv" ref={fileRef} onChange={(e) => handleDeptFileUpload(e, dept)} className="hidden" />
-                          <button onClick={() => fileRef.current?.click()} className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold border border-gray-700 flex items-center gap-2">
+                          <button onClick={() => fileRef.current?.click()} className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2 rounded-lg text-sm font-semibold border border-gray-700 flex items-center gap-2">
                             <Upload className="w-4 h-4" /> Upload {dept} Roster
                           </button>
                         </div>
@@ -877,7 +877,7 @@ export default function Schedule() {
                 </div>
                 <div className="text-center pt-6 border-t border-gray-800">
                   <button onClick={handleGenerateSchedules} disabled={Object.values(pendingRosters).every(r => r === null)}
-                    className={`px-12 py-4 rounded-xl font-bold transition-all shadow-lg text-xl flex items-center justify-center gap-3 mx-auto ${Object.values(pendingRosters).some(r => r !== null) ? 'bg-brand-gold text-black hover:bg-brand-goldHover hover:-translate-y-0.5' : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'}`}>
+                    className={`px-12 py-4 rounded-xl font-bold transition-all shadow-lg text-xl flex items-center justify-center gap-3 mx-auto ${Object.values(pendingRosters).some(r => r !== null) ? 'bg-brand-primary text-black hover:bg-brand-primaryHover hover:-translate-y-0.5' : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'}`}>
                     <CalendarDays className="w-6 h-6" /> Generate Schedules
                   </button>
                 </div>
@@ -888,11 +888,11 @@ export default function Schedule() {
               <div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-gray-800 pb-6 gap-4">
                   <div>
-                    <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3"><CheckCircle className="text-green-500 w-8 h-8" /> Smart Slots Generated</h2>
+                    <h2 className="text-3xl font-bold text-blue-200 mb-2 flex items-center gap-3"><CheckCircle className="text-green-500 w-8 h-8" /> Smart Slots Generated</h2>
                     <p className="text-gray-400">Batched into 9 AM / 3 PM slots. Trainer Days Off were actively skipped.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button onClick={handleSaveSmartAllocations} disabled={savingAllocations} className="bg-brand-gold text-black px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-brand-goldHover transition-colors font-bold shadow-lg">
+                    <button onClick={handleSaveSmartAllocations} disabled={savingAllocations} className="bg-brand-primary text-black px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-brand-primaryHover transition-colors font-bold shadow-lg">
                       {savingAllocations ? 'Saving...' : <><Save className="w-5 h-5" /> Push to Master Calendar</>}
                     </button>
                   </div>
@@ -902,10 +902,10 @@ export default function Schedule() {
                     <div key={index} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-md">
                       <div className="bg-gray-800 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-700 gap-2">
                         <div>
-                          <h4 className="font-bold text-white text-lg"><span className="text-brand-gold mr-2">[{session.department}]</span>{session.topic}</h4>
-                          <div className="text-sm text-gray-400 mt-1 flex items-center gap-2"><Clock className="w-4 h-4 text-brand-gold"/><span className="font-bold text-white">{new Date(session.training_date).toLocaleString()}</span></div>
+                          <h4 className="font-bold text-blue-200 text-lg"><span className="text-brand-primary mr-2">[{session.department}]</span>{session.topic}</h4>
+                          <div className="text-sm text-gray-400 mt-1 flex items-center gap-2"><Clock className="w-4 h-4 text-brand-primary"/><span className="font-bold text-blue-200">{new Date(session.training_date).toLocaleString()}</span></div>
                         </div>
-                        <span className="text-sm bg-brand-gold/20 text-brand-gold px-3 py-1 rounded-full font-bold">{session.employees.length} Staff</span>
+                        <span className="text-sm bg-brand-primary/20 text-brand-primary px-3 py-1 rounded-full font-bold">{session.employees.length} Staff</span>
                       </div>
                       <div className="p-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                         {session.employees.map((emp, i) => (
@@ -928,20 +928,20 @@ export default function Schedule() {
       {showCalUploadModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden">
           <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-md w-full p-8 relative">
-            <button onClick={() => setShowCalUploadModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-6 h-6" /></button>
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2"><CalendarDays className="text-brand-gold" /> Import Calendar</h2>
+            <button onClick={() => setShowCalUploadModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-blue-200 mb-2 flex items-center gap-2"><CalendarDays className="text-brand-primary" /> Import Calendar</h2>
             <p className="text-gray-400 text-sm mb-6">Upload a monthly Excel (.xlsx) or CSV schedule for a specific department.</p>
             <div className="space-y-5">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Target Department</label>
-                <select value={calUploadDept} onChange={(e) => setCalUploadDept(e.target.value)} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-white focus:border-brand-gold outline-none">
+                <select value={calUploadDept} onChange={(e) => setCalUploadDept(e.target.value)} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-3 text-blue-200 focus:border-brand-primary outline-none">
                   {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               <div className="bg-gray-900 border border-dashed border-gray-700 rounded-xl p-6 text-center">
                 <p className="text-xs text-gray-500 mb-4 text-left font-mono">Format: Date(YYYY-MM-DD), Time(HH:MM), Topic, Venue, Trainer</p>
                 <input type="file" accept=".csv, .xlsx, .xls" ref={calFileInputRef} onChange={handleCalendarUpload} className="hidden" />
-                <button onClick={() => calFileInputRef.current?.click()} disabled={uploadingCal} className="bg-brand-gold text-black px-6 py-2.5 rounded-lg font-bold hover:bg-brand-goldHover transition-colors w-full">
+                <button onClick={() => calFileInputRef.current?.click()} disabled={uploadingCal} className="bg-brand-primary text-black px-6 py-2.5 rounded-lg font-bold hover:bg-brand-primaryHover transition-colors w-full">
                   {uploadingCal ? 'Uploading...' : 'Select CSV File'}
                 </button>
               </div>
@@ -954,25 +954,25 @@ export default function Schedule() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 print:hidden">
           <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative">
-            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
-            <h2 className="text-xl font-bold text-white mb-6">Schedule New Training</h2>
+            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-5 h-5" /></button>
+            <h2 className="text-xl font-bold text-blue-200 mb-6">Schedule New Training</h2>
             <form onSubmit={handleAddSubmit} className="space-y-4">
-              <div><label className="block text-sm text-gray-400 mb-1">Topic</label><input required type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" /></div>
+              <div><label className="block text-sm text-gray-400 mb-1">Topic</label><input required type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
               <div><label className="block text-sm text-gray-400 mb-1">Department</label>
-                <select required value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none">
+                <select required value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
                   <option value="">Select Department</option>
                   {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               <div><label className="block text-sm text-gray-400 mb-1">Category</label>
-                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none">
+                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
                   <option>Mandatory</option><option>OJT</option><option>SOP</option><option>Hotel HR</option>
                 </select>
               </div>
-              <div><label className="block text-sm text-gray-400 mb-1">Trainer</label><input type="text" value={formData.trainer} onChange={(e) => setFormData({...formData, trainer: e.target.value})} placeholder="TBD" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" /></div>
-              <div><label className="block text-sm text-gray-400 mb-1">Venue</label><input type="text" value={formData.venue} onChange={(e) => setFormData({...formData, venue: e.target.value})} placeholder="Main Room" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" /></div>
-              <div><label className="block text-sm text-gray-400 mb-1">Date & Time</label><input required type="datetime-local" value={formData.training_date} onChange={(e) => setFormData({...formData, training_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} /></div>
-              <div className="pt-4"><button type="submit" className="w-full bg-brand-gold hover:bg-brand-goldHover text-black py-2.5 rounded-lg font-bold transition-colors">Save Session</button></div>
+              <div><label className="block text-sm text-gray-400 mb-1">Trainer</label><input type="text" value={formData.trainer} onChange={(e) => setFormData({...formData, trainer: e.target.value})} placeholder="TBD" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+              <div><label className="block text-sm text-gray-400 mb-1">Venue</label><input type="text" value={formData.venue} onChange={(e) => setFormData({...formData, venue: e.target.value})} placeholder="Main Room" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+              <div><label className="block text-sm text-gray-400 mb-1">Date & Time</label><input required type="datetime-local" value={formData.training_date} onChange={(e) => setFormData({...formData, training_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} /></div>
+              <div className="pt-4"><button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors">Save Session</button></div>
             </form>
           </div>
         </div>
@@ -982,13 +982,13 @@ export default function Schedule() {
       {qrModal.show && qrModal.session && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print:hidden">
           <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-sm w-full p-8 relative flex flex-col items-center text-center shadow-2xl">
-            <button onClick={() => setQrModal({ show: false, session: null })} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
-            <h2 className="text-2xl font-bold text-white mb-2">{qrModal.session.topic}</h2>
-            <p className="text-brand-gold text-sm font-medium mb-6 uppercase tracking-widest">Attendance QR Portal</p>
+            <button onClick={() => setQrModal({ show: false, session: null })} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200 transition-colors"><X className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-blue-200 mb-2">{qrModal.session.topic}</h2>
+            <p className="text-brand-primary text-sm font-medium mb-6 uppercase tracking-widest">Attendance QR Portal</p>
             <div className="bg-white p-4 rounded-xl shadow-inner mb-6">
               <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http://localhost:5173/%23/attendance/${qrModal.session.id}`} alt="QR Code" className="w-48 h-48" />
             </div>
-            <button onClick={() => window.print()} className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-lg font-bold transition-colors border border-gray-700 flex items-center justify-center gap-2"><Printer className="w-4 h-4" /> Print QR Poster</button>
+            <button onClick={() => window.print()} className="w-full bg-gray-800 hover:bg-gray-700 text-blue-200 py-3 rounded-lg font-bold transition-colors border border-gray-700 flex items-center justify-center gap-2"><Printer className="w-4 h-4" /> Print QR Poster</button>
           </div>
         </div>
       )}

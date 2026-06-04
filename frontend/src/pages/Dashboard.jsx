@@ -155,11 +155,11 @@ export default function Dashboard() {
     <div className="p-8 w-full max-w-7xl mx-auto pb-24">
       <header className="mb-10 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Executive Dashboard</h1>
+          <h1 className="text-3xl font-bold text-blue-200 mb-2 tracking-tight">Executive Dashboard</h1>
           <p className="text-gray-400">Overview of hotel-wide training metrics and compliance.</p>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-gray-700">
+          <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2 rounded-lg font-medium transition-colors border border-gray-700">
             <Printer className="w-4 h-4" />
             Print Report
           </button>
@@ -186,7 +186,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
+                  <h3 className="text-3xl font-bold text-blue-200 mb-1">{stat.value}</h3>
                   <p className="text-sm font-medium text-gray-400 mb-4">{stat.title}</p>
                   <p className="text-xs text-brand-primary flex items-center gap-1 font-medium">
                     <TrendingUp className="w-3 h-3" />
@@ -202,7 +202,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         {/* Main Chart */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-2">
-          <h2 className="text-lg font-bold text-white mb-6">Training Completion Overview</h2>
+          <h2 className="text-lg font-bold text-blue-200 mb-6">Training Completion Overview</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trainingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -230,7 +230,7 @@ export default function Dashboard() {
 
         {/* Secondary Chart */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800">
-          <h2 className="text-lg font-bold text-white mb-6">Training Hours by Department</h2>
+          <h2 className="text-lg font-bold text-blue-200 mb-6">Training Hours by Department</h2>
           <div className="h-72">
             {departmentData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -275,7 +275,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         {/* Secondary Bar Chart */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-1">
-          <h2 className="text-lg font-bold text-white mb-6">Rooms Division Training Breakdown</h2>
+          <h2 className="text-lg font-bold text-blue-200 mb-6">Rooms Division Training Breakdown</h2>
           <div className="h-80">
             {housekeepingData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -304,7 +304,7 @@ export default function Dashboard() {
 
         {/* Third Chart: Training % by Department */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-1">
-          <h2 className="text-lg font-bold text-white mb-6">Training % by Department</h2>
+          <h2 className="text-lg font-bold text-blue-200 mb-6">Training % by Department</h2>
           <div className="h-80">
             {deptPercentageData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -334,7 +334,7 @@ export default function Dashboard() {
 
         {/* Fourth Chart: OJT Performance */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-1">
-          <h2 className="text-lg font-bold text-white mb-6">OJT Assessment Results</h2>
+          <h2 className="text-lg font-bold text-blue-200 mb-6">OJT Assessment Results</h2>
           <div className="h-80">
             {ojtChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -381,7 +381,7 @@ export default function Dashboard() {
             <Gift className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">This Month's Birthdays</h2>
+            <h2 className="text-xl font-bold text-blue-200">This Month's Birthdays</h2>
             <p className="text-sm text-gray-400">Celebrate with your team!</p>
           </div>
         </div>
@@ -398,7 +398,7 @@ export default function Dashboard() {
                   {new Date(emp.date_of_birth).getDate()}
                 </div>
                 <div>
-                  <h4 className="text-white font-bold text-sm truncate w-32">{emp.full_name}</h4>
+                  <h4 className="text-blue-200 font-bold text-sm truncate w-32">{emp.full_name}</h4>
                   <p className="text-xs text-gray-400">{emp.department || 'Staff'}</p>
                 </div>
               </div>
