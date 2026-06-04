@@ -55,17 +55,20 @@ const renderActiveShape = (props) => {
 export default function Dashboard() {
   const [employees, setEmployees] = useState([]);
   const [trainings, setTrainings] = useState([]);
+  const [ojtRecords, setOjtRecords] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [empRes, trainRes] = await Promise.all([
+        const [empRes, trainRes, ojtRes] = await Promise.all([
           axios.get('/api/employees'),
-          axios.get('/api/trainings')
+          axios.get('/api/trainings'),
+          axios.get('/api/ojt')
         ]);
         setEmployees(empRes.data || []);
         setTrainings(trainRes.data || []);
+        setOjtRecords(ojtRes.data || []);
       } catch (err) {
         console.error(err);
       }
@@ -115,6 +118,15 @@ export default function Dashboard() {
     name: key,
     hours: housekeepingHoursMap[key]
   })).filter(d => d.hours > 0).sort((a, b) => b.hours - a.hours);
+
+  // OJT Performance Data
+  const ojtPassed = ojtRecords.filter(r => r.pass_fail).length;
+  const ojtFailed = ojtRecords.length > 0 ? ojtRecords.length - ojtPassed : 0;
+  const ojtChartData = ojtRecords.length > 0 ? [
+    { name: 'Passed', value: ojtPassed },
+    { name: 'Failed', value: ojtFailed }
+  ] : [];
+  const OJT_COLORS = ['#10B981', '#EF4444']; // Emerald for pass, Red for fail
 
   // Calculate active trainings this month
   const activeTrainings = trainings.filter(t => {
@@ -260,7 +272,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         {/* Secondary Bar Chart */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-1">
           <h2 className="text-lg font-bold text-white mb-6">Rooms Division Training Breakdown</h2>
@@ -316,6 +328,47 @@ export default function Dashboard() {
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500 text-sm">No data available</div>
+            )}
+          </div>
+        </div>
+
+        {/* Fourth Chart: OJT Performance */}
+        <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-1">
+          <h2 className="text-lg font-bold text-white mb-6">OJT Assessment Results</h2>
+          <div className="h-80">
+            {ojtChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <defs>
+                    <filter id="shadowOJT" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="3" dy="6" stdDeviation="4" floodColor="#000000" floodOpacity="0.6"/>
+                    </filter>
+                  </defs>
+                  <Pie
+                    data={ojtChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={85}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                    filter="url(#shadowOJT)"
+                    label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    {ojtChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={OJT_COLORS[index % OJT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: '#ccc', fontSize: '12px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500 text-sm">No OJT data available</div>
             )}
           </div>
         </div>
