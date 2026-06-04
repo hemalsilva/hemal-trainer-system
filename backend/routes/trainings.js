@@ -229,4 +229,83 @@ router.delete('/trainer/days-off/:id', async (req, res) => {
   }
 });
 
+
+// Get Attendance Summary (Attended vs Absent)
+router.get('/:id/attendance-summary', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Get Attended Employees
+    const attendedRes = await pool.query(
+      `SELECT a.id, a.emp_no, a.emp_name, a.scanned_at, e.department, e.designation 
+       FROM attendance_records a
+       LEFT JOIN employees e ON a.emp_no = e.emp_no
+       WHERE a.training_id = $1 ORDER BY a.scanned_at DESC`,
+      [id]
+    );
+
+    // Get Absent Employees (Employees not in attendance_records for this training_id)
+    const absentRes = await pool.query(
+      `SELECT e.emp_no, e.full_name as emp_name, e.department, e.designation 
+       FROM employees e
+       WHERE e.status = 'Active' AND e.emp_no NOT IN (
+         SELECT emp_no FROM attendance_records WHERE training_id = $1
+       ) ORDER BY e.full_name ASC`,
+      [id]
+    );
+
+    res.json({
+      attended: attendedRes.rows,
+      absent: absentRes.rows
+    });
+  } catch (err) {
+    console.error('Error fetching attendance summary:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Bulk Mark Attendance (from OCR)
+router.post('/:id/attendance/bulk', async (req, res) => {
+  const { id } = req.params;
+  const { emp_nos } = req.body; // Array of employee numbers
+
+  if (!emp_nos || !Array.isArray(emp_nos) || emp_nos.length === 0) {
+    return res.status(400).json({ error: 'No employee numbers provided' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    let addedCount = 0;
+    for (const empNo of emp_nos) {
+      const cleanEmpNo = empNo.toString().trim();
+      if (!cleanEmpNo) continue;
+      
+      // Fetch name from DB
+      const empRes = await client.query('SELECT full_name FROM employees WHERE emp_no = $1', [cleanEmpNo]);
+      const empName = empRes.rows.length > 0 ? empRes.rows[0].full_name : 'Unknown';
+
+      // Insert if not exists
+      const insertRes = await client.query(
+        `INSERT INTO attendance_records (training_id, emp_no, emp_name)
+         SELECT $1, $2, $3
+         WHERE NOT EXISTS (
+           SELECT 1 FROM attendance_records WHERE training_id = $1 AND emp_no = $2
+         ) RETURNING *`,
+        [id, cleanEmpNo, empName]
+      );
+      if (insertRes.rowCount > 0) addedCount++;
+    }
+    
+    await client.query('COMMIT');
+    res.json({ success: true, added: addedCount });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error in bulk attendance:', err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
