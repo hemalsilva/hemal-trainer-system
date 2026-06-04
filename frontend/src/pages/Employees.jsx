@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X, Edit } from 'lucide-react';
+import { Search, Plus, MoreVertical, Mail, Upload, FileSpreadsheet, AlertCircle, X, Edit, Trash2 } from 'lucide-react';
 
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
@@ -25,6 +25,17 @@ export default function Employees() {
     });
     setIsEditing(true);
     setShowModal(true);
+  };
+
+  const handleDelete = async (emp) => {
+    if (window.confirm(`Are you sure you want to delete ${emp.full_name} (${emp.emp_no})? This will also remove their training and attendance records.`)) {
+      try {
+        await axios.delete(`/api/employees/${emp.emp_no}`);
+        fetchEmployees();
+      } catch (err) {
+        alert('Error deleting employee: ' + (err.response?.data?.error || err.message));
+      }
+    }
   };
 
   const fetchEmployees = async () => {
@@ -104,14 +115,14 @@ export default function Employees() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search staff..." 
-              className="pl-10 pr-4 py-2 bg-brand-card border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold w-full md:w-48 lg:w-64 transition-all"
+              className="pl-10 pr-4 py-2 bg-brand-card border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary w-full md:w-48 lg:w-64 transition-all"
             />
           </div>
           
           <select 
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="bg-brand-card border border-gray-800 rounded-lg text-white px-4 py-2 focus:outline-none focus:border-brand-gold"
+            className="bg-brand-card border border-gray-800 rounded-lg text-white px-4 py-2 focus:outline-none focus:border-brand-primary"
           >
             <option value="All">All Departments</option>
             <option value="Rooms">Rooms</option>
@@ -149,7 +160,7 @@ export default function Employees() {
           
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-brand-gold hover:bg-brand-goldHover text-black px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+            className="bg-brand-primary hover:bg-brand-primaryHover text-black px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(212,175,55,0.2)]"
           >
             <Plus className="w-5 h-5" />
             Add Staff
@@ -158,10 +169,10 @@ export default function Employees() {
       </header>
 
       {/* Info Banner */}
-      <div className="mb-6 bg-brand-goldLight border border-brand-gold/20 rounded-xl p-4 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-brand-gold flex-shrink-0 mt-0.5" />
+      <div className="mb-6 bg-brand-primaryLight border border-brand-primary/20 rounded-xl p-4 flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-brand-primary flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-brand-gold font-medium">Excel Bulk Import Available</h4>
+          <h4 className="text-brand-primary font-medium">Excel Bulk Import Available</h4>
           <p className="text-sm text-gray-300 mt-1">You can now import massive staff directories via Excel. Ensure columns are named: Emp No, Name, Designation, Email.</p>
         </div>
       </div>
@@ -169,7 +180,7 @@ export default function Employees() {
       <div className="bg-brand-card rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
         {loading ? (
           <div className="p-12 flex justify-center items-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-gold"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-primary"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -181,7 +192,8 @@ export default function Employees() {
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">POSITION</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF JOINED</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF BIRTH</th>
-<th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-right"></th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-center">TRAINING HOURS</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-right"></th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-800/50">
@@ -195,20 +207,20 @@ export default function Employees() {
                   });
 
                   if (filteredEmployees.length === 0) {
-                    return <tr><td colSpan="5" className="p-8 text-center text-gray-500">No employees found.</td></tr>;
+                    return <tr><td colSpan="7" className="p-8 text-center text-gray-500">No employees found.</td></tr>;
                   }
 
                   return filteredEmployees.map((emp) => (
                     <tr key={emp.id} className="hover:bg-gray-800/50 transition-colors group">
                     <td className="p-4 pl-6">
-                      <p className="font-mono font-bold text-brand-gold">{emp.emp_no || '—'}</p>
+                      <p className="font-mono font-bold text-brand-primary">{emp.emp_no || '—'}</p>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {emp.photo_url ? (
                           <img src={`/${emp.photo_url}`} alt={emp.full_name} className="w-9 h-9 rounded-full object-cover border border-gray-700" />
                         ) : (
-                          <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 text-brand-gold flex items-center justify-center font-bold text-sm">
+                          <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 text-brand-primary flex items-center justify-center font-bold text-sm">
                             {emp.full_name?.charAt(0) || '?'}
                           </div>
                         )}
@@ -226,9 +238,17 @@ export default function Employees() {
                     <td className="p-4">
                       <p className="text-gray-300 text-sm">{emp.date_of_birth ? new Date(emp.date_of_birth).toLocaleDateString() : '—'}</p>
                     </td>
-                    <td className="p-4 text-right">
-                      <button onClick={() => handleEdit(emp)} className="text-gray-500 hover:text-brand-gold p-1.5 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors">
+                    <td className="p-4 text-center">
+                      <div className="inline-flex items-center justify-center bg-gray-800 border border-gray-700 text-brand-primary font-bold px-3 py-1 rounded-lg shadow-inner">
+                        {Number(emp.training_hours || 0).toFixed(1)} <span className="text-gray-500 text-xs ml-1 font-normal">hrs</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-right flex justify-end gap-2">
+                      <button onClick={() => handleEdit(emp)} className="text-gray-500 hover:text-brand-primary p-1.5 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors" title="Edit">
                         <Edit className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDelete(emp)} className="text-gray-500 hover:text-red-500 p-1.5 rounded bg-gray-800/50 hover:bg-red-500/10 transition-colors" title="Delete">
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -251,19 +271,19 @@ export default function Employees() {
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee No</label>
-                <input required type="text" disabled={isEditing} value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                <input required type="text" disabled={isEditing} value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Full Name</label>
-                <input required type="text" value={formData.full_name || ''} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
+                <input required type="text" value={formData.full_name || ''} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Designation</label>
-                <input required type="text" value={formData.designation || ''} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" />
+                <input required type="text" value={formData.designation || ''} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Department</label>
-                <select required value={formData.department || ''} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none">
+                <select required value={formData.department || ''} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none">
                   <option value="">Select Department</option>
                   <option value="Rooms">Rooms</option>
                   <option value="Public Area">Public Area</option>
@@ -278,18 +298,18 @@ export default function Employees() {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Date of Join</label>
-                <input required type="date" value={formData.join_date} onChange={(e) => setFormData({...formData, join_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} />
+                <input required type="date" value={formData.join_date} onChange={(e) => setFormData({...formData, join_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
-                <input type="date" value={formData.date_of_birth} onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none" style={{ colorScheme: 'dark' }} />
+                <input type="date" value={formData.date_of_birth} onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee Photo (Optional)</label>
-                <input type="file" accept="image/*" onChange={(e) => setFormData({...formData, photo: e.target.files[0]})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-gold outline-none text-sm" />
+                <input type="file" accept="image/*" onChange={(e) => setFormData({...formData, photo: e.target.files[0]})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-white focus:border-brand-primary outline-none text-sm" />
               </div>
               <div className="pt-4">
-                <button type="submit" className="w-full bg-brand-gold hover:bg-brand-goldHover text-black py-2.5 rounded-lg font-bold transition-colors">
+                <button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors">
                   Save Employee
                 </button>
               </div>
@@ -300,11 +320,3 @@ export default function Employees() {
     </div>
   );
 }
-
-
-
-
-
-
-
-

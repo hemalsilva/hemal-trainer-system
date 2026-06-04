@@ -19,13 +19,24 @@ router.get('/', async (req, res) => {
   try {
     const { search } = req.query;
     let result;
+    const queryBase = `
+      SELECT e.*, COALESCE(th.training_hours, 0) AS training_hours
+      FROM employees e
+      LEFT JOIN (
+        SELECT a.emp_no, SUM(t.duration_minutes) / 60.0 AS training_hours
+        FROM attendance_records a
+        JOIN trainings t ON a.training_id = t.id
+        GROUP BY a.emp_no
+      ) th ON e.emp_no = th.emp_no
+    `;
+
     if (search) {
       result = await pool.query(
-        `SELECT * FROM employees WHERE LOWER(emp_no::text) LIKE LOWER($1) OR LOWER(full_name) LIKE LOWER($1) LIMIT 10`,
+        `${queryBase} WHERE LOWER(e.emp_no::text) LIKE LOWER($1) OR LOWER(e.full_name) LIKE LOWER($1) LIMIT 10`,
         [`%${search}%`]
       );
     } else {
-      result = await pool.query('SELECT * FROM employees');
+      result = await pool.query(`${queryBase} ORDER BY e.emp_no`);
     }
     res.json(result.rows);
   } catch (err) {
@@ -153,5 +164,25 @@ router.put('/:emp_no', upload.single('photo'), async (req, res) => {
   }
 });
 
-module.exports = router;
+// DELETE single employee
+router.delete('/:emp_no', async (req, res) => {
+  const emp_no = req.params.emp_no;
+  try {
+    // Delete from attendance_records and training_allocations first to satisfy foreign key constraints if any
+    await pool.query('DELETE FROM attendance_records WHERE emp_no = $1', [emp_no]);
+    await pool.query('DELETE FROM training_allocations WHERE emp_no = $1', [emp_no]);
+    
+    // Now delete the employee
+    const result = await pool.query('DELETE FROM employees WHERE emp_no = $1 RETURNING *', [emp_no]);
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    res.json({ message: 'Employee deleted successfully', employee: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
+module.exports = router;
