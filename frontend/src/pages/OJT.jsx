@@ -24,6 +24,7 @@ export default function OJT() {
   // View State
   const [ojtRecords, setOjtRecords] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDept, setSelectedDept] = useState('All');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -81,7 +82,9 @@ export default function OJT() {
 
   const filteredRecords = ojtRecords.filter(r => {
     const query = searchQuery.toLowerCase();
-    return (r.emp_name || '').toLowerCase().includes(query) || (r.emp_no || '').toLowerCase().includes(query);
+    const matchesSearch = (r.emp_name || '').toLowerCase().includes(query) || (r.emp_no || '').toLowerCase().includes(query);
+    const matchesDept = selectedDept === 'All' || r.department === selectedDept;
+    return matchesSearch && matchesDept;
   });
 
   return (
@@ -286,15 +289,33 @@ export default function OJT() {
             <h2 className="text-xl font-bold text-blue-200 flex items-center gap-2">
               <List className="w-5 h-5 text-brand-primary" /> OJT Records Directory
             </h2>
-            <div className="relative w-full max-w-sm">
-              <Search className="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input 
-                type="text"
-                placeholder="Search by Employee Name or ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2 text-sm text-blue-200 focus:border-brand-primary outline-none"
-              />
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-64">
+                <Search className="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input 
+                  type="text"
+                  placeholder="Search Employee..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-2 text-sm text-blue-200 focus:border-brand-primary outline-none"
+                />
+              </div>
+              <select 
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-sm text-blue-200 focus:border-brand-primary outline-none"
+              >
+                <option value="All">All Departments</option>
+                <option value="Rooms">Rooms</option>
+                <option value="Public Area">Public Area</option>
+                <option value="Laundry">Laundry</option>
+                <option value="Flower">Flower</option>
+                <option value="Stores">Stores</option>
+                <option value="Coordinator">Coordinator</option>
+                <option value="Hotel School">Hotel School</option>
+                <option value="Cinnamon Hotel Academy">Cinnamon Hotel Academy</option>
+                <option value="General">General</option>
+              </select>
             </div>
           </div>
 
