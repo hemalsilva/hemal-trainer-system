@@ -59,22 +59,30 @@ export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
+  const fetchData = async () => {
+    try {
+      const [empRes, trainRes, ojtRes] = await Promise.all([
+        axios.get('/api/employees'),
+        axios.get('/api/trainings'),
+        axios.get('/api/ojt')
+      ]);
+      setEmployees(empRes.data || []);
+      setTrainings(trainRes.data || []);
+      setOjtRecords(ojtRes.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [empRes, trainRes, ojtRes] = await Promise.all([
-          axios.get('/api/employees'),
-          axios.get('/api/trainings'),
-          axios.get('/api/ojt')
-        ]);
-        setEmployees(empRes.data || []);
-        setTrainings(trainRes.data || []);
-        setOjtRecords(ojtRes.data || []);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchData();
+    fetchData(); // Initial fetch
+    
+    // Live update every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 5000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   const currentMonth = new Date().getMonth();
