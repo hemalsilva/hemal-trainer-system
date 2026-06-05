@@ -303,7 +303,7 @@ export default function Employees() {
                     </td>
                     <td className="p-4 text-center">
                       <div className="inline-flex items-center justify-center bg-gray-800 border border-gray-700 text-brand-primary font-bold px-3 py-1 rounded-lg shadow-inner">
-                        {Number(emp.training_hours || 0).toFixed(1)} <span className="text-gray-500 text-xs ml-1 font-normal">hrs</span>
+                        {Number(emp.total_training_hours || 0).toFixed(1)} <span className="text-gray-500 text-xs ml-1 font-normal">hrs</span>
                       </div>
                     </td>
                     <td className="p-4 text-right flex justify-end gap-2">

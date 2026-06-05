@@ -22,7 +22,10 @@ router.get('/', async (req, res) => {
     const { search } = req.query;
     let result;
     const queryBase = `
-      SELECT e.*, COALESCE(th.training_hours, 0) AS training_hours
+      SELECT e.*, 
+        COALESCE(th.training_hours, 0) AS standard_training_hours,
+        COALESCE(oh.ojt_hours, 0) AS ojt_hours,
+        (COALESCE(th.training_hours, 0) + COALESCE(oh.ojt_hours, 0)) AS total_training_hours
       FROM employees e
       LEFT JOIN (
         SELECT a.emp_no, SUM(t.duration_minutes) / 60.0 AS training_hours
@@ -30,6 +33,11 @@ router.get('/', async (req, res) => {
         JOIN trainings t ON a.training_id = t.id
         GROUP BY a.emp_no
       ) th ON e.emp_no = th.emp_no
+      LEFT JOIN (
+        SELECT emp_no, SUM(duration_minutes) / 60.0 AS ojt_hours
+        FROM ojt_records
+        GROUP BY emp_no
+      ) oh ON e.emp_no = oh.emp_no
     `;
 
     if (search) {

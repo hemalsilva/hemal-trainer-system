@@ -62,7 +62,8 @@ export default function OJT() {
       assessment_notes: formData.assessment_notes,
       rating: rating,
       pass_fail: passFail,
-      completion_status: 'Completed'
+      completion_status: 'Completed',
+      duration_minutes: formData.duration
     };
 
     try {

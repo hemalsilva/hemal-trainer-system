@@ -23,16 +23,17 @@ router.post('/', async (req, res) => {
     assessment_notes,
     rating,
     pass_fail,
-    completion_status
+    completion_status,
+    duration_minutes
   } = req.body;
 
   try {
     const result = await pool.query(
       `INSERT INTO ojt_records
-      (emp_no, emp_name, department, assessment_date, topic, trainer_name, location, assessment_notes, rating, pass_fail, completion_status)
+      (emp_no, emp_name, department, assessment_date, topic, trainer_name, location, assessment_notes, rating, pass_fail, completion_status, duration_minutes)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *`,
-      [emp_no, emp_name, department, assessment_date, topic, trainer_name, location, assessment_notes, rating, pass_fail, completion_status]
+      [emp_no, emp_name, department, assessment_date, topic, trainer_name, location, assessment_notes, rating, pass_fail, completion_status, duration_minutes || 60]
     );
 
     res.json(result.rows[0]);

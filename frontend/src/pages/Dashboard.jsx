@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Users, BookOpen, Clock, CheckCircle2, TrendingUp, Award, Printer, Gift } from 'lucide-react';
+import { Users, BookOpen, Clock, CheckCircle2, TrendingUp, Award, Printer, Gift, Filter } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, Sector } from 'recharts';
 
 const COLORS = ['#D4AF37', '#FDE047', '#B8860B', '#FEF08A', '#CD853F', '#8B6508'];
@@ -56,19 +56,23 @@ export default function Dashboard() {
   const [employees, setEmployees] = useState([]);
   const [trainings, setTrainings] = useState([]);
   const [ojtRecords, setOjtRecords] = useState([]);
+  const [timelineRaw, setTimelineRaw] = useState({ ojt: [], standard: [] });
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [timelineFilter, setTimelineFilter] = useState('Month'); // Date, Week, Month
 
   const fetchData = async () => {
     try {
-      const [empRes, trainRes, ojtRes] = await Promise.all([
+      const [empRes, trainRes, ojtRes, timelineRes] = await Promise.all([
         axios.get('/api/employees'),
         axios.get('/api/trainings'),
-        axios.get('/api/ojt')
+        axios.get('/api/ojt'),
+        axios.get('/api/reports/timeline')
       ]);
       setEmployees(empRes.data || []);
       setTrainings(trainRes.data || []);
       setOjtRecords(ojtRes.data || []);
+      setTimelineRaw(timelineRes.data || { ojt: [], standard: [] });
     } catch (err) {
       console.error(err);
     }
@@ -88,7 +92,6 @@ export default function Dashboard() {
   const currentMonth = new Date().getMonth();
   const upcomingBirthdays = employees.filter(emp => {
     if (!emp.date_of_birth) return false;
-    // Safely parse YYYY-MM-DD to avoid timezone shifts
     let monthIndex;
     if (typeof emp.date_of_birth === 'string' && emp.date_of_birth.includes('-')) {
         monthIndex = parseInt(emp.date_of_birth.split('T')[0].split('-')[1], 10) - 1;
@@ -100,25 +103,32 @@ export default function Dashboard() {
   
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-
   // Calculate dynamic data
   const totalEmployees = employees.length;
   
   // Calculate total training hours from employees
   let totalHours = 0;
+  let ojtTotalHours = 0;
+  let standardTotalHours = 0;
+  
   const deptHoursMap = {};
   const housekeepingHoursMap = {};
 
   employees.forEach(emp => {
-    const hrs = Number(emp.training_hours) || 0;
-    totalHours += hrs;
+    const total = Number(emp.total_training_hours) || 0;
+    const ojt = Number(emp.ojt_hours) || 0;
+    const standard = Number(emp.standard_training_hours) || 0;
+    
+    totalHours += total;
+    ojtTotalHours += ojt;
+    standardTotalHours += standard;
     
     const dept = emp.department || 'Other';
-    deptHoursMap[dept] = (deptHoursMap[dept] || 0) + hrs;
+    deptHoursMap[dept] = (deptHoursMap[dept] || 0) + total;
 
     if (dept === 'Rooms' || dept === 'Housekeeping') {
       const desig = emp.designation || 'Staff';
-      housekeepingHoursMap[desig] = (housekeepingHoursMap[desig] || 0) + hrs;
+      housekeepingHoursMap[desig] = (housekeepingHoursMap[desig] || 0) + total;
     }
   });
 
@@ -144,7 +154,7 @@ export default function Dashboard() {
     { name: 'Passed', value: ojtPassed },
     { name: 'Failed', value: ojtFailed }
   ] : [];
-  const OJT_COLORS = ['#10B981', '#EF4444']; // Emerald for pass, Red for fail
+  const OJT_COLORS = ['#10B981', '#EF4444']; 
 
   // Calculate active trainings this month
   const activeTrainings = trainings.filter(t => {
@@ -154,18 +164,63 @@ export default function Dashboard() {
 
   const completionRate = totalHours > 0 ? Math.min(100, Math.round((totalHours / (totalEmployees * 2)) * 100)) : 0;
 
-  // Training Timeline Data (mocked based on actual training volume)
-  const trainingData = [
-    { name: 'Week 1', completed: Math.round(totalHours * 0.2) },
-    { name: 'Week 2', completed: Math.round(totalHours * 0.35) },
-    { name: 'Week 3', completed: Math.round(totalHours * 0.15) },
-    { name: 'Week 4', completed: Math.round(totalHours * 0.3) }
-  ];
+  // Process Timeline Data
+  const getWeekNumber = (d) => {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+    return `W${weekNo} ${d.getUTCFullYear()}`;
+  };
+
+  const processTimeline = () => {
+    const groups = {};
+    const allRecords = [...(timelineRaw.ojt || []), ...(timelineRaw.standard || [])];
+    
+    allRecords.forEach(rec => {
+      if (!rec.date) return;
+      const d = new Date(rec.date);
+      let key = '';
+      if (timelineFilter === 'Date') {
+        key = d.toISOString().split('T')[0];
+      } else if (timelineFilter === 'Week') {
+        key = getWeekNumber(d);
+      } else {
+        key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      }
+      
+      if (!groups[key]) groups[key] = { name: key, OJT: 0, Standard: 0 };
+      
+      const hrs = Number(rec.duration) / 60.0;
+      if (rec.type === 'ojt') {
+        groups[key].OJT += hrs;
+      } else {
+        groups[key].Standard += hrs;
+      }
+    });
+
+    const sortedData = Object.values(groups).sort((a,b) => {
+      if (timelineFilter === 'Date') return new Date(a.name) - new Date(b.name);
+      return 0; // simple sort for now
+    });
+    
+    if (sortedData.length === 0) {
+      return [{ name: 'No Data', OJT: 0, Standard: 0 }];
+    }
+    
+    return sortedData.map(d => ({
+      name: d.name,
+      OJT: Number(d.OJT.toFixed(1)),
+      Standard: Number(d.Standard.toFixed(1))
+    }));
+  };
+
+  const trainingData = processTimeline();
 
   const stats = [
     { title: 'Total Employees', value: totalEmployees.toString(), icon: Users, trend: 'Updated dynamically' },
     { title: 'Active Trainings', value: activeTrainings.length.toString(), icon: BookOpen, trend: 'This month' },
-    { title: 'Training Hours', value: totalHours.toFixed(1), icon: Clock, trend: 'Total hours logged' },
+    { title: 'Total Training Hours', value: totalHours.toFixed(1), icon: Clock, trend: `${ojtTotalHours.toFixed(1)} OJT / ${standardTotalHours.toFixed(1)} Std` },
     { title: 'Est. Completion', value: `${completionRate}%`, icon: CheckCircle2, trend: 'Based on targets' }
   ];
 
@@ -220,28 +275,35 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         {/* Main Chart */}
         <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 lg:col-span-2">
-          <h2 className="text-lg font-bold text-blue-200 mb-6">Training Completion Overview</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-blue-200">Training Completion Overview</h2>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <select 
+                value={timelineFilter} 
+                onChange={e => setTimelineFilter(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded-lg text-blue-200 px-3 py-1.5 focus:outline-none focus:border-brand-primary text-sm"
+              >
+                <option value="Date">By Date</option>
+                <option value="Week">By Week</option>
+                <option value="Month">By Month</option>
+              </select>
+            </div>
+          </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trainingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
-                  </linearGradient>
-                  <filter id="shadowArea" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="5" floodColor="#D4AF37" floodOpacity="0.4"/>
-                  </filter>
-                </defs>
+              <BarChart data={trainingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="name" stroke="#666" tick={{fill: '#888'}} axisLine={false} />
                 <YAxis stroke="#666" tick={{fill: '#888'}} axisLine={false} tickLine={false} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff' }}
-                  itemStyle={{ color: '#D4AF37' }}
+                  cursor={{fill: 'rgba(255,255,255,0.05)'}}
                 />
-                <Area type="monotone" dataKey="completed" stroke="#D4AF37" strokeWidth={4} fillOpacity={1} fill="url(#colorCompleted)" filter="url(#shadowArea)" />
-              </AreaChart>
+                <Legend verticalAlign="top" height={36} wrapperStyle={{ color: '#ccc', fontSize: '12px' }} />
+                <Bar dataKey="Standard" stackId="a" fill="#D4AF37" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="OJT" stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
