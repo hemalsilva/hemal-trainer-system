@@ -6,9 +6,12 @@ import { Calendar, Search, FileText, CheckCircle, XCircle, Link as LinkIcon, Upl
 
 
 
+const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+
 export default function TrainingAttendance() {
   const [trainings, setTrainings] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedTrainingId, setSelectedTrainingId] = useState('');
   
   const [attended, setAttended] = useState([]);
@@ -123,10 +126,12 @@ export default function TrainingAttendance() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Filter trainings by selected month
+  // Filter trainings by selected month and department
   const filteredTrainings = trainings.filter(t => {
     if (!t.training_date) return false;
-    return new Date(t.training_date).getMonth() === selectedMonth;
+    const matchesMonth = new Date(t.training_date).getMonth() === selectedMonth;
+    const matchesDept = selectedDepartment === '' || t.department === selectedDepartment;
+    return matchesMonth && matchesDept;
   });
 
   return (
@@ -144,7 +149,7 @@ export default function TrainingAttendance() {
       )}
 
       {/* Selectors */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-brand-card p-6 rounded-2xl border border-gray-800 shadow-xl">
           <label className="block text-sm text-gray-400 mb-2">Select Month</label>
           <select 
@@ -157,6 +162,23 @@ export default function TrainingAttendance() {
           >
             {monthNames.map((m, i) => (
               <option key={i} value={i}>{m}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="bg-brand-card p-6 rounded-2xl border border-gray-800 shadow-xl">
+          <label className="block text-sm text-gray-400 mb-2">Select Department</label>
+          <select 
+            value={selectedDepartment}
+            onChange={(e) => {
+              setSelectedDepartment(e.target.value);
+              setSelectedTrainingId('');
+            }}
+            className="w-full bg-[#181818] border border-gray-800 rounded-lg text-blue-200 px-4 py-3 focus:outline-none focus:border-brand-primary transition-colors"
+          >
+            <option value="">All Departments</option>
+            {DEPARTMENTS.map(dept => (
+              <option key={dept} value={dept}>{dept}</option>
             ))}
           </select>
         </div>
