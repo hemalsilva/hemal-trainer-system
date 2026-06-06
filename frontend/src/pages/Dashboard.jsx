@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Users, BookOpen, Clock, CheckCircle2, TrendingUp, Award, Printer, Gift, Filter } from 'lucide-react';
+import { Users, BookOpen, Clock, CheckCircle2, TrendingUp, Award, Printer, Gift, Filter, Briefcase } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend, Sector } from 'recharts';
 
 const COLORS = ['#D4AF37', '#FDE047', '#B8860B', '#FEF08A', '#CD853F', '#8B6508'];
@@ -100,6 +100,17 @@ export default function Dashboard() {
     }
     return monthIndex === selectedMonth;
   });
+  const upcomingAnniversaries = employees.filter(emp => {
+    if (!emp.join_date) return false;
+    let monthIndex;
+    if (typeof emp.join_date === 'string' && emp.join_date.includes('-')) {
+        monthIndex = parseInt(emp.join_date.split('T')[0].split('-')[1], 10) - 1;
+    } else {
+        monthIndex = new Date(emp.join_date).getMonth();
+    }
+    return monthIndex === selectedMonth;
+  });
+
   
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -494,6 +505,50 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Work Anniversary Widget */}
+      <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 mb-10 border-t-4 border-t-cyan-500 shadow-[0_10px_30px_rgba(6,182,212,0.1)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-cyan-500/10 rounded-xl text-cyan-500">
+              <Briefcase className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-blue-200">Work Anniversaries</h2>
+              <p className="text-sm text-gray-400">Celebrate loyalty and milestones!</p>
+            </div>
+          </div>
+        </div>
+        
+        {upcomingAnniversaries.length === 0 ? (
+          <div className="text-center p-6 text-gray-500 border border-dashed border-gray-700 rounded-xl">
+            No work anniversaries this month.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {upcomingAnniversaries.map(emp => {
+              let yearJoined = new Date().getFullYear();
+              if (typeof emp.join_date === 'string' && emp.join_date.includes('-')) {
+                  yearJoined = parseInt(emp.join_date.split('T')[0].split('-')[0], 10);
+              } else {
+                  yearJoined = new Date(emp.join_date).getFullYear();
+              }
+              const yearsOfService = new Date().getFullYear() - yearJoined;
+              
+              return (
+              <div key={emp.id + '-anniv'} className="flex items-center gap-4 bg-[#181818] p-4 rounded-xl border border-gray-800 hover:border-cyan-500/50 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-cyan-500/10 text-cyan-500 font-bold flex items-center justify-center border border-cyan-500/20 text-sm text-center leading-tight">
+                  {yearsOfService > 0 ? yearsOfService + ' Yr' : 'New'}
+                </div>
+                <div>
+                  <h4 className="text-blue-200 font-bold text-sm truncate w-32">{emp.full_name}</h4>
+                  <p className="text-xs text-gray-400">{new Date(emp.join_date).getDate()} {monthNames[selectedMonth]}</p>
+                </div>
+              </div>
+            )})}
           </div>
         )}
       </div>
