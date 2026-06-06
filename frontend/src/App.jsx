@@ -34,7 +34,7 @@ function Sidebar() {
     ];
 
   return (
-    <aside className="w-64 bg-brand-card border-r border-gray-800 flex flex-col hidden md:flex">
+    <aside className="w-64 bg-brand-card border-r border-gray-800 flex flex-col hidden md:flex print:hidden">
       <div className="p-6 border-b border-gray-800 flex items-center justify-center">
         <h1 className="text-xl font-bold text-brand-primary flex items-center gap-2 tracking-wide">
           <Award className="w-6 h-6" />
@@ -88,7 +88,7 @@ function App() {
 
   return (
     <HashRouter>
-      <div className="flex w-full h-screen bg-brand-dark text-blue-200 font-sans selection:bg-brand-primary selection:text-black">
+      <div className="flex w-full h-screen print:h-auto print:overflow-visible bg-brand-dark text-blue-200 font-sans selection:bg-brand-primary selection:text-black">
         <Routes>
           {/* Public Route - Employee Attendance Scanning */}
           <Route path="/attendance/:id" element={<AttendancePortal />} />
@@ -101,7 +101,7 @@ function App() {
               <>
                 <ErrorBoundary>
                 <Sidebar />
-                <main className="flex-1 overflow-auto relative w-full">
+                <main className="flex-1 overflow-auto print:overflow-visible relative w-full print:bg-white">
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-64 bg-brand-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
                   <div className="relative z-10">
                     <Routes>
