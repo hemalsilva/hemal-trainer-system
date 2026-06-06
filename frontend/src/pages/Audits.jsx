@@ -435,7 +435,7 @@ export default function Audits() {
                     onChange={(e) => setNewAudit({...newAudit, audit_type: e.target.value})}
                     className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   >
-                    {auditTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                    {auditTypes.filter(t => t !== 'Team Leader').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
