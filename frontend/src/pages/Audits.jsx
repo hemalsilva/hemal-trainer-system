@@ -23,6 +23,7 @@ export default function Audits() {
   });
   const [savingAudit, setSavingAudit] = useState(false);
   const [empSearchText, setEmpSearchText] = useState('');
+  const [modalDepartment, setModalDepartment] = useState('All');
 
   const [activeTab, setActiveTab] = useState('overview');
   const [department, setDepartment] = useState('All');
@@ -91,6 +92,7 @@ export default function Audits() {
     try {
       await axios.post('/api/audits', newAudit);
       setShowAddModal(false);
+      setModalDepartment('All');
       setNewAudit({
         emp_no: '',
         emp_name: '',
@@ -360,6 +362,21 @@ export default function Audits() {
             </div>
             
             <form onSubmit={handleAddAudit} className="space-y-4">
+              <div className="mb-4">
+                <label className="block text-sm text-gray-400 mb-1">Filter by Department</label>
+                <select 
+                  value={modalDepartment}
+                  onChange={(e) => {
+                    setModalDepartment(e.target.value);
+                    setNewAudit({...newAudit, emp_no: '', emp_name: ''});
+                  }}
+                  className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                >
+                  <option value="All">All Departments</option>
+                  {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                  <option value="Team Leader">Team Leader</option>
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Employee No *</label>
@@ -398,7 +415,11 @@ export default function Audits() {
                     className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
                   />
                   <datalist id="employee-options">
-                    {employees.map(emp => (
+                    {employees.filter(emp => {
+                      if (modalDepartment === 'All') return true;
+                      if (modalDepartment === 'Team Leader') return emp.designation && emp.designation.toLowerCase().includes('team leader');
+                      return emp.department === modalDepartment;
+                    }).map(emp => (
                       <option key={emp.emp_no} value={emp.full_name} />
                     ))}
                   </datalist>
