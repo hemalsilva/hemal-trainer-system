@@ -243,15 +243,29 @@ router.get('/:id/attendance-summary', async (req, res) => {
       [id]
     );
 
+    // Get the training department first
+    const trainingRes = await pool.query('SELECT department FROM trainings WHERE id = $1', [id]);
+    const trainingDept = trainingRes.rows.length > 0 ? trainingRes.rows[0].department : 'General';
+
     // Get Absent Employees (Employees not in attendance_records for this training_id)
-    const absentRes = await pool.query(
-      `SELECT e.emp_no, e.full_name as emp_name, e.department, e.designation 
-       FROM employees e
-       WHERE e.status = 'Active' AND e.emp_no NOT IN (
-         SELECT emp_no FROM attendance_records WHERE training_id = $1
-       ) ORDER BY e.full_name ASC`,
-      [id]
-    );
+    let absentQuery = `
+      SELECT e.emp_no, e.full_name as emp_name, e.department, e.designation 
+      FROM employees e
+      WHERE e.status = 'Active' AND e.emp_no NOT IN (
+        SELECT emp_no FROM attendance_records WHERE training_id = $1
+      )
+    `;
+    const absentParams = [id];
+
+    // Filter by department if not General
+    if (trainingDept && trainingDept !== 'General') {
+      absentQuery += ` AND e.department = $2 `;
+      absentParams.push(trainingDept);
+    }
+
+    absentQuery += ` ORDER BY e.full_name ASC `;
+
+    const absentRes = await pool.query(absentQuery, absentParams);
 
     res.json({
       attended: attendedRes.rows,
