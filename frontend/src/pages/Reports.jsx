@@ -8,6 +8,7 @@ export default function Reports() {
   const [selectedReportTab, setSelectedReportTab] = useState('overview');
   const [employees, setEmployees] = useState([]);
   const [birthdayMonth, setBirthdayMonth] = useState(new Date().getMonth());
+  const [selectedYears, setSelectedYears] = useState(1);
   const [selectedDepartment, setSelectedDepartment] = useState('');
 
   const departments = [...new Set(employees.map(e => e.department).filter(Boolean))];
@@ -180,7 +181,7 @@ export default function Reports() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800 mb-8 overflow-x-auto print:hidden">
-        {['overview', 'attendance', 'ojt-performance', 'detailed-summary', 'birthday-calendar', 'ai-report'].map((tab) => {
+        {['overview', 'attendance', 'ojt-performance', 'detailed-summary', 'birthday-calendar', 'service-years', 'ai-report'].map((tab) => {
           if (tab === 'ai-report' && !isAiThinking && !aiResult) return null;
           return (
             <button
@@ -189,7 +190,7 @@ export default function Reports() {
               className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 ${selectedReportTab === tab ? 'text-brand-primary border-b-2 border-brand-primary bg-brand-primary/5' : 'text-gray-400 hover:text-blue-200'}`}
             >
               {tab === 'ai-report' && <Sparkles className="w-4 h-4"/>}
-              {tab === 'overview' ? 'Training Overview' : tab === 'attendance' ? 'Attendance & Coverage' : tab === 'ojt-performance' ? 'OJT Employee Details' : tab === 'detailed-summary' ? 'Detailed Summary (Printable)' : tab === 'birthday-calendar' ? 'Birthday Calendar' : 'AI Custom Report'}
+              {tab === 'overview' ? 'Training Overview' : tab === 'attendance' ? 'Attendance & Coverage' : tab === 'ojt-performance' ? 'OJT Employee Details' : tab === 'detailed-summary' ? 'Detailed Summary (Printable)' : tab === 'birthday-calendar' ? 'Birthday Calendar' : tab === 'service-years' ? 'Service Years' : 'AI Custom Report'}
             </button>
           )
         })}
@@ -499,6 +500,89 @@ export default function Reports() {
                       <tr key={emp.id} className="hover:bg-gray-800/50 print:hover:bg-transparent transition-colors">
                         <td className="p-4 border-b border-gray-800 print:border-gray-300 text-pink-500 print:text-black font-bold text-lg">
                           {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][birthdayMonth]} {new Date(emp.date_of_birth).getDate()}
+                        </td>
+                        <td className="p-4 border-b border-gray-800 print:border-gray-300 text-blue-200 print:text-black font-medium">{emp.full_name}</td>
+                        <td className="p-4 border-b border-gray-800 print:border-gray-300 text-gray-400 print:text-gray-700">{emp.department || 'N/A'}</td>
+                        <td className="p-4 border-b border-gray-800 print:border-gray-300 text-gray-400 print:text-gray-700">{emp.designation}</td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
+            
+          </div>
+        </div>
+      )}
+
+      {/* SERVICE YEARS TAB */}
+      {(selectedReportTab === 'service-years' || (typeof window !== 'undefined' && window.matchMedia('print').matches && selectedReportTab === 'service-years')) && (
+        <div className="space-y-8 print:block">
+          <div className="bg-brand-card print:bg-white rounded-2xl border border-gray-800 print:border-none shadow-lg print:shadow-none overflow-hidden print:block p-8">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-800 print:border-gray-400 pb-6 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-cyan-500/10 print:bg-transparent rounded-xl text-cyan-500 print:text-black">
+                  <Award className="w-8 h-8" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-blue-200 print:text-black">Service Years Report</h2>
+                  <p className="text-gray-400 print:text-gray-600">Employee work years based on join date</p>
+                </div>
+              </div>
+              <div className="print:hidden">
+                <select 
+                  value={selectedYears}
+                  onChange={(e) => setSelectedYears(Number(e.target.value))}
+                  className="bg-[#181818] border border-gray-700 rounded-lg p-3 text-blue-200 focus:border-brand-primary outline-none font-bold text-lg"
+                >
+                  {[...Array(40).keys()].map(i => (
+                    <option key={i+1} value={i+1}>{i+1} Year{i > 0 ? 's' : ''}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-gray-800 print:border-gray-300">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-900 print:bg-gray-100">
+                    <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Join Date</th>
+                    <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Employee Name</th>
+                    <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Department</th>
+                    <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Designation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const currentYear = new Date().getFullYear();
+                    const filteredEmps = employees
+                      .filter(emp => {
+                        if (!emp.join_date) return false;
+                        let yearJoined = currentYear;
+                        if (typeof emp.join_date === 'string' && emp.join_date.includes('-')) {
+                            yearJoined = parseInt(emp.join_date.split('T')[0].split('-')[0], 10);
+                        } else {
+                            yearJoined = new Date(emp.join_date).getFullYear();
+                        }
+                        const yearsOfService = currentYear - yearJoined;
+                        return yearsOfService === selectedYears;
+                      })
+                      .sort((a, b) => new Date(a.join_date) - new Date(b.join_date));
+
+                    if (filteredEmps.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan="4" className="p-12 text-center text-gray-500 print:text-gray-600 border-b border-gray-800 print:border-gray-300">
+                            No employees found with {selectedYears} year{selectedYears > 1 ? 's' : ''} of service.
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return filteredEmps.map((emp) => (
+                      <tr key={emp.id || emp.emp_no} className="hover:bg-gray-800/50 print:hover:bg-transparent transition-colors">
+                        <td className="p-4 border-b border-gray-800 print:border-gray-300 text-cyan-500 print:text-black font-bold text-lg">
+                          {new Date(emp.join_date).toLocaleDateString()}
                         </td>
                         <td className="p-4 border-b border-gray-800 print:border-gray-300 text-blue-200 print:text-black font-medium">{emp.full_name}</td>
                         <td className="p-4 border-b border-gray-800 print:border-gray-300 text-gray-400 print:text-gray-700">{emp.department || 'N/A'}</td>
