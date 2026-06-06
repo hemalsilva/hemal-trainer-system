@@ -29,38 +29,52 @@ export default function Reports() {
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [aiResult, setAiResult] = useState(null);
 
-  // MOCK DATA for UI Preview
-  const monthlyData = [];
+  // LIVE ANALYTICS DATA
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [deptData, setDeptData] = useState([]);
+  const [absentData, setAbsentData] = useState([]);
+  const [missingTopicsData, setMissingTopicsData] = useState([]);
+  const [lowPerformanceOJT, setLowPerformanceOJT] = useState([]);
+  const [ojtDetails, setOjtDetails] = useState([]);
+  
+  const [printDataSOP, setPrintDataSOP] = useState([]);
+  const [printDataOJT, setPrintDataOJT] = useState([]);
+  const [printDataHR, setPrintDataHR] = useState([]);
+  const [printDataHours, setPrintDataHours] = useState([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
-  const deptData = [];
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const params = {};
+      if (dateRange.start) params.start = dateRange.start;
+      if (dateRange.end) params.end = dateRange.end;
+      if (selectedDepartment) params.department = selectedDepartment;
 
-  const absentData = [];
+      const res = await axios.get('/api/reports/analytics', { params });
+      const data = res.data;
+      
+      setMonthlyData(data.monthlyData || []);
+      setDeptData(data.deptData || []);
+      setAbsentData(data.absentData || []);
+      setMissingTopicsData(data.missingTopicsData || []);
+      setLowPerformanceOJT(data.lowPerformanceOJT || []);
+      setOjtDetails(data.ojtDetails || []);
+      setPrintDataSOP(data.printDataSOP || []);
+      setPrintDataOJT(data.printDataOJT || []);
+      setPrintDataHR(data.printDataHR || []);
+      setPrintDataHours(data.printDataHours || []);
+    } catch (err) {
+      console.error('Failed to fetch analytics:', err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
-  const missingTopicsData = [];
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
-  const lowPerformanceOJT = [];
-
-  const ojtDetails = [];
-
-  // PRINT REPORT SPECIFIC MOCK DATA
-  const printDataSOP = [
-    { topic: 'Guest Recovery & Apologies', sessions: 4, attendees: 45 },
-    { topic: 'Room Cleaning Sequences', sessions: 8, attendees: 112 },
-    { topic: 'Chemical Handling', sessions: 2, attendees: 28 },
-  ];
-  const printDataOJT = [
-    { topic: 'Bed Making Standards', assessed: 15, passed: 14 },
-    { topic: 'Bathroom Deep Clean', assessed: 12, passed: 10 },
-  ];
-  const printDataHR = [
-    { topic: 'Code of Conduct Refresher', sessions: 3, attendees: 90 },
-    { topic: 'Sexual Harassment Prevention', sessions: 2, attendees: 115 },
-  ];
-  const printDataHours = [
-    { category: 'Department wise SOP training hours', hours: 145 },
-    { category: 'OJT hours', hours: 68 },
-    { category: 'Hotel HR Training hours', hours: 32 },
-  ];
 
   const handleAskAI = async (e) => {
     e.preventDefault();
@@ -148,7 +162,7 @@ export default function Reports() {
             </select>
           </div>
           <div className="flex gap-3">
-            <button className="bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 border border-brand-primary/30 px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+            <button onClick={fetchAnalytics} disabled={analyticsLoading} className="bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 border border-brand-primary/30 px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50">
               <Calendar className="w-4 h-4" />
               Apply Filter
             </button>
