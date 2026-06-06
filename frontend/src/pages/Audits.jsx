@@ -302,7 +302,7 @@ export default function Audits() {
                   <th className="p-4 font-semibold text-center">Type</th>
                   <th className="p-4 font-semibold text-center">Stayover</th>
                   <th className="p-4 font-semibold text-center">Departure</th>
-                  <th className="p-4 font-semibold text-center">Total Pending</th>
+                  <th className="p-4 font-semibold text-center">Average</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
@@ -338,8 +338,8 @@ export default function Audits() {
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <div className={`inline-flex items-center justify-center w-12 h-8 rounded-lg font-bold ${b.totalPending > 0 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
-                          {b.totalPending}
+                        <div className={`inline-flex items-center justify-center w-14 h-8 rounded-lg font-bold ${b.avgScore !== '-' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-800 text-gray-500 border border-gray-700'}`}>
+                          {b.avgScore}
                         </div>
                       </td>
                     </tr>

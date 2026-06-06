@@ -106,7 +106,8 @@ router.get('/balances', async (req, res) => {
         e.department, 
         e.designation,
         COUNT(ra.id) FILTER (WHERE ra.audit_type IN ('Stayover', 'IP Stayover')) as stayover_completed,
-        COUNT(ra.id) FILTER (WHERE ra.audit_type IN ('Departure', 'IP Departure')) as departure_completed
+        COUNT(ra.id) FILTER (WHERE ra.audit_type IN ('Departure', 'IP Departure')) as departure_completed,
+        AVG(ra.score) FILTER (WHERE ra.audit_type IN ('Stayover', 'IP Stayover', 'Departure', 'IP Departure')) as avg_score
       FROM employees e
       LEFT JOIN room_audits ra ON e.emp_no = ra.emp_no AND ${joinDateCondition}
       GROUP BY e.emp_no, e.full_name, e.department, e.designation
@@ -133,7 +134,8 @@ router.get('/balances', async (req, res) => {
         departureCompleted: depCompleted,
         stayoverPending: Math.max(0, targetStayover - stCompleted),
         departurePending: Math.max(0, targetDeparture - depCompleted),
-        totalPending: Math.max(0, targetStayover - stCompleted) + Math.max(0, targetDeparture - depCompleted)
+        totalPending: Math.max(0, targetStayover - stCompleted) + Math.max(0, targetDeparture - depCompleted),
+        avgScore: emp.avg_score ? parseFloat(emp.avg_score).toFixed(1) : '-'
       };
     });
 
