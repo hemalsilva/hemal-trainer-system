@@ -62,14 +62,15 @@ export default function Audits() {
   const auditTypes = ['Departure', 'Stayover', 'IP Departure', 'IP Stayover', 'Public Area', 'Laundry', 'Flower', 'Stores'];
   
   const renderTopPerformer = (performer, index) => {
-    const medals = ['text-yellow-400', 'text-gray-300', 'text-amber-600'];
-    const bgColors = ['bg-yellow-400/10 border-yellow-400/30', 'bg-gray-300/10 border-gray-300/30', 'bg-amber-600/10 border-amber-600/30'];
+    const rank = parseInt(performer.rank, 10);
+    const medalColor = rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-gray-300' : rank === 3 ? 'text-amber-600' : 'text-gray-400';
+    const bgColor = rank === 1 ? 'bg-yellow-400/10 border-yellow-400/30' : rank === 2 ? 'bg-gray-300/10 border-gray-300/30' : rank === 3 ? 'bg-amber-600/10 border-amber-600/30' : 'bg-gray-800/50 border-gray-700';
     
     return (
-      <div key={`${performer.emp_no}-${performer.audit_type}-${index}`} className={`flex items-center justify-between p-4 rounded-xl border ${bgColors[index] || 'bg-gray-800/50 border-gray-700'}`}>
+      <div key={`${performer.emp_no}-${performer.audit_type}-${index}`} className={`flex items-center justify-between p-4 rounded-xl border ${bgColor}`}>
         <div className="flex items-center gap-4">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${index < 3 ? medals[index] : 'text-gray-400'}`}>
-            {index === 0 ? <Trophy className="w-6 h-6" /> : `#${index + 1}`}
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${medalColor}`}>
+            {rank === 1 ? <Trophy className="w-6 h-6" /> : `#${rank}`}
           </div>
           <div>
             <h4 className="text-blue-200 font-bold">{performer.emp_name}</h4>
@@ -77,8 +78,8 @@ export default function Audits() {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-blue-200">{performer.max_score}<span className="text-sm text-gray-500 font-normal">/100</span></div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide">Top Score</div>
+          <div className="text-2xl font-bold text-blue-200">{performer.score || performer.max_score}<span className="text-sm text-gray-500 font-normal">/100</span></div>
+          <div className="text-xs text-gray-400 uppercase tracking-wide">{performer.score ? 'Avg Score' : 'Top Score'}</div>
         </div>
       </div>
     );
@@ -191,7 +192,7 @@ export default function Audits() {
           {/* Top Performers Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {auditTypes.map((type, idx) => {
-              const top = filteredTopPerformers.filter(t => t.audit_type === type).slice(0, 3);
+              const top = filteredTopPerformers.filter(t => t.audit_type === type).slice(0, 3); // Keeping to 3 to maintain UI layout
               const colors = [
                 { bg: 'bg-blue-500/20', text: 'text-blue-400' },
                 { bg: 'bg-purple-500/20', text: 'text-purple-400' },

@@ -43,11 +43,15 @@ router.get('/top-performers', async (req, res) => {
     }
 
     const query = `
-      SELECT emp_no, emp_name, audit_type, MAX(score) as max_score
-      FROM room_audits
-      ${dateFilter}
-      GROUP BY emp_no, emp_name, audit_type
-      ORDER BY max_score DESC
+      WITH RankedAudits AS (
+        SELECT emp_no, emp_name, audit_type, ROUND(AVG(score), 1) as score,
+               DENSE_RANK() OVER(PARTITION BY audit_type ORDER BY AVG(score) DESC) as rank
+        FROM room_audits
+        ${dateFilter}
+        GROUP BY emp_no, emp_name, audit_type
+      )
+      SELECT * FROM RankedAudits WHERE rank <= 3
+      ORDER BY audit_type, rank ASC, emp_name ASC
     `;
 
     const result = await pool.query(query, params);
