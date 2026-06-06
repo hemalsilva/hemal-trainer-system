@@ -59,7 +59,7 @@ export default function Audits() {
     fetchAudits();
   }, [month, year]);
 
-  const auditTypes = ['Departure', 'Stayover', 'IP Departure', 'IP Stayover', 'Public Area', 'Laundry', 'Flower', 'Stores'];
+  const auditTypes = ['Departure', 'Stayover', 'IP Departure', 'IP Stayover', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Team Leader'];
   
   const renderTopPerformer = (performer, index) => {
     const rank = parseInt(performer.rank, 10);
