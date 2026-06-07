@@ -10,6 +10,32 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+
+router.get('/migrate', async (req, res) => {
+  try {
+      await pool.query(`
+      CREATE TABLE IF NOT EXISTS room_audits (
+        id SERIAL PRIMARY KEY,
+        emp_no VARCHAR(20) NOT NULL,
+        emp_name VARCHAR(150),
+        audit_type VARCHAR(50) NOT NULL,
+        score INT NOT NULL,
+        audit_date DATE NOT NULL,
+        room_number VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      `);
+      
+      try {
+        await pool.query(`ALTER TABLE room_audits ADD COLUMN room_number VARCHAR(50);`);
+      } catch(e) { }
+
+      res.send('Migrated successfully');
+  } catch(err) {
+      res.status(500).json({error: err.message});
+  }
+});
+
 // GET /api/audits
 // Fetch recent audits
 router.get('/', async (req, res) => {

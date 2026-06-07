@@ -12,6 +12,9 @@ export default function Audits() {
   const month = parseInt(selectedDate.split('-')[1], 10);
   
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [savingBulk, setSavingBulk] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [newAudit, setNewAudit] = useState({
     emp_no: '',
@@ -86,6 +89,63 @@ export default function Audits() {
     );
   };
 
+  
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    if (!bulkText.trim()) return;
+    
+    setSavingBulk(true);
+    try {
+      const blocks = bulkText.split(/\n\s*\n/);
+      const parsedAudits = [];
+      
+      blocks.forEach(block => {
+        const lines = block.split('\n');
+        const audit = {};
+        lines.forEach(line => {
+          const lowerLine = line.toLowerCase();
+          if (lowerLine.startsWith('employee no:')) audit.emp_no = line.split(':')[1].trim();
+          if (lowerLine.startsWith('employee name:')) audit.emp_name = line.split(':')[1].trim();
+          if (lowerLine.startsWith('audit type:')) audit.audit_type = line.split(':')[1].trim();
+          if (lowerLine.startsWith('date:')) {
+            const dateStr = line.split(':')[1].trim();
+            // Try to parse DD/MM/YYYY or MM/DD/YYYY to YYYY-MM-DD
+            try {
+               const parts = dateStr.split('/');
+               if(parts.length === 3) {
+                 audit.audit_date = `${parts[2]}-${parts[0]}-${parts[1]}`; // Assume MM/DD/YYYY from image
+               } else {
+                 audit.audit_date = new Date(dateStr).toISOString().split('T')[0];
+               }
+            } catch(err) {
+               audit.audit_date = dateStr;
+            }
+          }
+          if (lowerLine.startsWith('score:')) audit.score = parseInt(line.split(':')[1].trim(), 10);
+          if (lowerLine.startsWith('room / area:')) audit.room_number = line.split(':')[1].trim();
+        });
+        
+        if (audit.emp_no && audit.score !== undefined && audit.audit_date) {
+          parsedAudits.push(audit);
+        }
+      });
+
+      if (parsedAudits.length > 0) {
+        await axios.post('/api/audits/bulk', { audits: parsedAudits });
+        setShowBulkModal(false);
+        setBulkText('');
+        fetchAudits();
+      } else {
+        alert('No valid audits found in text');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save bulk audits');
+    } finally {
+      setSavingBulk(false);
+    }
+  };
+
   const handleAddAudit = async (e) => {
     e.preventDefault();
     setSavingAudit(true);
@@ -139,6 +199,9 @@ export default function Audits() {
         </div>
         
         <div className="flex items-center gap-3">
+          <button onClick={() => setShowBulkModal(true)} className="bg-blue-600 hover:bg-blue-500 text-blue-100 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors">
+            <LayoutDashboard className="w-5 h-5" /> Bulk Upload in Text
+          </button>
           <button onClick={() => setShowAddModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-blue-200 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors">
             <Plus className="w-5 h-5" /> Add Manual Audit
           </button>
