@@ -414,6 +414,37 @@ export default function Audits() {
         </div>
       )}
 
+      {showBulkModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-2xl p-6 relative">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-blue-200 flex items-center gap-2">
+                <LayoutDashboard className="w-6 h-6 text-blue-400" /> Bulk Upload Audits
+              </h2>
+              <button onClick={() => setShowBulkModal(false)} className="text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            </div>
+            
+            <form onSubmit={handleBulkSubmit} className="space-y-4">
+              <div className="mb-4">
+                <label className="block text-sm text-gray-400 mb-2">Paste text here (separate each audit with an empty line)</label>
+                <textarea 
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 text-blue-200 outline-none h-64 font-mono text-sm"
+                  placeholder="Department : Laundry\nEmployee No: 1234\nEmployee Name: John Doe\nAudit type: Stayover\nDate: 06/07/2026\nScore: 90\nRoom / Area: 101\n\nDepartment : ..."
+                />
+              </div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setShowBulkModal(false)} className="flex-1 px-4 py-3 border border-gray-700 rounded-xl text-gray-400 font-bold hover:text-blue-200 transition-colors">Cancel</button>
+                <button type="submit" disabled={savingBulk} className="flex-1 bg-blue-600 hover:bg-blue-500 text-blue-100 rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  {savingBulk ? 'Uploading...' : 'Upload Audits'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {showAddModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
           <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-lg p-6 relative">
