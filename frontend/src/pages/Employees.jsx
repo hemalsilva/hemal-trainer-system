@@ -160,9 +160,6 @@ export default function Employees() {
         </div>
       </header>
 
-      
-      </div>
-
       <div className="bg-brand-card rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
         {loading ? (
           <div className="p-12 flex justify-center items-center">
