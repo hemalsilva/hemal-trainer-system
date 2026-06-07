@@ -1,0 +1,6 @@
+2026/06/03-21:59:35.444 fe8 Reusing MANIFEST C:\Users\User\.gemini\antigravity\brain\efea42d5-e2f1-4aca-ad48-5b27089cfb4a\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2026/06/03-21:59:35.605 fe8 Recovering log #3
+2026/06/03-21:59:35.686 fe8 Reusing old log C:\Users\User\.gemini\antigravity\brain\efea42d5-e2f1-4aca-ad48-5b27089cfb4a\backend\.wwebjs_auth\session\Default\Local Storage\leveldb/000003.log 
+2026/06/03-22:00:35.694 6f4 Level-0 table #5: started
+2026/06/03-22:00:35.917 6f4 Level-0 table #5: 20609 bytes OK
+2026/06/03-22:00:35.935 6f4 Delete type=0 #3
