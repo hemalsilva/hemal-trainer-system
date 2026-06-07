@@ -58,56 +58,6 @@ export default function Employees() {
     fetchEmployees();
   }, []);
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      // Run OCR on the image
-      const { data: { text } } = await Tesseract.recognize(file, 'eng');
-      
-      // Basic parsing logic: Look for lines with EMP-XXX and a name
-      // E.g., "EMP-001 John Doe" or "John Doe EMP-001"
-      const lines = text.split('\n');
-      const employeesToUpdate = [];
-      
-      const empRegex = /EMP-\d+/i;
-      
-      lines.forEach(line => {
-        const match = line.match(empRegex);
-        if (match) {
-          const empNo = match[0].toUpperCase();
-          // Remove the emp number from the line to try and isolate the name
-          let name = line.replace(empRegex, '').trim();
-          // Clean up weird OCR artifacts
-          name = name.replace(/[^a-zA-Z\s]/g, '').trim();
-          
-          if (name.length > 2) {
-             employeesToUpdate.push({ emp_no: empNo, full_name: name });
-          }
-        }
-      });
-      
-      if (employeesToUpdate.length === 0) {
-         alert('No employee numbers (e.g. EMP-001) could be found in this image.');
-         setUploading(false);
-         return;
-      }
-
-      await axios.post('/api/employees/bulk-json', { employees: employeesToUpdate });
-      alert(`Successfully extracted and processed ${employeesToUpdate.length} employees from image!`);
-      fetchEmployees();
-    } catch (err) {
-      console.error(err);
-      alert('Error processing image');
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  
   const handleEncryptedUpload = async (e) => {
     e.preventDefault();
     if (!excelFile || !excelPassword) {
@@ -198,28 +148,7 @@ export default function Employees() {
             <option value="Cinnamon Hotel Academy">Cinnamon Hotel Academy</option>
             </select>
           
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileUpload} 
-            accept="image/*" 
-            className="hidden" 
-          />
           
-          <button 
-            onClick={() => fileInputRef.current.click()}
-            disabled={uploading}
-            className="bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-700 transition-colors"
-          >
-            {uploading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            ) : (
-              <>
-                <FileSpreadsheet className="w-5 h-5 text-brand-primary" />
-                Scan Sign Sheet
-              </>
-            )}
-          </button>
           
           <button 
             onClick={() => setShowModal(true)}
@@ -231,13 +160,7 @@ export default function Employees() {
         </div>
       </header>
 
-      {/* Info Banner */}
-      <div className="mb-6 bg-brand-primaryLight border border-brand-primary/20 rounded-xl p-4 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-brand-primary flex-shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-brand-primary font-medium">AI Smart Scan Available</h4>
-          <p className="text-sm text-gray-300 mt-1">You can now upload photos of manual sign-in sheets. The AI will automatically extract Employee Numbers and Names to update the directory.</p>
-        </div>
+      
       </div>
 
       <div className="bg-brand-card rounded-2xl border border-gray-800 overflow-hidden shadow-xl">

@@ -101,9 +101,11 @@ export default function TrainingAttendance() {
     try {
       const { data: { text } } = await Tesseract.recognize(file, 'eng');
       
-      // Look for standard employee numbers (4-6 digits)
+      // Look for standard employee numbers (EMP-XXX or just digits)
+      const empMatches = text.match(/EMP-\d+/gi) || [];
       const numbers = text.match(/\b\d{4,6}\b/g) || [];
-      const uniqueNumbers = [...new Set(numbers)];
+      const combined = [...empMatches.map(m => m.toUpperCase()), ...numbers];
+      const uniqueNumbers = [...new Set(combined)];
       
       if (uniqueNumbers.length === 0) {
         showMessage('No employee numbers found in image.', 'error');
@@ -236,7 +238,7 @@ export default function TrainingAttendance() {
             <div className="bg-brand-card p-6 rounded-2xl border border-gray-800 shadow-xl">
               <h3 className="text-lg font-bold text-blue-200 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brand-primary" />
-                Upload Manual Sign Sheet (OCR)
+                Scan Sign Sheet (OCR)
               </h3>
               <p className="text-sm text-gray-400 mb-4">
                 Take a photo of the manual sign-in sheet. The AI will extract employee numbers and automatically mark them as present.
@@ -259,7 +261,7 @@ export default function TrainingAttendance() {
                 ) : (
                   <Upload className="w-5 h-5" />
                 )}
-                {ocrLoading ? 'Analyzing Image...' : 'Upload Sign Sheet Image'}
+                {ocrLoading ? 'Analyzing Image...' : 'Scan Sign Sheet'}
               </button>
             </div>
           </div>

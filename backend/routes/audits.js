@@ -170,4 +170,38 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+// POST /api/audits/bulk
+// Manually add multiple audits from bulk text
+router.post('/bulk', async (req, res) => {
+  const { audits } = req.body;
+  
+  if (!audits || !Array.isArray(audits) || audits.length === 0) {
+    return res.status(400).json({ error: 'No audits provided' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const audit of audits) {
+      const { emp_no, emp_name, audit_type, score, audit_date, room_number } = audit;
+      if (!emp_no || score === undefined || !audit_date) continue; // Skip invalid
+      
+      await client.query(
+        `INSERT INTO room_audits (emp_no, emp_name, audit_type, score, audit_date, room_number)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [emp_no, emp_name, audit_type || 'Departure', score, audit_date, room_number || '']
+      );
+    }
+    await client.query('COMMIT');
+    res.status(201).json({ message: 'Bulk audits saved successfully' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error saving bulk audits:', err);
+    res.status(500).json({ error: 'Database error' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
