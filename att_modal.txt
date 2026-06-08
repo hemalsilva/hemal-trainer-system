@@ -1,0 +1,59 @@
+﻿      {showAddModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-brand-card border border-gray-800 rounded-2xl max-w-lg w-full p-8 relative">
+            <button onClick={() => setShowAddModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-blue-200 mb-6 flex items-center gap-2"><Plus className="text-brand-primary" /> Add Session</h2>
+            
+            <form onSubmit={handleAddSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Topic *</label>
+                <input required value={formData.topic} onChange={e => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" placeholder="e.g. Bed Making Standard" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Department</label>
+                  <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
+                    <option value="">Select Dept...</option>
+                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Category</label>
+                  <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
+                    <option value="Mandatory">Mandatory</option>
+                    <option value="Optional">Optional</option>
+                    <option value="Compliance">Compliance</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Date & Time *</label>
+                  <input required type="datetime-local" value={formData.training_date} onChange={e => setFormData({...formData, training_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Duration (mins)</label>
+                  <input type="number" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Trainer Name</label>
+                  <input value={formData.trainer} onChange={e => setFormData({...formData, trainer: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" placeholder="e.g. John Doe" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Venue</label>
+                  <input value={formData.venue} onChange={e => setFormData({...formData, venue: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" placeholder="e.g. Main Hall" />
+                </div>
+              </div>
+
+              <button type="submit" className="w-full mt-2 bg-brand-primary hover:bg-brand-primaryHover text-black py-3 rounded-lg font-bold transition-colors">
+                Schedule Session
+              </button>
+            </form>
+          </div>
+        </div>
+      )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ClipboardCheck, User, MapPin, CheckCircle, XCircle, FileSignature, Calendar, Hash, Search, List, PenTool } from 'lucide-react';
+import { ClipboardCheck, User, MapPin, CheckCircle, XCircle, FileSignature, Calendar, Hash, Search, List, PenTool } , Trash2, X } from 'lucide-react';
 
 export default function OJT() {
   const [activeTab, setActiveTab] = useState('record'); // 'record' or 'view'
@@ -340,14 +340,15 @@ export default function OJT() {
                   <th className="p-4 font-semibold">Trainer</th>
                   <th className="p-4 font-semibold text-center">Rating</th>
                   <th className="p-4 font-semibold text-center">Verdict</th>
+                  <th className="p-4 font-semibold text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {loading ? (
-                  <tr><td colSpan="6" className="p-8 text-center text-gray-500">Loading records...</td></tr>
+                  <tr><td colSpan="7" className="p-8 text-center text-gray-500">Loading records...</td></tr>
                 ) : filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="p-12 text-center text-gray-500">
+                    <td colSpan="7" className="p-12 text-center text-gray-500">
                       <List className="w-12 h-12 text-gray-700 mx-auto mb-4" />
                       <p className="font-semibold text-lg">No OJT Records Found</p>
                       <p className="text-sm">Adjust your search or add a new record.</p>
@@ -387,6 +388,21 @@ export default function OJT() {
                           </span>
                         )}
                       </td>
+
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => setEditingRecord({
+                            ...record, 
+                            assessment_date: new Date(record.assessment_date).toISOString().split('T')[0]
+                          })} className="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">
+                            <PenTool className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDeleteRecord(record.id)} className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+  
                     </tr>
                   ))
                 )}
@@ -395,6 +411,112 @@ export default function OJT() {
           </div>
         </div>
       )}
+﻿      {editingRecord && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-blue-200 flex items-center gap-2">
+                <PenTool className="w-6 h-6 text-brand-primary" /> Edit OJT Record
+              </h2>
+              <button onClick={() => setEditingRecord(null)} className="text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Employee No *</label>
+                  <input 
+                    type="text" required
+                    value={editingRecord.emp_no}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditingRecord({...editingRecord, emp_no: val});
+                      const emp = employees.find(em => em.emp_no === val);
+                      if (emp) {
+                        setEditingRecord(prev => ({...prev, emp_name: emp.full_name, emp_no: emp.emp_no, department: emp.department || 'General'}));
+                      }
+                    }}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Employee Name *</label>
+                  <input 
+                    type="text" required list="edit-employee-options"
+                    value={editingRecord.emp_name}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditingRecord({...editingRecord, emp_name: val});
+                      const emp = employees.find(em => em.full_name === val);
+                      if (emp) {
+                        setEditingRecord(prev => ({...prev, emp_no: emp.emp_no, emp_name: emp.full_name, department: emp.department || 'General'}));
+                      }
+                    }}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                  <datalist id="edit-employee-options">
+                    {employees.map(emp => <option key={emp.emp_no} value={emp.full_name} />)}
+                  </datalist>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Topic *</label>
+                <input 
+                  type="text" required value={editingRecord.topic}
+                  onChange={(e) => setEditingRecord({...editingRecord, topic: e.target.value})}
+                  className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Trainer *</label>
+                  <input 
+                    type="text" required value={editingRecord.trainer_name}
+                    onChange={(e) => setEditingRecord({...editingRecord, trainer_name: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Date *</label>
+                  <input 
+                    type="date" required value={editingRecord.assessment_date}
+                    onChange={(e) => setEditingRecord({...editingRecord, assessment_date: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none [color-scheme:dark]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Rating (out of 5) *</label>
+                  <input 
+                    type="number" min="0" max="5" required value={editingRecord.rating}
+                    onChange={(e) => setEditingRecord({...editingRecord, rating: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Verdict</label>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setEditingRecord({...editingRecord, pass_fail: true})} className={`flex-1 py-3 rounded-xl border ${editingRecord.pass_fail === true ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'border-gray-700 text-gray-400'} flex items-center justify-center gap-2 font-bold`}>Pass</button>
+                    <button type="button" onClick={() => setEditingRecord({...editingRecord, pass_fail: false})} className={`flex-1 py-3 rounded-xl border ${editingRecord.pass_fail === false ? 'bg-red-500/20 border-red-500 text-red-400' : 'border-gray-700 text-gray-400'} flex items-center justify-center gap-2 font-bold`}>Fail</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setEditingRecord(null)} className="flex-1 px-4 py-3 border border-gray-700 rounded-xl text-gray-400 font-bold hover:text-blue-200 transition-colors">Cancel</button>
+                <button type="submit" disabled={savingEdit} className="flex-1 bg-brand-primary hover:bg-brand-primaryHover text-black rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  {savingEdit ? 'Updating...' : 'Update Record'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
