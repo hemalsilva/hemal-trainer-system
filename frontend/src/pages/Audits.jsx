@@ -37,8 +37,8 @@ export default function Audits() {
   const [employeeMap, setEmployeeMap] = useState({});
   const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
-  const fetchAudits = async () => {
-    setLoading(true);
+  const fetchAudits = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const [auditsRes, topRes, balRes, empRes] = await Promise.all([
         axios.get('/api/audits'),
@@ -58,13 +58,13 @@ export default function Audits() {
     } catch (err) {
       console.error('Error fetching audits:', err);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchAudits();
-    const interval = setInterval(fetchAudits, 5000);
+    const interval = setInterval(() => fetchAudits(true), 5000);
     return () => clearInterval(interval);
   }, [month, year]);
 
