@@ -438,7 +438,7 @@ export default function Settings() {
             onClick={() => setActiveTab(tab)}
             className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'text-brand-primary border-b-2 border-brand-primary bg-brand-primary/5' : 'text-gray-400 hover:text-blue-200'}`}
           >
-            {tab === 'photos' ? 'Bulk Staff Photos' : tab === 'attendance-scan' ? 'Scan Attendance Sheets' : tab === 'integrations' ? 'Form Integrations' : tab === 'whatsapp' ? 'WhatsApp Setup' : tab === 'backups' ? 'Backups & Storage' : 'General Preferences'}
+            {tab === 'photos' ? 'Bulk Staff Photos' : tab === 'attendance-scan' ? 'Scan Attendance Sheets' : tab === 'integrations' ? 'Form Integrations' : tab === 'whatsapp' ? 'WhatsApp Setup' : tab === 'backups' ? 'Backups & Storage' : 'Audit Report'}
           </button>
         ))}
       </div>
