@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ClipboardCheck, User, MapPin, CheckCircle, XCircle, FileSignature, Calendar, Hash, Search, List, PenTool } , Trash2, X } from 'lucide-react';
+import { ClipboardCheck, User, MapPin, CheckCircle, XCircle, FileSignature, Calendar, Hash, Search, List, PenTool , Trash2, X } from 'lucide-react';
 
 export default function OJT() {
   const [activeTab, setActiveTab] = useState('record'); // 'record' or 'view'
