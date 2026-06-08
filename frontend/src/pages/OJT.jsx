@@ -167,6 +167,7 @@ export default function OJT() {
                     <option value="Coordinator">Coordinator</option>
                     <option value="Hotel School">Hotel School</option>
                     <option value="Cinnamon Hotel Academy">Cinnamon Hotel Academy</option>
+            <option value="General">General</option>
                   </select>
                 </div>
               </div>

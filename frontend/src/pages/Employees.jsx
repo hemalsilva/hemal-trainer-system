@@ -14,11 +14,15 @@ export default function Employees() {
   const [excelPassword, setExcelPassword] = useState('');
   const [excelFile, setExcelFile] = useState(null);
   const [selectedDept, setSelectedDept] = useState('All');
+  const [selectedPosition, setSelectedPosition] = useState('All');
   const [formData, setFormData] = useState({
     emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null
   });
   const fileInputRef = useRef(null);
 
+  
+  
+  const uniquePositions = [...new Set(employees.map(e => e.designation).filter(Boolean))].sort();
   
   const handleEdit = (emp) => {
     setFormData({
@@ -146,6 +150,7 @@ export default function Employees() {
             <option value="Coordinator">Coordinator</option>
             <option value="Hotel School">Hotel School</option>
             <option value="Cinnamon Hotel Academy">Cinnamon Hotel Academy</option>
+            <option value="General">General</option>
             </select>
           
           
