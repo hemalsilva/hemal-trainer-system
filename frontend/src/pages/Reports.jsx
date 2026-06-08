@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Printer, Calendar, AlertCircle, FileText, Search, UserX, BarChart, PieChart, Sparkles, Send, Loader2, Gift, Eye, Award } from 'lucide-react';
+import { Printer, Calendar, AlertCircle, FileText, Search, UserX, BarChart, PieChart, Sparkles, Send, Loader2, Gift, Eye, Award, Trophy } from 'lucide-react';
 import { Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, Cell } from 'recharts';
 
 function AuditReportTab() {
