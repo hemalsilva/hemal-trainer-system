@@ -26,8 +26,10 @@ export default function OJT() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
   const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
+    axios.get('/api/employees').then(res => setEmployees(res.data)).catch(console.error);
     if (activeTab === 'view') {
       fetchRecords();
     }
@@ -131,7 +133,14 @@ export default function OJT() {
                   <input 
                     type="text" 
                     value={empDetails.emp_no} 
-                    onChange={(e) => setEmpDetails({...empDetails, emp_no: e.target.value})} 
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEmpDetails({...empDetails, emp_no: val});
+                      const emp = employees.find(em => em.emp_no === val);
+                      if (emp) {
+                        setEmpDetails(prev => ({...prev, emp_name: emp.full_name, department: emp.department || ''}));
+                      }
+                    }} 
                     placeholder="e.g. EMP-001"
                     className="w-full bg-gray-900 border border-gray-700 rounded-xl pl-10 pr-4 py-3 text-blue-200 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
                   />
