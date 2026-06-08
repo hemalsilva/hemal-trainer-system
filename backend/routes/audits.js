@@ -63,10 +63,15 @@ router.get('/top-performers', async (req, res) => {
     const query = `
       WITH RankedAudits AS (
         SELECT emp_no, emp_name, audit_type, ROUND(AVG(score), 1) as score,
+               COUNT(id) as audit_count,
                DENSE_RANK() OVER(PARTITION BY audit_type ORDER BY AVG(score) DESC) as rank
         FROM room_audits
         ${dateFilter}
         GROUP BY emp_no, emp_name, audit_type
+        HAVING 
+          (audit_type IN ('Stayover', 'IP Stayover', 'Departure', 'IP Departure') AND COUNT(id) >= 20)
+          OR 
+          (audit_type NOT IN ('Stayover', 'IP Stayover', 'Departure', 'IP Departure') AND COUNT(id) >= 5)
       )
       SELECT * FROM RankedAudits WHERE rank <= 3
       ORDER BY audit_type, rank ASC, emp_name ASC
@@ -136,8 +141,8 @@ router.get('/balances', async (req, res) => {
     
     const balances = result.rows.map(emp => {
       const isTeamLeader = emp.designation && emp.designation.toLowerCase().includes('team leader');
-      const targetStayover = 30;
-      const targetDeparture = 30;
+      const targetStayover = 20;
+      const targetDeparture = 20;
       
       const stCompleted = parseInt(emp.stayover_completed, 10) || 0;
       const depCompleted = parseInt(emp.departure_completed, 10) || 0;
