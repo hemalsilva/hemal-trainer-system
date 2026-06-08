@@ -104,6 +104,7 @@ function FormCard({ link, onDelete }) {
 function GeneralPreferences() {
   const [overview, setOverview] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [selectedDesignation, setSelectedDesignation] = React.useState('');
   
   React.useEffect(() => {
     fetchOverview();
@@ -130,6 +131,11 @@ function GeneralPreferences() {
     .filter(e => e.departure_completed >= 20 && e.departure_avg != null)
     .sort((a, b) => parseFloat(b.departure_avg) - parseFloat(a.departure_avg))
     .slice(0, 3);
+
+  const uniqueDesignations = [...new Set(overview.map(r => r.designation).filter(Boolean))].sort();
+  const filteredOverview = selectedDesignation 
+    ? overview.filter(r => r.designation === selectedDesignation) 
+    : overview;
 
   return (
     <div className="space-y-6">
@@ -201,7 +207,19 @@ function GeneralPreferences() {
               </div>
             </div>
 
-            <h3 className="text-lg font-bold text-blue-200 mb-4">Employee Audit Scores</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-blue-200">Employee Audit Scores</h3>
+              <select 
+                value={selectedDesignation} 
+                onChange={(e) => setSelectedDesignation(e.target.value)}
+                className="bg-[#181818] border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-blue-200 focus:border-brand-primary outline-none"
+              >
+                <option value="">All Designations</option>
+                {uniqueDesignations.map(desig => (
+                  <option key={desig} value={desig}>{desig}</option>
+                ))}
+              </select>
+            </div>
             <div className="overflow-x-auto rounded-xl border border-gray-800">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -215,7 +233,7 @@ function GeneralPreferences() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800 text-sm">
-                  {overview.map(row => (
+                  {filteredOverview.map(row => (
                     <tr key={row.emp_no} className="hover:bg-[#1a1a1a] transition-colors">
                       <td className="p-4">
                         <div className="font-bold text-blue-200">{row.emp_name}</div>
