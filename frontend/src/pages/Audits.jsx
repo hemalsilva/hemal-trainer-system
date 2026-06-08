@@ -31,6 +31,7 @@ export default function Audits() {
   const [modalDepartment, setModalDepartment] = useState('All');
 
   const [activeTab, setActiveTab] = useState('overview');
+  const [balanceDesignation, setBalanceDesignation] = useState('');
   const [department, setDepartment] = useState('All');
   const [selectedType, setSelectedType] = useState(null);
   const [tableFilterType, setTableFilterType] = useState('All');
@@ -229,8 +230,10 @@ export default function Audits() {
     return true;
   });
 
+  const uniqueBalanceDesignations = [...new Set(balances.map(b => b.designation).filter(Boolean))].sort();
   const filteredBalances = balances.filter(b => {
     if (department !== 'All' && b.department !== department) return false;
+    if (balanceDesignation && b.designation !== balanceDesignation) return false;
     return true;
   });
 
@@ -428,9 +431,21 @@ export default function Audits() {
         </div>
       ) : (
         <div className="bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden">
-          <div className="p-6 border-b border-gray-800">
-            <h2 className="text-xl font-bold text-blue-200">Employee Audit Balances</h2>
-            <p className="text-sm text-gray-400 mt-1">Track monthly audit completion progress (Target: 40/month)</p>
+          <div className="p-6 border-b border-gray-800 flex flex-wrap justify-between items-center gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-blue-200">Employee Audit Balances</h2>
+              <p className="text-sm text-gray-400 mt-1">Track monthly audit completion progress (Target: 40/month)</p>
+            </div>
+            <select 
+              value={balanceDesignation} 
+              onChange={(e) => setBalanceDesignation(e.target.value)}
+              className="bg-[#181818] border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-blue-200 focus:border-brand-primary outline-none"
+            >
+              <option value="">All Designations</option>
+              {uniqueBalanceDesignations.map(desig => (
+                <option key={desig} value={desig}>{desig}</option>
+              ))}
+            </select>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
