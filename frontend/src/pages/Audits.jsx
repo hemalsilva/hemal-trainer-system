@@ -430,7 +430,7 @@ export default function Audits() {
         <div className="bg-brand-card border border-gray-800 rounded-2xl shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-800">
             <h2 className="text-xl font-bold text-blue-200">Employee Audit Balances</h2>
-            <p className="text-sm text-gray-400 mt-1">Track monthly audit completion progress (Target: 60/month)</p>
+            <p className="text-sm text-gray-400 mt-1">Track monthly audit completion progress (Target: 40/month)</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
