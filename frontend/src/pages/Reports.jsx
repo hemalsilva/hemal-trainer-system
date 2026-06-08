@@ -23,6 +23,8 @@ export default function Reports() {
       }
     };
     fetchEmployees();
+    const interval = setInterval(fetchEmployees, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // AI Assistant State
@@ -74,7 +76,33 @@ export default function Reports() {
 
   useEffect(() => {
     fetchAnalytics();
-  }, []);
+    
+    // Live update interval for analytics
+    const interval = setInterval(() => {
+      const params = {};
+      if (dateRange.start) params.start = dateRange.start;
+      if (dateRange.end) params.end = dateRange.end;
+      if (selectedDepartment) params.department = selectedDepartment;
+
+      axios.get('/api/reports/analytics', { params })
+        .then(res => {
+          const data = res.data;
+          setMonthlyData(data.monthlyData || []);
+          setDeptData(data.deptData || []);
+          setAbsentData(data.absentData || []);
+          setMissingTopicsData(data.missingTopicsData || []);
+          setLowPerformanceOJT(data.lowPerformanceOJT || []);
+          setOjtDetails(data.ojtDetails || []);
+          setPrintDataSOP(data.printDataSOP || []);
+          setPrintDataOJT(data.printDataOJT || []);
+          setPrintDataHR(data.printDataHR || []);
+          setPrintDataHours(data.printDataHours || []);
+        })
+        .catch(err => console.error('Background sync failed:', err));
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [dateRange.start, dateRange.end, selectedDepartment]);
 
 
   const handleAskAI = async (e) => {
