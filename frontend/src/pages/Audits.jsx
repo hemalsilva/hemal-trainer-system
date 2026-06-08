@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Trophy, Calendar as CalendarIcon, Loader2, ArrowUpRight, ArrowDownRight, Award, History, LayoutDashboard , X, Plus, PenTool, Trash2 , PenTool, Trash2 } from 'lucide-react';
+import { CheckCircle, Trophy, Calendar as CalendarIcon, Loader2, ArrowUpRight, ArrowDownRight, Award, History, LayoutDashboard , X, Plus, PenTool, Trash2 } from 'lucide-react';
 import axios from 'axios';
 
 export default function Audits() {
