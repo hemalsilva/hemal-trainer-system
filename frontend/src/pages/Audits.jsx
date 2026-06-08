@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Trophy, Calendar as CalendarIcon, Loader2, ArrowUpRight, ArrowDownRight, Award, History, LayoutDashboard , X, Plus} from 'lucide-react';
+import { CheckCircle, Trophy, Calendar as CalendarIcon, Loader2, ArrowUpRight, ArrowDownRight, Award, History, LayoutDashboard , X, Plus, PenTool, Trash2 , PenTool, Trash2 } from 'lucide-react';
 import axios from 'axios';
 
 export default function Audits() {
@@ -12,6 +12,8 @@ export default function Audits() {
   const month = parseInt(selectedDate.split('-')[1], 10);
   
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingAudit, setEditingAudit] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
   const [savingBulk, setSavingBulk] = useState(false);
@@ -161,6 +163,32 @@ export default function Audits() {
     }
   };
 
+  
+  const handleDeleteAudit = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this audit?')) return;
+    try {
+      await axios.delete(`/api/audits/${id}`);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting audit');
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSavingEdit(true);
+    try {
+      await axios.put(`/api/audits/${editingAudit.id}`, editingAudit);
+      setEditingAudit(null);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Error updating audit');
+    }
+    setSavingEdit(false);
+  };
+  
   const handleAddAudit = async (e) => {
     e.preventDefault();
     setSavingAudit(true);
@@ -320,12 +348,13 @@ export default function Audits() {
                     <th className="p-4 font-semibold">Type</th>
                     <th className="p-4 font-semibold">Room No</th>
                     <th className="p-4 font-semibold text-right">Score</th>
+                    <th className="p-4 font-semibold text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
                   {filteredAudits.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="p-8 text-center text-gray-500">
+                      <td colSpan="6" className="p-8 text-center text-gray-500">
                         No recent audits found. Audits submitted via Google Forms will appear here automatically.
                       </td>
                     </tr>
@@ -356,6 +385,21 @@ export default function Audits() {
                             {audit.score}
                           </div>
                         </td>
+
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => setEditingAudit({
+                              ...audit, 
+                              audit_date: new Date(audit.audit_date).toISOString().split('T')[0]
+                            })} className="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">
+                              <PenTool className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDeleteAudit(audit.id)} className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+  
                       </tr>
                     ))
                   )}
@@ -594,6 +638,103 @@ export default function Audits() {
           </div>
         </div>
       )}
-    </div>
+
+      {editingAudit && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-brand-card border border-gray-800 rounded-2xl w-full max-w-lg p-6 relative">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-blue-200 flex items-center gap-2">
+                <PenTool className="w-6 h-6 text-brand-primary" /> Edit Audit
+              </h2>
+              <button onClick={() => setEditingAudit(null)} className="text-gray-400 hover:text-blue-200"><X className="w-6 h-6" /></button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Employee No *</label>
+                  <input 
+                    type="text" required
+                    value={editingAudit.emp_no}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditingAudit({...editingAudit, emp_no: val});
+                      const emp = employees.find(em => em.emp_no === val);
+                      if (emp) {
+                        setEditingAudit(prev => ({...prev, emp_name: emp.full_name, emp_no: emp.emp_no}));
+                      }
+                    }}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Employee Name *</label>
+                  <input 
+                    type="text" required list="edit-employee-options"
+                    value={editingAudit.emp_name}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditingAudit({...editingAudit, emp_name: val});
+                      const emp = employees.find(em => em.full_name === val);
+                      if (emp) {
+                        setEditingAudit(prev => ({...prev, emp_no: emp.emp_no, emp_name: emp.full_name}));
+                      }
+                    }}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                  <datalist id="edit-employee-options">
+                    {employees.map(emp => <option key={emp.emp_no} value={emp.full_name} />)}
+                  </datalist>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Audit Type *</label>
+                  <select 
+                    required value={editingAudit.audit_type}
+                    onChange={(e) => setEditingAudit({...editingAudit, audit_type: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  >
+                    {auditTypes.filter(t => t !== 'Team Leader').map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Date *</label>
+                  <input 
+                    type="date" required value={editingAudit.audit_date}
+                    onChange={(e) => setEditingAudit({...editingAudit, audit_date: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none [color-scheme:dark]"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Score (out of 100) *</label>
+                  <input 
+                    type="number" min="0" max="100" required value={editingAudit.score}
+                    onChange={(e) => setEditingAudit({...editingAudit, score: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Room / Area No</label>
+                  <input 
+                    type="text" value={editingAudit.room_number || ''}
+                    onChange={(e) => setEditingAudit({...editingAudit, room_number: e.target.value})}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl p-3 text-blue-200 outline-none"
+                  />
+                </div>
+              </div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setEditingAudit(null)} className="flex-1 px-4 py-3 border border-gray-700 rounded-xl text-gray-400 font-bold hover:text-blue-200 transition-colors">Cancel</button>
+                <button type="submit" disabled={savingEdit} className="flex-1 bg-brand-primary hover:bg-brand-primaryHover text-black rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  {savingEdit ? 'Updating...' : 'Update Audit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      </div>
   );
 }

@@ -222,4 +222,37 @@ router.post('/bulk', async (req, res) => {
   }
 });
 
+
+// PUT /api/audits/:id
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { emp_no, emp_name, audit_type, score, audit_date, room_number } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE room_audits 
+       SET emp_no = $1, emp_name = $2, audit_type = $3, score = $4, audit_date = $5, room_number = $6 
+       WHERE id = $7 RETURNING *`,
+      [emp_no, emp_name, audit_type, score, audit_date, room_number, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Audit not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating audit:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// DELETE /api/audits/:id
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM room_audits WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Audit not found' });
+    res.json({ message: 'Deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting audit:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 module.exports = router;
