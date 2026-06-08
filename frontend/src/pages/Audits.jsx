@@ -168,7 +168,7 @@ export default function Audits() {
     if (!window.confirm('Are you sure you want to delete this audit?')) return;
     try {
       await axios.delete(`/api/audits/${id}`);
-      fetchData();
+      fetchAudits();
     } catch (err) {
       console.error(err);
       alert('Error deleting audit');
@@ -181,7 +181,7 @@ export default function Audits() {
     try {
       await axios.put(`/api/audits/${editingAudit.id}`, editingAudit);
       setEditingAudit(null);
-      fetchData();
+      fetchAudits();
     } catch (err) {
       console.error(err);
       alert('Error updating audit');
