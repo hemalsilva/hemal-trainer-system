@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Tesseract from 'tesseract.js';
-import { Upload, Settings as SettingsIcon, Save, Image as ImageIcon, MousePointer2, CheckCircle2, FormInput, Plus, X, ExternalLink, ClipboardList, Users, ChevronDown, ChevronUp, BookOpen, CheckCircle, Copy, Info , ScanLine, Award, MessageSquare} from 'lucide-react';
+import { Upload, Settings as SettingsIcon, Save, Image as ImageIcon, MousePointer2, CheckCircle2, FormInput, Plus, X, ExternalLink, ClipboardList, Users, ChevronDown, ChevronUp, BookOpen, CheckCircle, Copy, Info , ScanLine, Award, MessageSquare, Trophy} from 'lucide-react';
 
 const STORAGE_KEYS = { attendance: 'hk_attendance_forms', quiz: 'hk_quiz_forms', audit: 'hk_audit_forms' };
 
