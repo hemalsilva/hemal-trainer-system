@@ -27,6 +27,8 @@ export default function OJT() {
   const [selectedDept, setSelectedDept] = useState('All');
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     axios.get('/api/employees').then(res => setEmployees(res.data)).catch(console.error);
