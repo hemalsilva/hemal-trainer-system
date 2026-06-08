@@ -36,6 +36,11 @@ export default function TrainingAttendance() {
   useEffect(() => {
     fetchTrainings();
     fetchEmployees();
+    const interval = setInterval(() => {
+      axios.get('/api/trainings').then(res => setTrainings(res.data)).catch(console.error);
+      axios.get('/api/employees').then(res => setEmployees(res.data)).catch(console.error);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   
@@ -82,6 +87,8 @@ export default function TrainingAttendance() {
   useEffect(() => {
     if (selectedTrainingId) {
       fetchAttendanceSummary();
+      const interval = setInterval(() => fetchAttendanceSummary(true), 5000);
+      window.__taInterval = interval;
       const tr = trainings.find(t => t.id === Number(selectedTrainingId));
       if (tr) {
         setGoogleFormLink(tr.google_form_link || '');
@@ -91,19 +98,20 @@ export default function TrainingAttendance() {
       setAbsent([]);
       setGoogleFormLink('');
     }
+    return () => { if (window.__taInterval) clearInterval(window.__taInterval); };
   }, [selectedTrainingId, trainings]);
 
-  const fetchAttendanceSummary = async () => {
-    setLoading(true);
+  const fetchAttendanceSummary = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const res = await axios.get('/api/trainings/' + selectedTrainingId + '/attendance-summary');
       setAttended(res.data.attended || []);
       setAbsent(res.data.absent || []);
     } catch (err) {
       console.error(err);
-      showMessage('Error fetching attendance summary', 'error');
+      if (!isBackground) showMessage('Error fetching attendance summary', 'error');
     }
-    setLoading(false);
+    if (!isBackground) setLoading(false);
   };
 
   const showMessage = (msg, type = 'success') => {

@@ -34,18 +34,20 @@ export default function OJT() {
     axios.get('/api/employees').then(res => setEmployees(res.data)).catch(console.error);
     if (activeTab === 'view') {
       fetchRecords();
+      const interval = setInterval(() => fetchRecords(true), 5000);
+      return () => clearInterval(interval);
     }
   }, [activeTab]);
 
-  const fetchRecords = async () => {
-    setLoading(true);
+  const fetchRecords = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const res = await axios.get('/api/ojt');
       setOjtRecords(res.data);
     } catch (err) {
       console.error('Failed to fetch OJT records:', err);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

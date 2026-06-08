@@ -74,7 +74,7 @@ export default function Schedule() {
     } catch (err) { console.error(err); }
   };
 
-  useEffect(() => { fetchSchedules(); fetchTrainerDaysOff(); }, []);
+  useEffect(() => { fetchSchedules(); fetchTrainerDaysOff(); const interval = setInterval(() => { fetchSchedules(); fetchTrainerDaysOff(); }, 5000); return () => clearInterval(interval); }, []);
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
