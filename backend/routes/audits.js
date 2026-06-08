@@ -260,4 +260,46 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+
+// GET /api/audits/overview
+// Audit Result Overview excluding Managers/Directors
+router.get('/overview', async (req, res) => {
+  const { month, year } = req.query;
+  try {
+    let joinDateCondition = '';
+    let params = [];
+    if (month && year) {
+      joinDateCondition = `EXTRACT(MONTH FROM ra.audit_date) = $1 AND EXTRACT(YEAR FROM ra.audit_date) = $2`;
+      params = [month, year];
+    } else {
+      joinDateCondition = `EXTRACT(MONTH FROM ra.audit_date) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM ra.audit_date) = EXTRACT(YEAR FROM CURRENT_DATE)`;
+    }
+
+    const query = `
+      SELECT 
+        e.emp_no, 
+        e.full_name as emp_name, 
+        e.department, 
+        e.designation,
+        COUNT(ra.id) FILTER (WHERE ra.audit_type IN ('Stayover', 'IP Stayover')) as stayover_completed,
+        AVG(ra.score) FILTER (WHERE ra.audit_type IN ('Stayover', 'IP Stayover')) as stayover_avg,
+        COUNT(ra.id) FILTER (WHERE ra.audit_type IN ('Departure', 'IP Departure')) as departure_completed,
+        AVG(ra.score) FILTER (WHERE ra.audit_type IN ('Departure', 'IP Departure')) as departure_avg
+      FROM employees e
+      LEFT JOIN room_audits ra ON e.emp_no = ra.emp_no AND ${joinDateCondition}
+      WHERE e.designation NOT ILIKE '%manager%' 
+        AND e.designation NOT ILIKE '%director%'
+      GROUP BY e.emp_no, e.full_name, e.department, e.designation
+      ORDER BY e.full_name ASC
+    `;
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching audit overview:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 module.exports = router;
+
