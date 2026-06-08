@@ -138,6 +138,26 @@ export default function Schedule() {
     } catch (err) { alert('Failed to load allocated employees'); }
   };
   
+  const handleEditClick = async (session) => {
+    try {
+      const res = await axios.get(`/api/trainings/${session.id}/allocations`);
+      setViewSessionModal({ show: true, session, allocations: res.data });
+      setEditSessionData(session);
+      setIsEditingSession(true);
+    } catch (err) { alert('Failed to load session'); }
+  };
+
+  const handleDeleteSession = async (id) => {
+    if (window.confirm('Are you sure you want to delete this training session? This will also remove any staff allocations to this session.')) {
+      try {
+        await axios.delete(`/api/trainings/${id}`);
+        fetchSchedules();
+      } catch (err) {
+        alert('Error deleting session: ' + err.message);
+      }
+    }
+  };
+
   const handleUpdateSession = async () => {
     try {
       const payload = {
@@ -548,12 +568,13 @@ export default function Schedule() {
                 <th className="p-4 font-semibold">Department</th>
                 <th className="p-4 font-semibold">Topic</th>
                 <th className="p-4 font-semibold">Trainer</th>
-                <th className="p-4 font-semibold text-right">Venue</th>
+                <th className="p-4 font-semibold">Venue</th>
+                <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {filteredSchedules.filter(s => new Date(s.training_date).getMonth() === currentMonth && new Date(s.training_date).getFullYear() === currentYear).length === 0 ? (
-                <tr><td colSpan="5" className="p-8 text-center text-gray-500">No training sessions scheduled for this month.</td></tr>
+                <tr><td colSpan="6" className="p-8 text-center text-gray-500">No training sessions scheduled for this month.</td></tr>
               ) : (
                 filteredSchedules.filter(s => new Date(s.training_date).getMonth() === currentMonth && new Date(s.training_date).getFullYear() === currentYear)
                 .sort((a,b) => new Date(a.training_date) - new Date(b.training_date))
@@ -569,7 +590,17 @@ export default function Schedule() {
                     </td>
                     <td className="p-4 font-bold text-blue-200">{session.topic}</td>
                     <td className="p-4 text-gray-400">{session.trainer_name || 'TBD'}</td>
-                    <td className="p-4 text-right text-gray-400">{session.venue || 'N/A'}</td>
+                    <td className="p-4 text-gray-400">{session.venue || 'N/A'}</td>
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={(e) => { e.stopPropagation(); handleEditClick(session); }} className="text-gray-500 hover:text-brand-primary p-1.5 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors" title="Edit">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }} className="text-gray-500 hover:text-red-500 p-1.5 rounded bg-gray-800/50 hover:bg-red-500/10 transition-colors" title="Delete">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
