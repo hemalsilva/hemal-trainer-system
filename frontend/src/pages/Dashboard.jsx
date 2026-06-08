@@ -99,7 +99,7 @@ export default function Dashboard() {
         monthIndex = new Date(emp.date_of_birth).getMonth();
     }
     return monthIndex === selectedMonth;
-  });
+  }).sort((a, b) => new Date(a.date_of_birth).getDate() - new Date(b.date_of_birth).getDate());
   const upcomingAnniversaries = employees.filter(emp => {
     if (!emp.join_date) return false;
     let monthIndex;
@@ -109,7 +109,7 @@ export default function Dashboard() {
         monthIndex = new Date(emp.join_date).getMonth();
     }
     return monthIndex === selectedMonth;
-  });
+  }).sort((a, b) => new Date(a.join_date).getDate() - new Date(b.join_date).getDate());
 
   
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
