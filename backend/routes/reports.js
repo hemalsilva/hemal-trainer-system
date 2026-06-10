@@ -85,14 +85,14 @@ router.get('/analytics', async (req, res) => {
     let ojtFilter = '1=1';
     let ojtParams = [];
     if (department) {
-       // Assuming ojt_assessments has no department, but we can join employees
+       // Assuming ojt_records has no department, but we can join employees
        ojtParams.push(department);
        ojtFilter += ` AND e.department = $1`;
     }
 
     const lowOJTRes = await pool.query(`
       SELECT o.employee_name as employee, o.topic, o.rating, TO_CHAR(o.date, 'YYYY-MM-DD') as date
-      FROM ojt_assessments o
+      FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
       WHERE (o.rating < 3 OR o.verdict = 'FAIL') AND ${ojtFilter}
       ORDER BY o.date DESC
@@ -107,7 +107,7 @@ router.get('/analytics', async (req, res) => {
         SUM(CASE WHEN o.verdict = 'FAIL' THEN 1 ELSE 0 END) as failed,
         ROUND(AVG(o.rating), 1) as avg_rating,
         MAX(o.topic) as last_topic
-      FROM ojt_assessments o
+      FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
       WHERE ${ojtFilter}
       GROUP BY o.employee_name
@@ -134,7 +134,7 @@ router.get('/analytics', async (req, res) => {
 
     const printOJTRes = await pool.query(`
       SELECT o.topic, COUNT(*) as assessed, SUM(CASE WHEN o.verdict = 'PASS' THEN 1 ELSE 0 END) as passed 
-      FROM ojt_assessments o
+      FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
       WHERE ${ojtFilter}
       GROUP BY o.topic
@@ -218,7 +218,7 @@ router.post('/ai', async (req, res) => {
             reportTitle = 'Completed ' + reportTitle;
         }
     } else if (intent === 'ojt_failed') {
-        query = 'SELECT employee_name as "Employee Name", topic as "Assessment Topic", TO_CHAR(date, \'YYYY-MM-DD\') as "Date", rating as "Score/5" FROM ojt_assessments WHERE verdict = \'FAIL\'';
+        query = 'SELECT employee_name as "Employee Name", topic as "Assessment Topic", TO_CHAR(date, \'YYYY-MM-DD\') as "Date", rating as "Score/5" FROM ojt_records WHERE verdict = \'FAIL\'';
         reportTitle = 'Failed OJT Assessments Report';
     } else if (intent === 'employees') {
         query = 'SELECT emp_no as "Emp No", name as "Employee Name", department as "Department", designation as "Designation" FROM employees WHERE 1=1';
