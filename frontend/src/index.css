@@ -13,3 +13,23 @@
 ::-webkit-scrollbar-thumb:hover { @apply bg-gray-400; }
 
 
+
+@media print {
+  html, body {
+    background-color: white !important;
+    color: black !important;
+  }
+  * {
+    background-color: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-color: #ccc !important;
+  }
+  table th, table td {
+    border-bottom: 1px solid #ccc !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}
