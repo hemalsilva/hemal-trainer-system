@@ -502,7 +502,10 @@ export default function TrainingAttendance() {
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Topic</label>
-                <input required value={formData.topic} onChange={e => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#161a22] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" />
+                <input required list="ta-topics-list" value={formData.topic} onChange={e => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#161a22] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" />
+                <datalist id="ta-topics-list">
+                  {[...new Set(trainings.filter(t => !formData.department || t.department === formData.department || t.department === 'All Staff').map(t => t.topic))].sort().map((topic, i) => <option key={i} value={topic} />)}
+                </datalist>
               </div>
 
               <div>

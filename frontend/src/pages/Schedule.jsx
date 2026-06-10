@@ -1046,7 +1046,7 @@ export default function Schedule() {
                   <label className="block text-sm text-gray-400 mb-1">Topic</label>
                   <input required list="topics-list" type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" />
                   <datalist id="topics-list">
-                    {[...new Set(schedules.map(s => s.topic))].sort().map((t, i) => <option key={i} value={t} />)}
+                    {[...new Set(schedules.filter(s => !formData.department || s.department === formData.department || s.department === 'All Staff').map(s => s.topic))].sort().map((t, i) => <option key={i} value={t} />)}
                   </datalist>
                 </div>
               <div><label className="block text-sm text-gray-400 mb-1">Department</label>
