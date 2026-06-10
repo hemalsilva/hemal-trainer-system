@@ -538,7 +538,7 @@ export default function TrainingAttendance() {
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-1">Duration (mins)</label>
-                    <input type="number" min="1" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full bg-[#161a22] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" />
+                    <select value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full bg-[#161a22] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none"><option value="30">30 mins</option><option value="60">1 Hour</option><option value="90">1.5 Hours</option><option value="120">2 Hours</option><option value="180">3 Hours</option><option value="240">4 Hours</option></select>
                   </div>
                 </div>
 
@@ -558,4 +558,5 @@ export default function TrainingAttendance() {
     </div>
   );
 }
+
 

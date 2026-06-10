@@ -711,7 +711,7 @@ export default function Schedule() {
               <div className="bg-gray-900 rounded-xl p-3">
                 <p className="text-gray-500 text-xs mb-1">Duration</p>
                 {isEditingSession ? (
-                  <input type="number" value={editSessionData.duration_minutes} onChange={e => setEditSessionData({...editSessionData, duration_minutes: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary" />
+                  <select value={editSessionData.duration_minutes} onChange={e => setEditSessionData({...editSessionData, duration_minutes: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary"><option value="30">30 mins</option><option value="60">1 Hour</option><option value="90">1.5 Hours</option><option value="120">2 Hours</option><option value="180">3 Hours</option><option value="240">4 Hours</option></select>
                 ) : (
                   <p className="text-blue-200 font-semibold">{viewSessionModal.session.duration_minutes || 60} mins</p>
                 )}
@@ -1066,7 +1066,7 @@ export default function Schedule() {
               <div><label className="block text-sm text-gray-400 mb-1">Trainer</label><input type="text" value={formData.trainer} onChange={(e) => setFormData({...formData, trainer: e.target.value})} placeholder="TBD" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
               <div className="grid grid-cols-2 gap-4">
                   <div><label className="block text-sm text-gray-400 mb-1">Venue</label><input type="text" value={formData.venue} onChange={(e) => setFormData({...formData, venue: e.target.value})} placeholder="Main Room" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
-                  <div><label className="block text-sm text-gray-400 mb-1">Duration (mins)</label><input type="number" min="1" value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+                  <div><label className="block text-sm text-gray-400 mb-1">Duration (mins)</label><select value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none"><option value="30">30 mins</option><option value="60">1 Hour</option><option value="90">1.5 Hours</option><option value="120">2 Hours</option><option value="180">3 Hours</option><option value="240">4 Hours</option></select></div>
                 </div>
               <div><label className="block text-sm text-gray-400 mb-1">Date & Time</label><input required type="datetime-local" value={formData.training_date} onChange={(e) => setFormData({...formData, training_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} /></div>
               <div className="pt-4"><button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors">Save Session</button></div>
@@ -1092,5 +1092,7 @@ export default function Schedule() {
     </div>
   );
 }
+
+
 
 
