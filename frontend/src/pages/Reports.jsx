@@ -195,6 +195,8 @@ function AuditReportTab() {
 }
 
 
+const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+
 export default function Reports() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [selectedReportTab, setSelectedReportTab] = useState('overview');
@@ -377,7 +379,7 @@ export default function Reports() {
             <label className="block text-sm text-gray-400 mb-1">Department</label>
             <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
               <option value="">All Departments</option>
-              {departments.map((dept, i) => (
+              {DEPARTMENTS.map((dept, i) => (
                 <option key={i} value={dept}>{dept}</option>
               ))}
             </select>
