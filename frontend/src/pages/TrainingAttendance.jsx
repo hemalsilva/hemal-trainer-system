@@ -512,7 +512,8 @@ export default function TrainingAttendance() {
                 <label className="block text-sm text-gray-400 mb-1">Department</label>
                 <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full bg-[#161a22] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none">
                   <option value="">Select Department</option>
-                  {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                  <option value="All Staff">All Staff</option>
+                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               
