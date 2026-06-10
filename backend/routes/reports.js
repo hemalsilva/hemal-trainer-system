@@ -194,8 +194,7 @@ router.get('/analytics', async (req, res) => {
       GROUP BY topic
     `, trainingParams);
 
-    // 9. printDataHours
-    const hoursRes = await pool.query(`
+    // 9.     const hoursRes = await pool.query(`
       SELECT category, COALESCE(SUM(duration_minutes) / 60, 0) as hours
       FROM trainings t
       WHERE ${trainingFilter}
@@ -214,11 +213,7 @@ router.get('/analytics', async (req, res) => {
       missingTopicsData: missingRes.rows,
       lowPerformanceOJT: lowOJTRes.rows,
       ojtDetails: ojtDetails,
-      printDataSOP: printSOPRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataOJT: printOJTRes.rows.map(r => ({ topic: r.topic, assessed: parseInt(r.assessed, 10), passed: parseInt(r.passed, 10) })),
-      printDataHR: printHRRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataHours
-    });
+                            });
   } catch (err) {
     console.error('Analytics Error:', err);
     res.status(500).json({ error: err.message });
@@ -341,8 +336,7 @@ router.post('/ai', async (req, res) => {
       GROUP BY topic
     `, trainingParams);
 
-    // 9. printDataHours
-    const hoursRes = await pool.query(`
+    // 9.     const hoursRes = await pool.query(`
       SELECT category, COALESCE(SUM(duration_minutes) / 60, 0) as hours
       FROM trainings t
       WHERE ${trainingFilter}
@@ -394,8 +388,7 @@ router.post('/ai', async (req, res) => {
       GROUP BY topic
     `, trainingParams);
 
-    // 9. printDataHours
-    const hoursRes = await pool.query(`
+    // 9.     const hoursRes = await pool.query(`
       SELECT category, COALESCE(SUM(duration_minutes) / 60, 0) as hours
       FROM trainings t
       WHERE ${trainingFilter}
