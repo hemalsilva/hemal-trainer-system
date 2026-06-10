@@ -195,7 +195,7 @@ function AuditReportTab() {
 }
 
 
-const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+const DEPARTMENTS = ['All Staff', 'Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
 export default function Reports() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -943,3 +943,4 @@ export default function Reports() {
     </div>
   );
 }
+

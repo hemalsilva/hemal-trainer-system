@@ -6,7 +6,7 @@ import { Calendar, Search, FileText, CheckCircle, XCircle, Link as LinkIcon, Upl
 
 
 
-const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+const DEPARTMENTS = ['All Staff', 'Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
 export default function TrainingAttendance() {
   const [trainings, setTrainings] = useState([]);
@@ -558,3 +558,4 @@ export default function TrainingAttendance() {
     </div>
   );
 }
+
