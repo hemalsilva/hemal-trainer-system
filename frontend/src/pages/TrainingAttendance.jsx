@@ -163,7 +163,8 @@ export default function TrainingAttendance() {
       if (rowRefs.current[0]) rowRefs.current[0].focus();
     } catch (err) {
       console.error(err);
-      showMessage('Error saving manual attendance', 'error');
+      const errMsg = err.response?.data?.error || err.message || 'Unknown error';
+      showMessage('Error: ' + errMsg, 'error');
     }
     setSavingManual(false);
   };

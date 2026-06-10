@@ -243,24 +243,40 @@ router.get('/:id/attendance-summary', async (req, res) => {
       [id]
     );
 
-    // Get the training department first
-    const trainingRes = await pool.query('SELECT department FROM trainings WHERE id = $1', [id]);
+    // Get the training department and category first
+    const trainingRes = await pool.query('SELECT department, category FROM trainings WHERE id = $1', [id]);
     const trainingDept = trainingRes.rows.length > 0 ? trainingRes.rows[0].department : 'General';
+    const trainingCategory = trainingRes.rows.length > 0 ? trainingRes.rows[0].category : '';
 
-    // Get Absent Employees (Employees not in attendance_records for this training_id)
-    let absentQuery = `
-      SELECT e.emp_no, e.full_name as emp_name, e.department, e.designation 
-      FROM employees e
-      WHERE e.status = 'Active' AND e.emp_no NOT IN (
-        SELECT emp_no FROM attendance_records WHERE training_id = $1
-      )
-    `;
-    const absentParams = [id];
+    let absentQuery = '';
+    let absentParams = [id];
 
-    // Filter by department if not General
-    if (trainingDept && trainingDept !== 'General') {
-      absentQuery += ` AND e.department = $2 `;
-      absentParams.push(trainingDept);
+    // Check if it's an HR category training
+    if (trainingCategory === 'Hotel HR' || trainingCategory === 'HR') {
+      // For HR, only consider employees who were EXPLICITLY ALLOCATED to this training
+      absentQuery = `
+        SELECT e.emp_no, e.full_name as emp_name, e.department, e.designation 
+        FROM employees e
+        JOIN training_allocations ta ON e.emp_no = ta.emp_no
+        WHERE e.status = 'Active' AND ta.training_id = $1 AND e.emp_no NOT IN (
+          SELECT emp_no FROM attendance_records WHERE training_id = $1
+        )
+      `;
+    } else {
+      // Get Absent Employees (Employees not in attendance_records for this training_id)
+      absentQuery = `
+        SELECT e.emp_no, e.full_name as emp_name, e.department, e.designation 
+        FROM employees e
+        WHERE e.status = 'Active' AND e.emp_no NOT IN (
+          SELECT emp_no FROM attendance_records WHERE training_id = $1
+        )
+      `;
+      
+      // Filter by department if not General or All Staff
+      if (trainingDept && trainingDept !== 'General' && trainingDept !== 'All Staff') {
+        absentQuery += ` AND e.department = $2 `;
+        absentParams.push(trainingDept);
+      }
     }
 
     absentQuery += ` ORDER BY e.full_name ASC `;
@@ -302,7 +318,7 @@ router.post('/:id/attendance/bulk', async (req, res) => {
       // Insert if not exists
       const insertRes = await client.query(
         `INSERT INTO attendance_records (training_id, emp_no, emp_name)
-         SELECT $1, $2, $3
+         SELECT $1::int, $2::varchar, $3::varchar
          WHERE NOT EXISTS (
            SELECT 1 FROM attendance_records WHERE training_id = $1 AND emp_no = $2
          ) RETURNING *`,
@@ -319,6 +335,16 @@ router.post('/:id/attendance/bulk', async (req, res) => {
     res.status(500).json({ error: err.message });
   } finally {
     client.release();
+  }
+});
+
+// Get all allocations across all trainings
+router.get('/allocations/all', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT a.emp_no, t.topic FROM training_allocations a JOIN trainings t ON a.training_id = t.id');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

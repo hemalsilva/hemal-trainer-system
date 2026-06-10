@@ -17,7 +17,7 @@ async function setupAllTables() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS employees (
         id SERIAL PRIMARY KEY,
-        emp_no VARCHAR(20) UNIQUE NOT NULL,
+        emp_no VARCHAR(100) UNIQUE NOT NULL,
         full_name VARCHAR(150) NOT NULL,
         department VARCHAR(100),
         designation VARCHAR(100),
@@ -53,7 +53,7 @@ async function setupAllTables() {
       CREATE TABLE IF NOT EXISTS training_allocations (
         id SERIAL PRIMARY KEY,
         training_id INT REFERENCES trainings(id) ON DELETE CASCADE,
-        emp_no VARCHAR(20),
+        emp_no VARCHAR(100),
         emp_name VARCHAR(150),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -74,7 +74,7 @@ async function setupAllTables() {
       CREATE TABLE IF NOT EXISTS attendance_records (
         id SERIAL PRIMARY KEY,
         training_id INT REFERENCES trainings(id) ON DELETE CASCADE,
-        emp_no VARCHAR(20),
+        emp_no VARCHAR(100),
         emp_name VARCHAR(150),
         scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -84,7 +84,7 @@ async function setupAllTables() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS ojt_records (
         id SERIAL PRIMARY KEY,
-        emp_no VARCHAR(20),
+        emp_no VARCHAR(100),
         emp_name VARCHAR(150),
         department VARCHAR(100) DEFAULT 'Rooms',
         assessment_date DATE,
@@ -118,7 +118,7 @@ async function setupAllTables() {
       `ALTER TABLE trainings ADD COLUMN IF NOT EXISTS department VARCHAR(100) DEFAULT 'General'`,
       `ALTER TABLE trainings ADD COLUMN IF NOT EXISTS trainer_name VARCHAR(150)`,
       `ALTER TABLE ojt_records ADD COLUMN IF NOT EXISTS department VARCHAR(100) DEFAULT 'Rooms'`,
-      `ALTER TABLE ojt_records ADD COLUMN IF NOT EXISTS emp_no VARCHAR(20)`,
+      `ALTER TABLE ojt_records ADD COLUMN IF NOT EXISTS emp_no VARCHAR(100)`,
       `ALTER TABLE ojt_records ADD COLUMN IF NOT EXISTS emp_name VARCHAR(150)`,
       `ALTER TABLE ojt_records ADD COLUMN IF NOT EXISTS assessment_date DATE`,
     ];

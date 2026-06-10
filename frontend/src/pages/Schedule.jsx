@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight, Plus, X, Upload, Printer, CheckCircle, Save, CalendarDays, Filter, UserMinus, Trash2, MessageCircle, BookOpen, RefreshCw, Edit3 } from 'lucide-react';
 
-const DEPARTMENTS = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+const DEPARTMENTS = ['All Staff', 'Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
 const DEPT_COLORS = {
   'Rooms':       'bg-blue-500/20 text-blue-300 border-blue-500/30',
@@ -382,12 +382,22 @@ export default function Schedule() {
     e.target.value = '';
   };
 
-  const handleGenerateAllocations = () => {
+  const handleGenerateAllocations = async () => {
     const uploadedDepts = Object.keys(monthlyRosters);
     if (uploadedDepts.length === 0) {
       alert('Please upload at least one department roster first.');
       return;
     }
+
+    // Fetch past allocations to prevent duplicates
+    let pastAllocations = [];
+    try {
+      const res = await axios.get('/api/trainings/allocations/all');
+      pastAllocations = res.data;
+    } catch(e) { console.error('Failed to fetch allocations for dup check'); }
+
+    // Create a Set of "empNo-topic"
+    const allocatedSet = new Set(pastAllocations.map(a => a.emp_no + '-' + a.topic));
 
     const preview = [];
     
@@ -395,23 +405,38 @@ export default function Schedule() {
     const currentMonthSessions = filteredSchedules.filter(s => new Date(s.training_date).getMonth() === currentMonth && new Date(s.training_date).getFullYear() === currentYear);
 
     currentMonthSessions.forEach(session => {
-      const roster = monthlyRosters[session.department];
-      if (!roster) return; // No roster for this dept, skip
-
       const dateObj = new Date(session.training_date);
       const day = dateObj.getDate();
       const hour = dateObj.getHours();
 
       if (isDayOff(dateObj)) return;
 
-      // Determine required shift based on hour (before 12 PM = 8, else 13)
       const requiredShift = hour < 12 ? '8' : '13';
+      let eligibleEmps = [];
 
-      const eligibleEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === requiredShift);
+      // Support "All Staff"
+      if (session.department === 'All Staff') {
+        uploadedDepts.forEach(dept => {
+          const roster = monthlyRosters[dept];
+          if (roster && roster.employees) {
+            eligibleEmps.push(...roster.employees.filter(emp => String(emp.days[day]).trim() === requiredShift));
+          }
+        });
+      } else {
+        const roster = monthlyRosters[session.department];
+        if (!roster) return; // No roster for this dept, skip
+        eligibleEmps = roster.employees.filter(emp => String(emp.days[day]).trim() === requiredShift);
+      }
+
+      // Filter out those who already took this topic
+      eligibleEmps = eligibleEmps.filter(emp => !allocatedSet.has(emp.emp_no + '-' + session.topic));
 
       if (eligibleEmps.length > 0) {
         // Cap to rosterBatchSize
         const batch = eligibleEmps.slice(0, parseInt(rosterBatchSize) || 15);
+        // Add them to allocatedSet so we don't pick them again for the same topic in another session this generation loop
+        batch.forEach(emp => allocatedSet.add(emp.emp_no + '-' + session.topic));
+
         preview.push({
           session, // The master session object
           employees: batch,
@@ -430,6 +455,35 @@ export default function Schedule() {
 
     setSyncPreview(preview);
     setShowSyncModal(true);
+  };
+
+
+  const downloadAllocationsExcel = () => {
+    let csv = 'Topic,Department,Date,Time,Emp No,Emp Name\n';
+    syncPreview.forEach(item => {
+      item.employees.forEach(emp => {
+        csv += `"${item.topic}","${item.dept}","${item.dateLabel}","${item.timeLabel}","${emp.emp_no}","${emp.name}"\n`;
+      });
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Allocations.csv';
+    a.click();
+  };
+
+  const downloadDetailedScheduleExcel = () => {
+    let csv = 'Date & Time,Department,Topic,Trainer,Venue\n';
+    filteredSchedules.forEach(s => {
+      csv += `"${new Date(s.training_date).toLocaleString()}","${s.department}","${s.topic}","${s.trainer_name}","${s.venue}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Detailed_Schedule.csv';
+    a.click();
   };
 
   const handleSaveSync = async () => {
@@ -519,7 +573,7 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* BIG CALENDAR GRID */}
+      {/* BIG CALENDAR GRID */}\n      
       <div className="grid grid-cols-7 gap-px bg-gray-800 border-x border-b border-gray-800 rounded-b-2xl overflow-hidden shadow-2xl print:border print:shadow-none">
         {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => (
           <div key={day} className="bg-[#181818] print:bg-gray-200 p-3 text-center text-sm font-bold text-gray-400 print:text-black">{day}</div>
@@ -988,7 +1042,13 @@ export default function Schedule() {
             <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200"><X className="w-5 h-5" /></button>
             <h2 className="text-xl font-bold text-blue-200 mb-6">Schedule New Training</h2>
             <form onSubmit={handleAddSubmit} className="space-y-4">
-              <div><label className="block text-sm text-gray-400 mb-1">Topic</label><input required type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+              <div>
+                  <label className="block text-sm text-gray-400 mb-1">Topic</label>
+                  <input required list="topics-list" type="text" value={formData.topic} onChange={(e) => setFormData({...formData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" />
+                  <datalist id="topics-list">
+                    {[...new Set(schedules.map(s => s.topic))].sort().map((t, i) => <option key={i} value={t} />)}
+                  </datalist>
+                </div>
               <div><label className="block text-sm text-gray-400 mb-1">Department</label>
                 <select required value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
                   <option value="">Select Department</option>
@@ -1001,7 +1061,10 @@ export default function Schedule() {
                 </select>
               </div>
               <div><label className="block text-sm text-gray-400 mb-1">Trainer</label><input type="text" value={formData.trainer} onChange={(e) => setFormData({...formData, trainer: e.target.value})} placeholder="TBD" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
-              <div><label className="block text-sm text-gray-400 mb-1">Venue</label><input type="text" value={formData.venue} onChange={(e) => setFormData({...formData, venue: e.target.value})} placeholder="Main Room" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-sm text-gray-400 mb-1">Venue</label><input type="text" value={formData.venue} onChange={(e) => setFormData({...formData, venue: e.target.value})} placeholder="Main Room" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+                  <div><label className="block text-sm text-gray-400 mb-1">Duration (mins)</label><input type="number" min="1" value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
+                </div>
               <div><label className="block text-sm text-gray-400 mb-1">Date & Time</label><input required type="datetime-local" value={formData.training_date} onChange={(e) => setFormData({...formData, training_date: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} /></div>
               <div className="pt-4"><button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors">Save Session</button></div>
             </form>
