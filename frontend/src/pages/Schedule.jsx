@@ -671,7 +671,10 @@ export default function Schedule() {
             <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 border ${DEPT_COLORS[viewSessionModal.session.department] || 'bg-brand-primary/20 text-brand-primary border-brand-primary/30'}`}>{viewSessionModal.session.department}</div>
             
             {isEditingSession ? (
-              <input required list="edit-topics-list" value={editSessionData.topic} onChange={e => setEditSessionData({...editSessionData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2 text-blue-200 text-2xl font-bold mb-2 focus:border-brand-primary outline-none" /><datalist id="edit-topics-list">{[...new Set(schedules.filter(s => !editSessionData.department || s.department === editSessionData.department || s.department === 'All Staff').map(s => s.topic))].sort().map((t, i) => <option key={i} value={t} />)}</datalist>
+              <>
+                <input required list="edit-topics-list" value={editSessionData.topic} onChange={e => setEditSessionData({...editSessionData, topic: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2 text-blue-200 text-2xl font-bold mb-2 focus:border-brand-primary outline-none" />
+                <datalist id="edit-topics-list">{[...new Set(schedules.filter(s => !editSessionData.department || s.department === editSessionData.department || s.department === 'All Staff').map(s => s.topic))].sort().map((t, i) => <option key={i} value={t} />)}</datalist>
+              </>
             ) : (
               <h2 className="text-2xl font-bold text-blue-200 mb-1 flex items-center justify-between">
                 <span>{viewSessionModal.session.topic}</span>
@@ -1089,4 +1092,5 @@ export default function Schedule() {
     </div>
   );
 }
+
 
