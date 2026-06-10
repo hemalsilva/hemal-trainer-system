@@ -165,95 +165,7 @@ router.get('/analytics', async (req, res) => {
       { category: 'Hotel HR Training hours', hours: parseInt(hrHours.rows[0].hours, 10) }
     ];
 
-    
-    // 6. printDataSOP
-    const sopRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions,
-      (SELECT COUNT(*) FROM attendance_records a JOIN trainings t2 ON a.training_id = t2.id WHERE t2.topic = t.topic) as attendees
-      FROM trainings t
-      WHERE category != 'Compliance' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    // 7. printDataOJT
-    const ojtSumRes = await pool.query(`
-      SELECT o.topic, COUNT(o.id) as assessed, 
-      COUNT(CASE WHEN o.rating >= 3 OR o.verdict = 'PASS' THEN 1 END) as passed
-      FROM ojt_assessments o
-      LEFT JOIN employees e ON o.emp_no = e.emp_no
-      WHERE ${ojtFilter}
-      GROUP BY o.topic
-    `, ojtParams);
-
-    // 8. printDataHR
-    const hrRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions,
-      (SELECT COUNT(*) FROM attendance_records a JOIN trainings t2 ON a.training_id = t2.id WHERE t2.topic = t.topic) as attendees
-      FROM trainings t
-      WHERE category = 'Compliance' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    // 9. printDataHours
-    const hoursRes = await pool.query(`
-      SELECT category, COALESCE(SUM(duration_minutes) / 60, 0) as hours
-      FROM trainings t
-      WHERE ${trainingFilter}
-      GROUP BY category
-    `, trainingParams);
-
-    
-    // 6. printSOPRes
-    const printSOPRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions, 
-             COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic)), 0) as attendees 
-      FROM trainings t 
-      WHERE category IN ('Mandatory', 'SOP') AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    const printOJTRes = await pool.query(`
-      SELECT o.topic, COUNT(*) as assessed, SUM(CASE WHEN o.verdict = 'PASS' THEN 1 ELSE 0 END) as passed 
-      FROM ojt_assessments o
-      LEFT JOIN employees e ON o.emp_no = e.emp_no
-      WHERE ${ojtFilter}
-      GROUP BY o.topic
-    `, ojtParams);
-
-    const printHRRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions, 
-             COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic)), 0) as attendees 
-      FROM trainings t 
-      WHERE category = 'Hotel HR' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    const sopHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category IN ('Mandatory', 'SOP') AND ${trainingFilter}`, trainingParams);
-    const hrHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category = 'Hotel HR' AND ${trainingFilter}`, trainingParams);
-    
-    let ojtRecFilter = '1=1';
-    let ojtRecParams = [];
-    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND date >= $${ojtRecParams.length}`; }
-    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND date <= $${ojtRecParams.length}`; }
-    const ojtHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM ojt_records WHERE ${ojtRecFilter}`, ojtRecParams);
-
-    const printDataHours = [
-      { category: 'Department wise SOP training hours', hours: parseInt(sopHours.rows[0].hours, 10) },
-      { category: 'OJT hours', hours: parseInt(ojtHours.rows[0].hours, 10) },
-      { category: 'Hotel HR Training hours', hours: parseInt(hrHours.rows[0].hours, 10) }
-    ];
-
     res.json({
-      printDataSOP: printSOPRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataOJT: printOJTRes.rows.map(r => ({ topic: r.topic, assessed: parseInt(r.assessed, 10), passed: parseInt(r.passed, 10) })),
-      printDataHR: printHRRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataHours: printDataHours,
-
-      printDataSOP: sopRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataOJT: ojtSumRes.rows.map(r => ({ topic: r.topic, assessed: parseInt(r.assessed, 10), passed: parseInt(r.passed, 10) })),
-      printDataHR: hrRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataHours: hoursRes.rows.map(r => ({ category: r.category, hours: parseInt(r.hours, 10) })),
-
       monthlyData: monthlyHoursRes.rows.map(r => ({ name: r.name, hours: parseInt(r.hours, 10) })),
       deptData: deptData,
       absentData: absentData,
@@ -358,49 +270,7 @@ router.post('/ai', async (req, res) => {
     
     // Simulate AI thinking delay for cool factor
     setTimeout(() => {
-        
-    // 6. printDataSOP
-    const sopRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions,
-      (SELECT COUNT(*) FROM attendance_records a JOIN trainings t2 ON a.training_id = t2.id WHERE t2.topic = t.topic) as attendees
-      FROM trainings t
-      WHERE category != 'Compliance' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    // 7. printDataOJT
-    const ojtSumRes = await pool.query(`
-      SELECT o.topic, COUNT(o.id) as assessed, 
-      COUNT(CASE WHEN o.rating >= 3 OR o.verdict = 'PASS' THEN 1 END) as passed
-      FROM ojt_assessments o
-      LEFT JOIN employees e ON o.emp_no = e.emp_no
-      WHERE ${ojtFilter}
-      GROUP BY o.topic
-    `, ojtParams);
-
-    // 8. printDataHR
-    const hrRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions,
-      (SELECT COUNT(*) FROM attendance_records a JOIN trainings t2 ON a.training_id = t2.id WHERE t2.topic = t.topic) as attendees
-      FROM trainings t
-      WHERE category = 'Compliance' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    // 9. printDataHours
-    const hoursRes = await pool.query(`
-      SELECT category, COALESCE(SUM(duration_minutes) / 60, 0) as hours
-      FROM trainings t
-      WHERE ${trainingFilter}
-      GROUP BY category
-    `, trainingParams);
-
-    res.json({
-      printDataSOP: sopRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataOJT: ojtSumRes.rows.map(r => ({ topic: r.topic, assessed: parseInt(r.assessed, 10), passed: parseInt(r.passed, 10) })),
-      printDataHR: hrRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataHours: hoursRes.rows.map(r => ({ category: r.category, hours: parseInt(r.hours, 10) })),
-
+        res.json({
             success: true,
             title: reportTitle,
             count: result.rows.length,
@@ -411,49 +281,7 @@ router.post('/ai', async (req, res) => {
   } catch (err) {
     if (err.message.includes('relation') && err.message.includes('does not exist')) {
         setTimeout(() => {
-            
-    // 6. printDataSOP
-    const sopRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions,
-      (SELECT COUNT(*) FROM attendance_records a JOIN trainings t2 ON a.training_id = t2.id WHERE t2.topic = t.topic) as attendees
-      FROM trainings t
-      WHERE category != 'Compliance' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    // 7. printDataOJT
-    const ojtSumRes = await pool.query(`
-      SELECT o.topic, COUNT(o.id) as assessed, 
-      COUNT(CASE WHEN o.rating >= 3 OR o.verdict = 'PASS' THEN 1 END) as passed
-      FROM ojt_assessments o
-      LEFT JOIN employees e ON o.emp_no = e.emp_no
-      WHERE ${ojtFilter}
-      GROUP BY o.topic
-    `, ojtParams);
-
-    // 8. printDataHR
-    const hrRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions,
-      (SELECT COUNT(*) FROM attendance_records a JOIN trainings t2 ON a.training_id = t2.id WHERE t2.topic = t.topic) as attendees
-      FROM trainings t
-      WHERE category = 'Compliance' AND ${trainingFilter}
-      GROUP BY topic
-    `, trainingParams);
-
-    // 9. printDataHours
-    const hoursRes = await pool.query(`
-      SELECT category, COALESCE(SUM(duration_minutes) / 60, 0) as hours
-      FROM trainings t
-      WHERE ${trainingFilter}
-      GROUP BY category
-    `, trainingParams);
-
-    res.json({
-      printDataSOP: sopRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataOJT: ojtSumRes.rows.map(r => ({ topic: r.topic, assessed: parseInt(r.assessed, 10), passed: parseInt(r.passed, 10) })),
-      printDataHR: hrRes.rows.map(r => ({ topic: r.topic, sessions: parseInt(r.sessions, 10), attendees: parseInt(r.attendees, 10) })),
-      printDataHours: hoursRes.rows.map(r => ({ category: r.category, hours: parseInt(r.hours, 10) })),
-
+            res.json({
                 success: true,
                 title: "Simulated Custom AI Report",
                 count: 1,
