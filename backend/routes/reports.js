@@ -133,32 +133,35 @@ router.get('/analytics', async (req, res) => {
 
     // 7. PRINT SUMMARIES
     const printSOPRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions, 
-             COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic)), 0) as attendees 
+      SELECT t.department, t.topic, COUNT(id) as sessions, 
+             COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic AND t2.department = t.department)), 0) as attendees 
       FROM trainings t 
       WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND ${trainingFilter}
-      GROUP BY topic
+      GROUP BY t.department, t.topic
+      ORDER BY t.department ASC, t.topic ASC
     `, trainingParams);
 
     const printOJTRes = await pool.query(`
-      SELECT o.topic, COUNT(*) as assessed, SUM(CASE WHEN o.pass_fail = true THEN 1 ELSE 0 END) as passed 
+      SELECT e.department, o.topic, COUNT(*) as assessed, SUM(CASE WHEN o.pass_fail = true THEN 1 ELSE 0 END) as passed 
       FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
       WHERE ${ojtFilter}
-      GROUP BY o.topic
+      GROUP BY e.department, o.topic
+      ORDER BY e.department ASC, o.topic ASC
     `, ojtParams);
 
     const printHRRes = await pool.query(`
-      SELECT topic, COUNT(id) as sessions, 
-             COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic)), 0) as attendees 
+      SELECT t.department, t.topic, COUNT(id) as sessions, 
+             COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic AND t2.department = t.department)), 0) as attendees 
       FROM trainings t 
       WHERE category ILIKE '%Hotel HR%' AND ${trainingFilter}
-      GROUP BY topic
+      GROUP BY t.department, t.topic
+      ORDER BY t.department ASC, t.topic ASC
     `, trainingParams);
 
     // Hours calculations
-    const sopHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND ${trainingFilter}`, trainingParams);
-    const hrHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category ILIKE '%Hotel HR%' AND ${trainingFilter}`, trainingParams);
+    const sopHours = await pool.query(`SELECT COALESCE(SUM(t.duration_minutes * (SELECT COUNT(*) FROM attendance_records a WHERE a.training_id = t.id)) / 60.0, 0) as hours FROM trainings t WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND ${trainingFilter}`, trainingParams);
+    const hrHours = await pool.query(`SELECT COALESCE(SUM(t.duration_minutes * (SELECT COUNT(*) FROM attendance_records a WHERE a.training_id = t.id)) / 60.0, 0) as hours FROM trainings t WHERE category ILIKE '%Hotel HR%' AND ${trainingFilter}`, trainingParams);
     
     // OJT records (different table) - sum duration from ojt_records
     let ojtRecFilter = '1=1';
