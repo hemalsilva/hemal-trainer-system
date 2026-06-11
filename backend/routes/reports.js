@@ -13,11 +13,11 @@ router.get('/analytics', async (req, res) => {
     
     if (start) {
       trainingParams.push(start);
-      trainingFilter += ` AND DATE(training_date) >= ${trainingParams.length}::date`;
+      trainingFilter += ` AND DATE(training_date) >= $${trainingParams.length}`;
     }
     if (end) {
       trainingParams.push(end);
-      trainingFilter += ` AND DATE(training_date) <= ${trainingParams.length}::date`;
+      trainingFilter += ` AND DATE(training_date) <= $${trainingParams.length}`;
     }
     if (department) {
       trainingParams.push(department);
@@ -86,11 +86,11 @@ router.get('/analytics', async (req, res) => {
     let ojtParams = [];
     if (start) {
        ojtParams.push(start);
-       ojtFilter += ` AND DATE(o.date) >= ${ojtParams.length}::date`;
+       ojtFilter += ` AND DATE(o.date) >= $${ojtParams.length}`;
     }
     if (end) {
        ojtParams.push(end);
-       ojtFilter += ` AND DATE(o.date) <= ${ojtParams.length}::date`;
+       ojtFilter += ` AND DATE(o.date) <= $${ojtParams.length}`;
     }
     if (department) {
        // Assuming ojt_records has no department, but we can join employees
@@ -163,8 +163,8 @@ router.get('/analytics', async (req, res) => {
     // OJT records (different table) - sum duration from ojt_records
     let ojtRecFilter = '1=1';
     let ojtRecParams = [];
-    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND DATE(date) >= ${ojtRecParams.length}::date`; }
-    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND DATE(date) <= ${ojtRecParams.length}::date`; }
+    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND DATE(date) >= $${ojtRecParams.length}`; }
+    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND DATE(date) <= $${ojtRecParams.length}`; }
     const ojtHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM ojt_records WHERE ${ojtRecFilter}`, ojtRecParams);
 
     const printDataHours = [
