@@ -86,11 +86,11 @@ router.get('/analytics', async (req, res) => {
     let ojtParams = [];
     if (start) {
        ojtParams.push(start);
-       ojtFilter += ` AND DATE(o.date) >= $${ojtParams.length}`;
+       ojtFilter += ` AND DATE(o.assessment_date) >= $${ojtParams.length}`;
     }
     if (end) {
        ojtParams.push(end);
-       ojtFilter += ` AND DATE(o.date) <= $${ojtParams.length}`;
+       ojtFilter += ` AND DATE(o.assessment_date) <= $${ojtParams.length}`;
     }
     if (department) {
        // Assuming ojt_records has no department, but we can join employees
@@ -99,26 +99,26 @@ router.get('/analytics', async (req, res) => {
     }
 
     const lowOJTRes = await pool.query(`
-      SELECT o.employee_name as employee, o.topic, o.rating, TO_CHAR(o.date, 'YYYY-MM-DD') as date
+      SELECT o.emp_name as employee, o.topic, o.rating, TO_CHAR(o.assessment_date, 'YYYY-MM-DD') as date
       FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
-      WHERE (o.rating < 3 OR o.verdict = 'FAIL') AND ${ojtFilter}
-      ORDER BY o.date DESC
+      WHERE (o.rating < 3 OR o.pass_fail = 'FAIL') AND ${ojtFilter}
+      ORDER BY o.assessment_date DESC
       LIMIT 20
     `, ojtParams);
 
     // 6. ojtDetails
     const ojtMasterRes = await pool.query(`
       SELECT 
-        o.employee_name as employee, 
+        o.emp_name as employee, 
         COUNT(*) as completed,
-        SUM(CASE WHEN o.verdict = 'FAIL' THEN 1 ELSE 0 END) as failed,
+        SUM(CASE WHEN o.pass_fail = 'FAIL' THEN 1 ELSE 0 END) as failed,
         ROUND(AVG(o.rating), 1) as avg_rating,
         MAX(o.topic) as last_topic
       FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
       WHERE ${ojtFilter}
-      GROUP BY o.employee_name
+      GROUP BY o.emp_name
       ORDER BY completed DESC
       LIMIT 50
     `, ojtParams);
@@ -141,7 +141,7 @@ router.get('/analytics', async (req, res) => {
     `, trainingParams);
 
     const printOJTRes = await pool.query(`
-      SELECT o.topic, COUNT(*) as assessed, SUM(CASE WHEN o.verdict = 'PASS' THEN 1 ELSE 0 END) as passed 
+      SELECT o.topic, COUNT(*) as assessed, SUM(CASE WHEN o.pass_fail = 'PASS' THEN 1 ELSE 0 END) as passed 
       FROM ojt_records o
       LEFT JOIN employees e ON o.emp_no = e.emp_no
       WHERE ${ojtFilter}
@@ -163,8 +163,8 @@ router.get('/analytics', async (req, res) => {
     // OJT records (different table) - sum duration from ojt_records
     let ojtRecFilter = '1=1';
     let ojtRecParams = [];
-    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND DATE(date) >= $${ojtRecParams.length}`; }
-    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND DATE(date) <= $${ojtRecParams.length}`; }
+    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND DATE(assessment_date) >= $${ojtRecParams.length}`; }
+    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND DATE(assessment_date) <= $${ojtRecParams.length}`; }
     const ojtHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM ojt_records WHERE ${ojtRecFilter}`, ojtRecParams);
 
     const printDataHours = [
