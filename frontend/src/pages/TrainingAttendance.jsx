@@ -129,6 +129,11 @@ export default function TrainingAttendance() {
       if (emp) {
         newRows[index].emp_name = emp.full_name;
       }
+    } else if (field === 'emp_name') {
+      const emp = employees.find(e => e.full_name.toLowerCase() === value.toLowerCase());
+      if (emp) {
+        newRows[index].emp_no = emp.emp_no;
+      }
     }
     setManualRows(newRows);
   };
@@ -150,13 +155,12 @@ export default function TrainingAttendance() {
 
   const handleSaveManual = async () => {
     if (!selectedTrainingId) return showMessage('Please select a training session first', 'error');
-    const validRows = manualRows.filter(r => r.emp_no);
+    const validRows = manualRows.filter(r => r.emp_no || r.emp_name);
     if (validRows.length === 0) return showMessage('No valid employee records to save', 'error');
 
     setSavingManual(true);
     try {
-      const emp_nos = validRows.map(r => r.emp_no);
-      const res = await axios.post(`/api/trainings/${selectedTrainingId}/attendance/bulk`, { emp_nos });
+      const res = await axios.post(`/api/trainings/${selectedTrainingId}/attendance/bulk`, { records: validRows });
       showMessage(`Successfully marked ${res.data.added} employees as attended!`, 'success');
       fetchAttendanceSummary();
       setManualRows([{ emp_no: '', emp_name: '' }]);
@@ -316,6 +320,7 @@ export default function TrainingAttendance() {
             Type Employee No and press Enter to quickly add multiple employees. Up to 50 at once.
           </p>
           
+          <datalist id="employee-names-list">{employees.map((e, i) => <option key={i} value={e.full_name} />)}</datalist>
           <div className="space-y-3 mb-6 max-h-[400px] overflow-y-auto pr-2">
             {manualRows.map((row, idx) => (
               <div key={idx} className="flex items-center gap-4 animate-in fade-in slide-in-from-left-4">
@@ -329,24 +334,18 @@ export default function TrainingAttendance() {
                   ref={el => rowRefs.current[idx] = el}
                   className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-blue-200 focus:border-brand-primary outline-none max-w-[250px]"
                 />
-                <input 
-                  type="text"
-                  placeholder="Name (Auto-filled)"
-                  value={row.emp_name}
-                  readOnly
-                  className="flex-1 bg-gray-900/50 border border-gray-800 rounded-lg px-4 py-2 text-gray-400 outline-none max-w-[300px] cursor-not-allowed"
-                />
+                <input type="text" list="employee-names-list" placeholder="Name (Search or Type)" value={row.emp_name} onChange={(e) => handleManualRowChange(idx, 'emp_name', e.target.value)} onKeyDown={(e) => handleManualKeyDown(e, idx)} className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-blue-200 focus:border-brand-primary outline-none max-w-[300px]" />
               </div>
             ))}
           </div>
           
           <button 
             onClick={handleSaveManual}
-            disabled={savingManual || manualRows.filter(r=>r.emp_no).length === 0}
+            disabled={savingManual || manualRows.filter(r=>r.emp_no || r.emp_name).length === 0}
             className="bg-brand-primary hover:bg-brand-primaryHover text-black px-8 py-3 rounded-xl font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 shadow-[0_4px_14px_0_rgba(212,175,55,0.39)] flex items-center gap-2"
           >
             <CheckCircle className="w-5 h-5" />
-            {savingManual ? 'Saving...' : `Save ${manualRows.filter(r=>r.emp_no).length} Records`}
+            {savingManual ? 'Saving...' : `Save ${manualRows.filter(r=>r.emp_no || r.emp_name).length} Records`}
           </button>
         </div>
       )}

@@ -13,11 +13,11 @@ router.get('/analytics', async (req, res) => {
     
     if (start) {
       trainingParams.push(start);
-      trainingFilter += ` AND training_date >= $${trainingParams.length}`;
+      trainingFilter += ` AND DATE(training_date) >= ${trainingParams.length}`;
     }
     if (end) {
       trainingParams.push(end);
-      trainingFilter += ` AND training_date <= $${trainingParams.length}`;
+      trainingFilter += ` AND DATE(training_date) <= ${trainingParams.length}`;
     }
     if (department) {
       trainingParams.push(department);
@@ -84,10 +84,18 @@ router.get('/analytics', async (req, res) => {
     // 5. lowPerformanceOJT
     let ojtFilter = '1=1';
     let ojtParams = [];
+    if (start) {
+       ojtParams.push(start);
+       ojtFilter += ` AND DATE(o.date) >= ${ojtParams.length}`;
+    }
+    if (end) {
+       ojtParams.push(end);
+       ojtFilter += ` AND DATE(o.date) <= ${ojtParams.length}`;
+    }
     if (department) {
        // Assuming ojt_records has no department, but we can join employees
        ojtParams.push(department);
-       ojtFilter += ` AND e.department = $1`;
+       ojtFilter += ` AND e.department = ${ojtParams.length}`;
     }
 
     const lowOJTRes = await pool.query(`
@@ -128,7 +136,7 @@ router.get('/analytics', async (req, res) => {
       SELECT topic, COUNT(id) as sessions, 
              COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic)), 0) as attendees 
       FROM trainings t 
-      WHERE category IN ('Mandatory', 'SOP') AND ${trainingFilter}
+      WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND ${trainingFilter}
       GROUP BY topic
     `, trainingParams);
 
@@ -144,19 +152,19 @@ router.get('/analytics', async (req, res) => {
       SELECT topic, COUNT(id) as sessions, 
              COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic)), 0) as attendees 
       FROM trainings t 
-      WHERE category = 'Hotel HR' AND ${trainingFilter}
+      WHERE category ILIKE '%Hotel HR%' AND ${trainingFilter}
       GROUP BY topic
     `, trainingParams);
 
     // Hours calculations
-    const sopHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category IN ('Mandatory', 'SOP') AND ${trainingFilter}`, trainingParams);
-    const hrHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category = 'Hotel HR' AND ${trainingFilter}`, trainingParams);
+    const sopHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND ${trainingFilter}`, trainingParams);
+    const hrHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM trainings WHERE category ILIKE '%Hotel HR%' AND ${trainingFilter}`, trainingParams);
     
     // OJT records (different table) - sum duration from ojt_records
     let ojtRecFilter = '1=1';
     let ojtRecParams = [];
-    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND date >= $${ojtRecParams.length}`; }
-    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND date <= $${ojtRecParams.length}`; }
+    if (start) { ojtRecParams.push(start); ojtRecFilter += ` AND DATE(date) >= ${ojtRecParams.length}`; }
+    if (end) { ojtRecParams.push(end); ojtRecFilter += ` AND DATE(date) <= ${ojtRecParams.length}`; }
     const ojtHours = await pool.query(`SELECT COALESCE(SUM(duration_minutes)/60, 0) as hours FROM ojt_records WHERE ${ojtRecFilter}`, ojtRecParams);
 
     const printDataHours = [

@@ -296,10 +296,10 @@ router.get('/:id/attendance-summary', async (req, res) => {
 // Bulk Mark Attendance (from OCR)
 router.post('/:id/attendance/bulk', async (req, res) => {
   const { id } = req.params;
-  const { emp_nos } = req.body; // Array of employee numbers
+  const { emp_nos, records } = req.body;
 
-  if (!emp_nos || !Array.isArray(emp_nos) || emp_nos.length === 0) {
-    return res.status(400).json({ error: 'No employee numbers provided' });
+  if ((!emp_nos || !Array.isArray(emp_nos) || emp_nos.length === 0) && (!records || !Array.isArray(records) || records.length === 0)) {
+    return res.status(400).json({ error: 'No employee data provided' });
   }
 
   const client = await pool.connect();
