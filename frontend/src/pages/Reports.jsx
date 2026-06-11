@@ -860,13 +860,28 @@ export default function Reports() {
                   </tr>
                 </thead>
                 <tbody>
-                  {printDataSOP.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-800/50 print:hover:bg-transparent">
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.topic}</td>
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.sessions}</td>
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.attendees}</td>
-                    </tr>
-                  ))}
+                  {(() => {
+                    const grouped = {};
+                    printDataSOP.forEach(row => {
+                      const dept = row.department || 'General';
+                      if (!grouped[dept]) grouped[dept] = [];
+                      grouped[dept].push(row);
+                    });
+                    return Object.entries(grouped).map(([dept, rows]) => (
+                      <React.Fragment key={dept}>
+                        <tr className="bg-gray-800 print:bg-gray-200">
+                          <td colSpan="3" className="p-2 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-white print:text-black uppercase">{dept}</td>
+                        </tr>
+                        {rows.map((row, i) => (
+                          <tr key={`${dept}-${i}`} className="hover:bg-gray-800/50 print:hover:bg-transparent">
+                            <td className="p-3 pl-6 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.topic}</td>
+                            <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.sessions}</td>
+                            <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.attendees}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
@@ -884,13 +899,28 @@ export default function Reports() {
                   </tr>
                 </thead>
                 <tbody>
-                  {printDataOJT.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-800/50 print:hover:bg-transparent">
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.topic}</td>
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.assessed}</td>
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-brand-primary print:text-black">{row.passed}</td>
-                    </tr>
-                  ))}
+                  {(() => {
+                    const grouped = {};
+                    printDataOJT.forEach(row => {
+                      const dept = row.department || 'General';
+                      if (!grouped[dept]) grouped[dept] = [];
+                      grouped[dept].push(row);
+                    });
+                    return Object.entries(grouped).map(([dept, rows]) => (
+                      <React.Fragment key={dept}>
+                        <tr className="bg-gray-800 print:bg-gray-200">
+                          <td colSpan="3" className="p-2 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-white print:text-black uppercase">{dept}</td>
+                        </tr>
+                        {rows.map((row, i) => (
+                          <tr key={`${dept}-${i}`} className="hover:bg-gray-800/50 print:hover:bg-transparent">
+                            <td className="p-3 pl-6 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.topic}</td>
+                            <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.assessed}</td>
+                            <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-brand-primary print:text-black">{row.passed}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
@@ -908,13 +938,28 @@ export default function Reports() {
                   </tr>
                 </thead>
                 <tbody>
-                  {printDataHR.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-800/50 print:hover:bg-transparent">
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.topic}</td>
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.sessions}</td>
-                      <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.attendees}</td>
-                    </tr>
-                  ))}
+                  {(() => {
+                    const grouped = {};
+                    printDataHR.forEach(row => {
+                      const dept = row.department || 'General';
+                      if (!grouped[dept]) grouped[dept] = [];
+                      grouped[dept].push(row);
+                    });
+                    return Object.entries(grouped).map(([dept, rows]) => (
+                      <React.Fragment key={dept}>
+                        <tr className="bg-gray-800 print:bg-gray-200">
+                          <td colSpan="3" className="p-2 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-white print:text-black uppercase">{dept}</td>
+                        </tr>
+                        {rows.map((row, i) => (
+                          <tr key={`${dept}-${i}`} className="hover:bg-gray-800/50 print:hover:bg-transparent">
+                            <td className="p-3 pl-6 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.topic}</td>
+                            <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.sessions}</td>
+                            <td className="p-3 border-b border-gray-800 print:border-gray-300 text-sm text-blue-200 print:text-black">{row.attendees}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
