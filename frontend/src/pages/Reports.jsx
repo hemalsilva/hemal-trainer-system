@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Printer, Calendar, AlertCircle, FileText, Search, UserX, BarChart, PieChart, Sparkles, Send, Loader2, Gift, Eye, Award, Trophy } from 'lucide-react';
-import { Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, Cell } from 'recharts';
+import { Printer, Calendar, AlertCircle, FileText, Search, UserX, BarChart as BarChartIcon, PieChart as PieChartIcon, Sparkles, Send, Loader2, Gift, Eye, Award, Trophy } from 'lucide-react';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 function AuditReportTab() {
   const [overview, setOverview] = React.useState([]);
@@ -485,43 +485,58 @@ export default function Reports() {
         <div className="space-y-8 print:hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 shadow-lg">
-              <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><BarChart className="w-5 h-5 text-brand-primary"/> Monthly Training Hours</h2>
+              <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><BarChartIcon className="w-5 h-5 text-brand-primary"/> Monthly Training Hours</h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                     <XAxis dataKey="name" stroke="#666" tick={{fill: '#888'}} axisLine={false} />
                     <YAxis stroke="#666" tick={{fill: '#888'}} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff' }} itemStyle={{ color: '#D4AF37' }} />
-                    <Line type="monotone" dataKey="hours" stroke="#D4AF37" strokeWidth={3} dot={{r: 4, fill: '#1E1E1E', strokeWidth: 2}} activeDot={{r: 6}} />
-                  </LineChart>
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff', borderRadius: '8px' }} 
+                      cursor={{fill: 'rgba(255,255,255,0.05)'}} 
+                    />
+                    <Bar dataKey="hours" fill="url(#colorHours)" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 shadow-lg">
-              <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><PieChart className="w-5 h-5 text-brand-primary"/> Dept. Training Hours (Housekeeping)</h2>
-              <div className="h-64 flex items-center justify-center">
+              <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><PieChartIcon className="w-5 h-5 text-brand-primary"/> Dept. Training Hours (Housekeeping)</h2>
+              <div className="h-64 flex items-center justify-center relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={deptData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    <Pie data={deptData} cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
                       {deptData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(0,0,0,0.2)" />
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff' }} itemStyle={{ color: '#fff' }} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff', borderRadius: '8px' }} 
+                      itemStyle={{ color: '#fff' }} 
+                    />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="absolute right-8 flex flex-col gap-2">
+                {/* Custom Legend */}
+                <div className="absolute right-0 pr-4 flex flex-col gap-2 max-h-full overflow-y-auto w-1/2">
                   {deptData.map((d, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm">
-                      <div className="w-3 h-3 rounded-full" style={{backgroundColor: d.color}}></div>
-                      <span className="text-gray-300">{d.name} ({d.value}h)</span>
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{backgroundColor: d.color}}></div>
+                      <span className="text-gray-300 truncate" title={`${d.name} (${d.value}h)`}>{d.name}</span>
+                      <span className="text-gray-400 font-bold ml-auto">{d.value}h</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       )}
