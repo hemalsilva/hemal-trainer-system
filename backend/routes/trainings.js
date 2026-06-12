@@ -38,16 +38,17 @@ router.post('/', async (req, res) => {
     trainer,
     training_date,
     google_form_link,
-    department
+    department,
+    status
   } = req.body;
 
   try {
     const result = await pool.query(
       `INSERT INTO trainings
-      (topic, category, venue, duration_minutes, trainer_name, training_date, google_form_link, department)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      (topic, category, venue, duration_minutes, trainer_name, training_date, google_form_link, department, status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *`,
-      [topic, category, venue, duration, trainer, training_date, google_form_link || '', department || 'General']
+      [topic, category, venue, duration, trainer, training_date, google_form_link || '', department || 'General', status || 'TBS']
     );
 
     res.json(result.rows[0]);
@@ -167,15 +168,16 @@ router.put('/:id', async (req, res) => {
     duration,
     trainer,
     training_date,
-    department
+    department,
+    status
   } = req.body;
 
   try {
     const result = await pool.query(
       `UPDATE trainings
-       SET topic = $1, category = $2, venue = $3, duration_minutes = $4, trainer_name = $5, training_date = $6, department = $7
-       WHERE id = $8 RETURNING *`,
-      [topic, category, venue, duration, trainer, training_date, department, id]
+       SET topic = $1, category = $2, venue = $3, duration_minutes = $4, trainer_name = $5, training_date = $6, department = $7, status = $8
+       WHERE id = $9 RETURNING *`,
+      [topic, category, venue, duration, trainer, training_date, department, status || 'TBS', id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Training not found' });
     res.json(result.rows[0]);
