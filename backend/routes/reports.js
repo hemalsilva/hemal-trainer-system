@@ -136,7 +136,7 @@ router.get('/analytics', async (req, res) => {
       SELECT t.department, t.topic, COUNT(id) as sessions, 
              COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic AND t2.department = t.department)), 0) as attendees 
       FROM trainings t 
-      WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND ${trainingFilter}
+      WHERE category ILIKE ANY (ARRAY['%Mandatory%', '%SOP%']) AND t.status IN ('On Going', 'Completed') AND ${trainingFilter.replace(/\b(?<![a-zA-Z0-9_\.])(department|training_date|category)\b/g, 't.$1')}
       GROUP BY t.department, t.topic
       ORDER BY t.department ASC, t.topic ASC
     `, trainingParams);
@@ -154,7 +154,7 @@ router.get('/analytics', async (req, res) => {
       SELECT t.department, t.topic, COUNT(id) as sessions, 
              COALESCE((SELECT COUNT(*) FROM attendance_records a WHERE a.training_id IN (SELECT id FROM trainings t2 WHERE t2.topic = t.topic AND t2.department = t.department)), 0) as attendees 
       FROM trainings t 
-      WHERE category ILIKE '%Hotel HR%' AND ${trainingFilter}
+      WHERE category ILIKE '%Hotel HR%' AND t.status IN ('On Going', 'Completed') AND ${trainingFilter.replace(/\b(?<![a-zA-Z0-9_\.])(department|training_date|category)\b/g, 't.$1')}
       GROUP BY t.department, t.topic
       ORDER BY t.department ASC, t.topic ASC
     `, trainingParams);
