@@ -510,22 +510,24 @@ export default function Reports() {
 
             <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 shadow-lg">
               <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><PieChartIcon className="w-5 h-5 text-brand-primary"/> Dept. Training Hours (Housekeeping)</h2>
-              <div className="h-64 flex items-center justify-center relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={deptData} cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
-                      {deptData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff', borderRadius: '8px' }} 
-                      itemStyle={{ color: '#fff' }} 
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="h-64 flex items-center relative">
+                <div className="w-1/2 h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={deptData} cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
+                        {deptData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', color: '#fff', borderRadius: '8px' }} 
+                        itemStyle={{ color: '#fff' }} 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
                 {/* Custom Legend */}
-                <div className="absolute right-0 pr-4 flex flex-col gap-2 max-h-full overflow-y-auto w-1/2">
+                <div className="w-1/2 pl-4 pr-2 flex flex-col gap-2 max-h-full overflow-y-auto">
                   {deptData.map((d, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs">
                       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{backgroundColor: d.color}}></div>
