@@ -307,13 +307,25 @@ router.post('/:id/attendance/bulk', async (req, res) => {
     await client.query('BEGIN');
     
     let addedCount = 0;
-    for (const empNo of emp_nos) {
-      const cleanEmpNo = empNo.toString().trim();
+    
+    const finalRecords = [];
+    if (emp_nos && Array.isArray(emp_nos)) {
+      emp_nos.forEach(e => finalRecords.push({ emp_no: e }));
+    }
+    if (records && Array.isArray(records)) {
+      records.forEach(r => finalRecords.push({ emp_no: r.emp_no, emp_name: r.emp_name }));
+    }
+
+    for (const record of finalRecords) {
+      const cleanEmpNo = record.emp_no?.toString().trim();
       if (!cleanEmpNo) continue;
       
-      // Fetch name from DB
-      const empRes = await client.query('SELECT full_name FROM employees WHERE emp_no = $1', [cleanEmpNo]);
-      const empName = empRes.rows.length > 0 ? empRes.rows[0].full_name : 'Unknown';
+      let empName = record.emp_name;
+      if (!empName) {
+        // Fetch name from DB
+        const empRes = await client.query('SELECT full_name FROM employees WHERE emp_no = $1', [cleanEmpNo]);
+        empName = empRes.rows.length > 0 ? empRes.rows[0].full_name : 'Unknown';
+      }
 
       // Insert if not exists
       const insertRes = await client.query(
