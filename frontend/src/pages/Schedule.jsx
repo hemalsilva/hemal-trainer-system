@@ -163,7 +163,8 @@ export default function Schedule() {
       const payload = {
         ...editSessionData,
         duration: editSessionData.duration_minutes,
-        trainer: editSessionData.trainer_name
+        trainer: editSessionData.trainer_name,
+        status: editSessionData.status || 'TBS'
       };
       await axios.put(`/api/trainings/${editSessionData.id}`, payload);
       setViewSessionModal(prev => ({ ...prev, session: { ...prev.session, ...payload, duration_minutes: payload.duration, trainer_name: payload.trainer } }));
@@ -623,6 +624,7 @@ export default function Schedule() {
                 <th className="p-4 font-semibold">Topic</th>
                 <th className="p-4 font-semibold">Trainer</th>
                 <th className="p-4 font-semibold">Venue</th>
+                <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -645,6 +647,11 @@ export default function Schedule() {
                     <td className="p-4 font-bold text-blue-200">{session.topic}</td>
                     <td className="p-4 text-gray-400">{session.trainer_name || 'TBD'}</td>
                     <td className="p-4 text-gray-400">{session.venue || 'N/A'}</td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold border ${session.status === 'Completed' ? 'bg-green-900/30 text-green-400 border-green-700' : session.status === 'On Going' ? 'bg-blue-900/30 text-blue-400 border-blue-700' : 'bg-gray-800 text-gray-400 border-gray-600'}`}>
+                        {session.status || 'TBS'}
+                      </span>
+                    </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={(e) => { e.stopPropagation(); handleEditClick(session); }} className="text-gray-500 hover:text-brand-primary p-1.5 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors" title="Edit">
@@ -698,6 +705,18 @@ export default function Schedule() {
                   <input value={editSessionData.venue} onChange={e => setEditSessionData({...editSessionData, venue: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary" />
                 ) : (
                   <p className="text-blue-200 font-semibold">{viewSessionModal.session.venue || 'N/A'}</p>
+                )}
+              </div>
+              <div className="bg-gray-900 rounded-xl p-3">
+                <p className="text-gray-500 text-xs mb-1">Status</p>
+                {isEditingSession ? (
+                  <select value={editSessionData.status || 'TBS'} onChange={e => setEditSessionData({...editSessionData, status: e.target.value})} className="w-full bg-[#181818] text-blue-200 p-1 rounded border border-gray-700 outline-none focus:border-brand-primary">
+                    <option value="TBS">TBS</option>
+                    <option value="On Going">On Going</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                ) : (
+                  <p className="text-blue-200 font-semibold">{viewSessionModal.session.status || 'TBS'}</p>
                 )}
               </div>
               <div className="bg-gray-900 rounded-xl p-3">
