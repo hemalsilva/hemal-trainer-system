@@ -26,6 +26,7 @@ export default function Employees() {
   
   const handleEdit = (emp) => {
     setFormData({
+      original_emp_no: emp.emp_no,
       ...emp,
       join_date: emp.join_date ? new Date(emp.join_date).toISOString().split('T')[0] : '',
       date_of_birth: emp.date_of_birth ? new Date(emp.date_of_birth).toISOString().split('T')[0] : '',
