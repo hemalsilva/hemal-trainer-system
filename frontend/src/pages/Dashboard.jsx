@@ -60,13 +60,14 @@ export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [timelineFilter, setTimelineFilter] = useState('Month'); // Date, Week, Month
-  const [dashboardFilter, setDashboardFilter] = useState('All');
+  const [dashboardFilter, setDashboardFilter] = useState(''); // empty means All Time
 
   const fetchData = async () => {
     try {
       let queryParams = '';
-      if (dashboardFilter !== 'All') {
-        const [m, y] = dashboardFilter.split('-');
+      if (dashboardFilter) {
+        const [y, mStr] = dashboardFilter.split('-');
+        const m = parseInt(mStr, 10) - 1;
         queryParams = `?month=${m}&year=${y}`;
       }
       const [empRes, trainRes, ojtRes, timelineRes] = await Promise.all([
@@ -176,7 +177,7 @@ export default function Dashboard() {
   // Calculate active trainings this month
   const activeTrainings = trainings.filter(t => {
     if (!t.training_date) return false;
-    if (dashboardFilter === 'All') {
+    if (!dashboardFilter) {
       return new Date(t.training_date).getMonth() === new Date().getMonth() && new Date(t.training_date).getFullYear() === new Date().getFullYear();
     }
     return true; // If filtered by API, just count all of them
@@ -239,7 +240,7 @@ export default function Dashboard() {
 
   const stats = [
     { title: 'Total Employees', value: totalEmployees.toString(), icon: Users, trend: 'Updated dynamically' },
-    { title: 'Active Trainings', value: activeTrainings.length.toString(), icon: BookOpen, trend: dashboardFilter === 'All' ? 'This month' : 'Selected month' },
+    { title: 'Active Trainings', value: activeTrainings.length.toString(), icon: BookOpen, trend: !dashboardFilter ? 'This month' : 'Selected month' },
     { title: 'Total Training Hours', value: totalHours.toFixed(1), icon: Clock, trend: `${ojtTotalHours.toFixed(1)} OJT / ${standardTotalHours.toFixed(1)} Std` },
     { title: 'Est. Completion', value: `${completionRate}%`, icon: CheckCircle2, trend: 'Based on targets' }
   ];
@@ -252,20 +253,27 @@ export default function Dashboard() {
           <p className="text-gray-400">Overview of hotel-wide training metrics and compliance.</p>
         </div>
         <div className="flex items-center gap-4">
-          <select 
-            value={dashboardFilter} 
-            onChange={(e) => setDashboardFilter(e.target.value)}
-            className="print:hidden bg-brand-card border border-gray-700 text-blue-200 px-4 py-2 rounded-lg font-medium focus:outline-none focus:border-brand-primary"
-          >
-            <option value="All">All Time</option>
-            {[...Array(12)].map((_, i) => {
-              const d = new Date();
-              d.setMonth(d.getMonth() - i);
-              const m = d.getMonth();
-              const y = d.getFullYear();
-              return <option key={`${m}-${y}`} value={`${m}-${y}`}>{d.toLocaleString('default', { month: 'long', year: 'numeric' })}</option>;
-            })}
-          </select>
+          <div className="flex items-center gap-2 print:hidden bg-brand-card border border-gray-700 px-4 py-2 rounded-lg font-medium focus-within:border-brand-primary">
+            <span className="text-gray-400 text-sm">Month:</span>
+            <input 
+              type="month" 
+              value={dashboardFilter} 
+              onChange={(e) => setDashboardFilter(e.target.value)}
+              className="bg-transparent text-blue-200 outline-none w-[130px] cursor-pointer"
+              style={{ colorScheme: 'dark' }}
+            />
+            {dashboardFilter && (
+              <button 
+                onClick={() => setDashboardFilter('')} 
+                className="text-gray-500 hover:text-red-400 text-xs ml-2 px-2 py-1 rounded bg-gray-800"
+              >
+                Clear
+              </button>
+            )}
+            {!dashboardFilter && (
+              <span className="text-brand-primary text-xs ml-2 px-2 py-1 bg-brand-primary/10 rounded">All Time</span>
+            )}
+          </div>
           <button onClick={() => window.print()} className="print:hidden flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2 rounded-lg font-medium transition-colors border border-gray-700">
             <Printer className="w-4 h-4" />
             Print Report
