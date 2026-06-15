@@ -243,7 +243,7 @@ export default function Reports() {
   const fetchAnalytics = async () => {
     setAnalyticsLoading(true);
     try {
-      const params = {};
+      const params = { t: Date.now() };
       if (dateRange.start) params.start = dateRange.start;
       if (dateRange.end) params.end = dateRange.end;
       if (selectedDepartment) params.department = selectedDepartment;

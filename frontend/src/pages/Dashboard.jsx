@@ -57,6 +57,7 @@ export default function Dashboard() {
   const [trainings, setTrainings] = useState([]);
   const [ojtRecords, setOjtRecords] = useState([]);
   const [timelineRaw, setTimelineRaw] = useState({ ojt: [], standard: [] });
+  const [birthdays, setBirthdays] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [timelineFilter, setTimelineFilter] = useState('Month'); // Date, Week, Month

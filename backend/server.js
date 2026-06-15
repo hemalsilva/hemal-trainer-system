@@ -18,6 +18,7 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 app.use('/api/employees', require('./routes/employees'));
+app.use('/api/birthdays', require('./routes/birthdays'));
 app.use('/api/trainings', require('./routes/trainings'));
 app.use('/api/ojt', require('./routes/ojt'));
 app.use('/api/attendance', require('./routes/attendance'));
