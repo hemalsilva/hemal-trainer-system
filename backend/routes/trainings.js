@@ -9,8 +9,18 @@ const fs = require('fs');
 // Get all trainings
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM trainings ORDER BY training_date ASC');
-    res.json(result.rows);
+    const { month, year } = req.query;
+    if (month && year && month !== 'All' && year !== 'All') {
+      const dbMonth = parseInt(month) + 1;
+      const result = await pool.query(
+        'SELECT * FROM trainings WHERE EXTRACT(MONTH FROM training_date) = $1 AND EXTRACT(YEAR FROM training_date) = $2 ORDER BY training_date ASC',
+        [dbMonth, parseInt(year)]
+      );
+      res.json(result.rows);
+    } else {
+      const result = await pool.query('SELECT * FROM trainings ORDER BY training_date ASC');
+      res.json(result.rows);
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

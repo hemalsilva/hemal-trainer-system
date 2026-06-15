@@ -19,8 +19,20 @@ const upload = multer({ storage: storage });
 // GET all employees (supports ?search=EMP001 for OJT auto-lookup)
 router.get('/', async (req, res) => {
   try {
-    const { search } = req.query;
-    let result;
+    const { search, month, year } = req.query;
+    let standardWhere = '';
+    let ojtWhere = '';
+    const params = [];
+    let paramIndex = 1;
+    
+    if (month && year && month !== 'All' && year !== 'All') {
+      const dbMonth = parseInt(month) + 1; // JS month (0-11) to Postgres month (1-12)
+      standardWhere = `WHERE EXTRACT(MONTH FROM t.training_date) = ${paramIndex} AND EXTRACT(YEAR FROM t.training_date) = ${paramIndex+1}`;
+      ojtWhere = `WHERE EXTRACT(MONTH FROM assessment_date) = ${paramIndex} AND EXTRACT(YEAR FROM assessment_date) = ${paramIndex+1}`;
+      params.push(dbMonth, parseInt(year));
+      paramIndex += 2;
+    }
+
     const queryBase = `
       SELECT e.*, 
         COALESCE(th.training_hours, 0) AS standard_training_hours,
@@ -31,22 +43,26 @@ router.get('/', async (req, res) => {
         SELECT a.emp_no, SUM(t.duration_minutes) / 60.0 AS training_hours
         FROM attendance_records a
         JOIN trainings t ON a.training_id = t.id
+        ${standardWhere}
         GROUP BY a.emp_no
       ) th ON e.emp_no = th.emp_no
       LEFT JOIN (
         SELECT emp_no, SUM(duration_minutes) / 60.0 AS ojt_hours
         FROM ojt_records
+        ${ojtWhere}
         GROUP BY emp_no
       ) oh ON e.emp_no = oh.emp_no
     `;
 
+    let result;
     if (search) {
+      params.push(`%${search}%`);
       result = await pool.query(
-        `${queryBase} WHERE LOWER(e.emp_no::text) LIKE LOWER($1) OR LOWER(e.full_name) LIKE LOWER($1) LIMIT 10`,
-        [`%${search}%`]
+        `${queryBase} WHERE LOWER(e.emp_no::text) LIKE LOWER(${paramIndex}) OR LOWER(e.full_name) LIKE LOWER(${paramIndex}) LIMIT 10`,
+        params
       );
     } else {
-      result = await pool.query(`${queryBase} ORDER BY e.emp_no`);
+      result = await pool.query(`${queryBase} ORDER BY e.emp_no`, params);
     }
     res.json(result.rows);
   } catch (err) {

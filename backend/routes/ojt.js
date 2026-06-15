@@ -4,8 +4,18 @@ const pool = require('../config/db');
 
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM ojt_records');
-    res.json(result.rows);
+    const { month, year } = req.query;
+    if (month && year && month !== 'All' && year !== 'All') {
+      const dbMonth = parseInt(month) + 1;
+      const result = await pool.query(
+        'SELECT * FROM ojt_records WHERE EXTRACT(MONTH FROM assessment_date) = $1 AND EXTRACT(YEAR FROM assessment_date) = $2',
+        [dbMonth, parseInt(year)]
+      );
+      res.json(result.rows);
+    } else {
+      const result = await pool.query('SELECT * FROM ojt_records');
+      res.json(result.rows);
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
