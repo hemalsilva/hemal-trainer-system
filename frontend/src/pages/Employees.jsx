@@ -74,9 +74,7 @@ export default function Employees() {
       formData.append('file', excelFile);
       formData.append('password', excelPassword);
       
-      const res = await axios.post('/api/employees/bulk-encrypted-excel', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await axios.post('/api/employees/bulk-encrypted-excel', formData);
       alert(res.data.message + '. Processed: ' + res.data.processed + ' Success: ' + res.data.success);
       setShowEncryptedModal(false);
       setExcelFile(null);
@@ -99,13 +97,9 @@ export default function Employees() {
       });
 
       if (isEditing) {
-        await axios.put(`/api/employees/${formData.original_emp_no || formData.emp_no}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.put(`/api/employees/${formData.original_emp_no || formData.emp_no}`, data);
       } else {
-        await axios.post('/api/employees', data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.post('/api/employees', data);
       }
       setShowModal(false);
       setIsEditing(false);
