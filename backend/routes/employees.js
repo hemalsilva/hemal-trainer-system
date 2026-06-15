@@ -157,20 +157,35 @@ router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
 
 // PUT single employee
 router.put('/:emp_no', upload.single('photo'), async (req, res) => {
-  const { full_name, department, designation, join_date, date_of_birth, contact_number, email } = req.body;
-  const emp_no = req.params.emp_no;
+  const { emp_no: new_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email } = req.body;
+  const old_emp_no = req.params.emp_no;
 
+  const client = await pool.connect();
   try {
-    const result = await pool.query(
+    await client.query('BEGIN');
+    
+    // If emp_no is changing, update it in related tables first to prevent orphaned records!
+    if (new_emp_no && new_emp_no !== old_emp_no) {
+      await client.query('UPDATE attendance_records SET emp_no = $1 WHERE emp_no = $2', [new_emp_no, old_emp_no]);
+      await client.query('UPDATE training_allocations SET emp_no = $1 WHERE emp_no = $2', [new_emp_no, old_emp_no]);
+      await client.query('UPDATE ojt_records SET emp_no = $1 WHERE emp_no = $2', [new_emp_no, old_emp_no]);
+    }
+
+    const result = await client.query(
       `UPDATE employees
-      SET full_name = $1, department = $2, designation = $3, join_date = $4, date_of_birth = $5, contact_number = $6, email = $7
-      WHERE emp_no = $8
+      SET emp_no = $1, full_name = $2, department = $3, designation = $4, join_date = $5, date_of_birth = $6, contact_number = $7, email = $8
+      WHERE emp_no = $9
       RETURNING *`,
-      [full_name, department, designation, join_date, date_of_birth, contact_number, email, emp_no]
+      [new_emp_no || old_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, old_emp_no]
     );
+    
+    await client.query('COMMIT');
     res.json(result.rows[0]);
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
   }
 });
 

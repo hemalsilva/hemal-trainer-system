@@ -99,7 +99,7 @@ export default function Employees() {
       });
 
       if (isEditing) {
-        await axios.put(`/api/employees/${formData.emp_no}`, data, {
+        await axios.put(`/api/employees/${formData.original_emp_no || formData.emp_no}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
@@ -109,7 +109,7 @@ export default function Employees() {
       }
       setShowModal(false);
       setIsEditing(false);
-      setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });
+      setFormData({ original_emp_no: '', emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });
       fetchEmployees();
     } catch (err) {
       alert('Error adding employee: ' + (err.response?.data?.error || err.message));
@@ -259,7 +259,7 @@ export default function Employees() {
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee No</label>
-                <input required type="text" disabled={isEditing} value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                <input required type="text" value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none`} />
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Full Name</label>
