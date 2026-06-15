@@ -16,7 +16,7 @@ export default function AttendancePortal() {
   useEffect(() => {
     const fetchTraining = async () => {
       try {
-        const res = await axios.get(`/api/trainings/${id}`);
+        const res = await axios.get(`/api/trainings/${id}?t=${Date.now()}`);
         setTraining(res.data);
       } catch (err) {
         setError('Training session not found or link is invalid.');

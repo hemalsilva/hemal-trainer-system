@@ -71,10 +71,10 @@ export default function Dashboard() {
         queryParams = `?month=${m}&year=${y}`;
       }
       const [empRes, trainRes, ojtRes, timelineRes] = await Promise.all([
-        axios.get(`/api/employees${queryParams}`),
-        axios.get(`/api/trainings${queryParams}`),
-        axios.get(`/api/ojt${queryParams}`),
-        axios.get('/api/reports/timeline')
+        axios.get(`/api/employees${queryParams}?t=${Date.now()}`),
+        axios.get(`/api/trainings${queryParams}?t=${Date.now()}`),
+        axios.get(`/api/ojt${queryParams}?t=${Date.now()}`),
+        axios.get(`/api/reports/timeline?t=${Date.now()}&t=${Date.now()}`)
       ]);
       setEmployees(empRes.data || []);
       setTrainings(trainRes.data || []);

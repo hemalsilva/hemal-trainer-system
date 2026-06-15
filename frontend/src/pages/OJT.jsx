@@ -31,7 +31,7 @@ export default function OJT() {
   const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
-    axios.get('/api/employees').then(res => setEmployees(res.data)).catch(console.error);
+    axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`).then(res => setEmployees(res.data)).catch(console.error);
     if (activeTab === 'view') {
       fetchRecords();
       const interval = setInterval(() => fetchRecords(true), 5000);
@@ -42,7 +42,7 @@ export default function OJT() {
   const fetchRecords = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
-      const res = await axios.get('/api/ojt');
+      const res = await axios.get(`/api/ojt?t=${Date.now()}&t=${Date.now()}`);
       setOjtRecords(res.data);
     } catch (err) {
       console.error('Failed to fetch OJT records:', err);

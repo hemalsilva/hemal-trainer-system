@@ -37,8 +37,8 @@ export default function TrainingAttendance() {
     fetchTrainings();
     fetchEmployees();
     const interval = setInterval(() => {
-      axios.get('/api/trainings').then(res => setTrainings(res.data)).catch(console.error);
-      axios.get('/api/employees').then(res => setEmployees(res.data)).catch(console.error);
+      axios.get(`/api/trainings?t=${Date.now()}&t=${Date.now()}`).then(res => setTrainings(res.data)).catch(console.error);
+      axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`).then(res => setEmployees(res.data)).catch(console.error);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -67,7 +67,7 @@ export default function TrainingAttendance() {
   
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('/api/employees');
+      const res = await axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`);
       setEmployees(res.data);
     } catch (err) {
       console.error(err);
@@ -76,7 +76,7 @@ export default function TrainingAttendance() {
   
   const fetchTrainings = async () => {
     try {
-      const res = await axios.get('/api/trainings');
+      const res = await axios.get(`/api/trainings?t=${Date.now()}&t=${Date.now()}`);
       setTrainings(res.data);
     } catch (err) {
       console.error(err);

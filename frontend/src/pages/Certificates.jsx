@@ -18,7 +18,7 @@ export default function Certificates() {
 
   const fetchCertificates = async () => {
     try {
-      const res = await axios.get(`/api/certificates?month=${month}&year=${year}`);
+      const res = await axios.get(`/api/certificates?month=${month}&year=${year}&t=${Date.now()}`);
       setRecords(res.data);
     } catch (err) {
       console.error(err);
@@ -29,7 +29,7 @@ export default function Certificates() {
 
   const checkWaStatus = async () => {
     try {
-      const res = await axios.get('/api/whatsapp/status');
+      const res = await axios.get(`/api/whatsapp/status?t=${Date.now()}&t=${Date.now()}`);
       setWaConnected(res.data.connected);
     } catch (err) {
       console.error(err);

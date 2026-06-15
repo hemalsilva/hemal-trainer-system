@@ -62,14 +62,14 @@ export default function Schedule() {
 
   const fetchSchedules = async () => {
     try {
-      const res = await axios.get('/api/trainings');
+      const res = await axios.get(`/api/trainings?t=${Date.now()}&t=${Date.now()}`);
       setSchedules(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchTrainerDaysOff = async () => {
     try {
-      const res = await axios.get('/api/trainings/trainer/days-off');
+      const res = await axios.get(`/api/trainings/trainer/days-off?t=${Date.now()}&t=${Date.now()}`);
       setTrainerDaysOff(res.data);
     } catch (err) { console.error(err); }
   };
@@ -133,14 +133,14 @@ export default function Schedule() {
   });
   const openSessionView = async (session) => {
     try {
-      const res = await axios.get(`/api/trainings/${session.id}/allocations`);
+      const res = await axios.get(`/api/trainings/${session.id}/allocations?t=${Date.now()}`);
       setViewSessionModal({ show: true, session, allocations: res.data });
     } catch (err) { alert('Failed to load allocated employees'); }
   };
   
   const handleEditClick = async (session) => {
     try {
-      const res = await axios.get(`/api/trainings/${session.id}/allocations`);
+      const res = await axios.get(`/api/trainings/${session.id}/allocations?t=${Date.now()}`);
       setViewSessionModal({ show: true, session, allocations: res.data });
       setEditSessionData(session);
       setIsEditingSession(true);
@@ -393,7 +393,7 @@ export default function Schedule() {
     // Fetch past allocations to prevent duplicates
     let pastAllocations = [];
     try {
-      const res = await axios.get('/api/trainings/allocations/all');
+      const res = await axios.get(`/api/trainings/allocations/all?t=${Date.now()}&t=${Date.now()}`);
       pastAllocations = res.data;
     } catch(e) { console.error('Failed to fetch allocations for dup check'); }
 

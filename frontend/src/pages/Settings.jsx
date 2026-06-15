@@ -114,7 +114,7 @@ export default function Settings() {
   const [scanStatus, setScanStatus] = useState('');
 
   useEffect(() => {
-    axios.get('/api/trainings').then(res => setTrainings(res.data)).catch(console.error);
+    axios.get(`/api/trainings?t=${Date.now()}&t=${Date.now()}`).then(res => setTrainings(res.data)).catch(console.error);
   }, []);
 
   const handleScanUpload = async (e) => {

@@ -42,10 +42,10 @@ export default function Audits() {
     if (!isBackground) setLoading(true);
     try {
       const [auditsRes, topRes, balRes, empRes] = await Promise.all([
-        axios.get('/api/audits'),
-        axios.get(`/api/audits/top-performers?month=${month}&year=${year}`),
-        axios.get(`/api/audits/balances?month=${month}&year=${year}`),
-        axios.get('/api/employees')
+        axios.get(`/api/audits?t=${Date.now()}&t=${Date.now()}`),
+        axios.get(`/api/audits/top-performers?month=${month}&year=${year}&t=${Date.now()}`),
+        axios.get(`/api/audits/balances?month=${month}&year=${year}&t=${Date.now()}`),
+        axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`)
       ]);
       setAudits(auditsRes.data);
       setTopPerformers(topRes.data);

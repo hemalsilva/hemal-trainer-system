@@ -16,7 +16,7 @@ function AuditReportTab() {
   const fetchOverview = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/audits/overview');
+      const res = await axios.get(`/api/audits/overview?t=${Date.now()}&t=${Date.now()}`);
       setOverview(res.data);
     } catch (err) {
       console.error(err);
@@ -210,7 +210,7 @@ export default function Reports() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get('/api/employees');
+        const res = await axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`);
         setEmployees(res.data);
       } catch (err) {
         console.error('Failed to fetch employees for birthdays:', err);

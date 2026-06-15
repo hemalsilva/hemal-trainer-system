@@ -50,7 +50,7 @@ export default function Employees() {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/employees');
+      const res = await axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`);
       setEmployees(res.data);
     } catch (err) {
       console.error(err);
