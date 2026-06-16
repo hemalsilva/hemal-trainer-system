@@ -286,6 +286,44 @@ export default function Dashboard() {
         </div>
       </header>
 
+      
+      {/* AI Today's Birthdays Widget */}
+      {birthdays && birthdays.length > 0 && (
+        <div className="bg-gradient-to-r from-brand-card to-[#2a1b00] border border-brand-primary/40 rounded-2xl p-6 mb-10 shadow-[0_0_30px_rgba(212,175,55,0.15)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-primary"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+          </div>
+          <h2 className="text-xl font-bold text-brand-primary mb-6 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+            Today's Birthdays
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
+            {birthdays.map((emp, i) => (
+              <div key={i} className="bg-black/40 border border-brand-primary/20 rounded-xl p-5 hover:border-brand-primary/50 transition-colors flex flex-col justify-center">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-brand-primary/20 flex items-center justify-center border border-brand-primary/30 shrink-0">
+                    {emp.photo_url ? (
+                      <img src={emp.photo_url} alt={emp.full_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-brand-primary font-bold text-lg">{emp.full_name.charAt(0)}</span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-blue-100 text-lg">{emp.full_name}</h3>
+                    <p className="text-xs text-brand-primary font-semibold uppercase tracking-wider">Happy Birthday!</p>
+                  </div>
+                </div>
+                {emp.wish && (
+                  <div className="text-sm text-gray-300 italic bg-brand-primary/5 p-4 rounded-lg border-l-2 border-brand-primary">
+                    "{emp.wish}"
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {stats.map((stat, index) => {
