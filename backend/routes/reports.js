@@ -307,4 +307,49 @@ router.post('/ai', async (req, res) => {
   }
 });
 
+
+// GET /api/reports/timeline
+router.get('/timeline', async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    let filter = '1=1';
+    let params = [];
+    if (month && year) {
+        params.push(parseInt(year, 10));
+        params.push(parseInt(month, 10) + 1);
+        filter += ` AND EXTRACT(YEAR FROM t.training_date) = $1 AND EXTRACT(MONTH FROM t.training_date) = $2`;
+    }
+
+    const standardQuery = `
+      SELECT t.training_date as date, 
+             COALESCE((t.duration_minutes * (SELECT COUNT(*) FROM attendance_records a WHERE a.training_id = t.id)), 0) as duration,
+             'standard' as type
+      FROM trainings t
+      WHERE ${filter}
+    `;
+    const stdRes = await pool.query(standardQuery, params);
+
+    let ojtFilter = '1=1';
+    if (month && year) {
+        ojtFilter += ` AND EXTRACT(YEAR FROM assessment_date) = $1 AND EXTRACT(MONTH FROM assessment_date) = $2`;
+    }
+    const ojtQuery = `
+      SELECT assessment_date as date, 
+             duration_minutes as duration,
+             'ojt' as type
+      FROM ojt_records
+      WHERE ${ojtFilter}
+    `;
+    const ojtRes = await pool.query(ojtQuery, params);
+
+    res.json({
+        standard: stdRes.rows,
+        ojt: ojtRes.rows
+    });
+  } catch (err) {
+      console.error('Timeline Error:', err);
+      res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
