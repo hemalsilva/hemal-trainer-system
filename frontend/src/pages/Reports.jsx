@@ -725,6 +725,7 @@ export default function Reports() {
                 <tbody>
                   {(() => {
                     const monthBirthdays = employees
+                      .filter(emp => !selectedDepartment || emp.department === selectedDepartment)
                       .filter(emp => emp.date_of_birth && new Date(emp.date_of_birth).getMonth() === birthdayMonth)
                       .sort((a, b) => new Date(a.date_of_birth).getDate() - new Date(b.date_of_birth).getDate());
 
@@ -798,6 +799,7 @@ export default function Reports() {
                   {(() => {
                     const currentYear = new Date().getFullYear();
                     const filteredEmps = employees
+                      .filter(emp => !selectedDepartment || emp.department === selectedDepartment)
                       .filter(emp => {
                         if (!emp.join_date) return false;
                         let yearJoined = currentYear;
