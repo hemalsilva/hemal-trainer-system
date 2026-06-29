@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
+
 const { Pool } = require('pg');
 
 const pool = new Pool({
