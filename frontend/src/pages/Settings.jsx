@@ -410,10 +410,10 @@ export default function Settings() {
               </button>
               {showAttGuide && (
                 <div className="px-6 pb-6 space-y-3 border-t border-blue-500/20 pt-4">
-                  <HowToStep num="1" text='Go to forms.google.com → Create a new form titled with the training topic (e.g. "Fire Safety Attendance").' />
-                  <HowToStep num="2" text='Add fields: Employee Number (Short answer), Full Name (Short answer), Department (Short answer), Date (Date).' />
+                  <HowToStep num="1" text='Go to forms.google.com → Create a single new form titled "Hotel Training Attendance" (or similar).' />
+                  <HowToStep num="2" text='Add fields: Employee Number (Short answer), Full Name (Short answer), Department (Dropdown), Training Topic (Dropdown or Short answer), Date (Date).' />
                   <HowToStep num="3" text='In your Google Form, go to the top right menu (3 dots) → Script editor.' />
-                  <HowToStep num="4" text='Copy the webhook script (provided below), paste it into the editor, and change "YOUR_TRAINING_TOPIC" to the actual topic you created (e.g. "Fire Safety"). Save it.' />
+                  <HowToStep num="4" text='Copy the webhook script (provided below), paste it into the editor, and save it.' />
                   <HowToStep num="5" text='Set up a Trigger in Apps Script (Clock icon) to run on "On form submit".' />
                   <HowToStep num="6" text='Come back here → Click "Add Attendance Form" → Paste the form link to keep track of it.' />
                   <HowToStep num="7" text='Share the form link with your staff. When they submit, attendance will automatically sync to your dashboard!' />
