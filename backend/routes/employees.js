@@ -27,8 +27,8 @@ router.get('/', async (req, res) => {
     
     if (month && year && month !== 'All' && year !== 'All') {
       const dbMonth = parseInt(month) + 1; // JS month (0-11) to Postgres month (1-12)
-      standardWhere = `WHERE EXTRACT(MONTH FROM t.training_date) = ${paramIndex} AND EXTRACT(YEAR FROM t.training_date) = ${paramIndex+1}`;
-      ojtWhere = `WHERE EXTRACT(MONTH FROM assessment_date) = ${paramIndex} AND EXTRACT(YEAR FROM assessment_date) = ${paramIndex+1}`;
+      standardWhere = `WHERE EXTRACT(MONTH FROM t.training_date) = $${paramIndex} AND EXTRACT(YEAR FROM t.training_date) = $${paramIndex+1}`;
+      ojtWhere = `WHERE EXTRACT(MONTH FROM assessment_date) = $${paramIndex} AND EXTRACT(YEAR FROM assessment_date) = $${paramIndex+1}`;
       params.push(dbMonth, parseInt(year));
       paramIndex += 2;
     }
@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
     if (search) {
       params.push(`%${search}%`);
       result = await pool.query(
-        `${queryBase} WHERE LOWER(e.emp_no::text) LIKE LOWER(${paramIndex}) OR LOWER(e.full_name) LIKE LOWER(${paramIndex}) LIMIT 10`,
+        `${queryBase} WHERE LOWER(e.emp_no::text) LIKE LOWER($${paramIndex}) OR LOWER(e.full_name) LIKE LOWER($${paramIndex}) LIMIT 10`,
         params
       );
     } else {
