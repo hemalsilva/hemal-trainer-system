@@ -1,0 +1,1 @@
+const fs = require('fs'); const file = 'backend/routes/employees.js'; let content = fs.readFileSync(file, 'utf8'); content = content.replace(/\\\$\\{paramIndex\\}/g, '\\$\\$\\{paramIndex\\}').replace(/\\\$\\{paramIndex\\+1\\}/g, '\\$\\$\\{paramIndex+1\\}'); fs.writeFileSync(file, content);

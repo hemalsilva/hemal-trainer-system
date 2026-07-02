@@ -1,0 +1,1 @@
+require('dotenv').config(); const pool = require('./backend/config/db'); pool.query('ALTER TABLE employees ADD COLUMN status VARCHAR(20) DEFAULT ''Active'';').then(() => console.log('DB Altered')).catch(console.error).finally(() => pool.end());

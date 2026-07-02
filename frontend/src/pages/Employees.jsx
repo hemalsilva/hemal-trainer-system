@@ -16,7 +16,7 @@ export default function Employees() {
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedPosition, setSelectedPosition] = useState('All');
   const [formData, setFormData] = useState({
-    emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null
+    emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null, status: 'Active'
   });
   const fileInputRef = useRef(null);
 
@@ -104,7 +104,7 @@ export default function Employees() {
       }
       setShowModal(false);
       setIsEditing(false);
-      setFormData({ original_emp_no: '', emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });
+      setFormData({ original_emp_no: '', emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null, status: 'Active' });
       fetchEmployees();
     } catch (err) {
       alert('Error adding employee: ' + (err.response?.data?.error || err.message));
@@ -176,6 +176,7 @@ export default function Employees() {
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF JOINED</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF BIRTH</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-center">TRAINING HOURS</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-center">STATUS</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider text-right">ACTIONS</th>
                 </tr>
               </thead>
@@ -226,6 +227,9 @@ export default function Employees() {
                         {Number(emp.total_training_hours || 0).toFixed(1)} <span className="text-gray-500 text-xs ml-1 font-normal">hrs</span>
                       </div>
                     </td>
+                    <td className="p-4 text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${emp.status === 'Inactive' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>{emp.status || 'Active'}</span>
+                    </td>
                     <td className="p-4 text-right flex justify-end gap-2">
                       <button onClick={() => handleEdit(emp)} className="text-gray-500 hover:text-brand-primary p-1.5 rounded bg-gray-800/50 hover:bg-gray-800 transition-colors" title="Edit">
                         <Edit className="w-4 h-4" />
@@ -247,7 +251,7 @@ export default function Employees() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null });}} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200">
+            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null, status: 'Active' });}} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200">
               <X className="w-5 h-5" />
             </button>
             <h2 className="text-xl font-bold text-blue-200 mb-6">{isEditing ? 'Edit Staff' : 'Add New Staff'}</h2>
@@ -286,6 +290,13 @@ export default function Employees() {
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
                 <input type="date" value={formData.date_of_birth} onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Status</label>
+                <select value={formData.status || 'Active'} onChange={(e) => setFormData({...formData, status: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee Photo (Optional)</label>

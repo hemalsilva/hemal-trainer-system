@@ -123,7 +123,7 @@ export default function Dashboard() {
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   // Calculate dynamic data
-  const totalEmployees = employees.length;
+  const totalEmployees = employees.filter(e => e.status !== 'Inactive').length;
   
   // Calculate total training hours from employees
   let totalHours = 0;

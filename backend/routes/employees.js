@@ -72,17 +72,17 @@ router.get('/', async (req, res) => {
 
 // POST single employee
 router.post('/', upload.single('photo'), async (req, res) => {
-  const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email } = req.body;
+  const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status } = req.body;
 
   const photo_url = null; // Photo upload not supported on serverless // Normalize slashes for DB
 
   try {
     const result = await pool.query(
       `INSERT INTO employees
-      (emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      (emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url, status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *`,
-      [emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url]
+      [emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url, status || 'Active']
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -173,7 +173,7 @@ router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
 
 // PUT single employee
 router.put('/:emp_no', upload.single('photo'), async (req, res) => {
-  const { emp_no: new_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email } = req.body;
+  const { emp_no: new_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status } = req.body;
   const old_emp_no = req.params.emp_no;
 
   const client = await pool.connect();
@@ -189,10 +189,10 @@ router.put('/:emp_no', upload.single('photo'), async (req, res) => {
 
     const result = await client.query(
       `UPDATE employees
-      SET emp_no = $1, full_name = $2, department = $3, designation = $4, join_date = $5, date_of_birth = $6, contact_number = $7, email = $8
+      SET emp_no = $1, full_name = $2, department = $3, designation = $4, join_date = $5, date_of_birth = $6, contact_number = $7, email = $8, status = $9
       WHERE TRIM(emp_no) = TRIM($9)
       RETURNING *`,
-      [new_emp_no || old_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, old_emp_no]
+      [new_emp_no || old_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status || 'Active', old_emp_no]
     );
     
     await client.query('COMMIT');
