@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Printer, Calendar, AlertCircle, FileText, Search, UserX, BarChart as BarChartIcon, PieChart as PieChartIcon, Sparkles, Send, Loader2, Gift, Eye, Award, Trophy } from 'lucide-react';
+import { Printer, Calendar, AlertCircle, FileText, Search, UserX, BarChart as BarChartIcon, PieChart as PieChartIcon, Sparkles, Send, Loader2, Gift, Eye, Award, Trophy, Clock } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 function AuditReportTab() {
@@ -194,6 +194,89 @@ function AuditReportTab() {
   );
 }
 
+
+
+function EmployeeHoursReportTab() {
+  const [loading, setLoading] = React.useState(false);
+  const [data, setData] = React.useState([]);
+  const [selectedMonth, setSelectedMonth] = React.useState(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
+
+  React.useEffect(() => {
+    const fetchHours = async () => {
+      setLoading(true);
+      try {
+        const [y, mStr] = selectedMonth.split('-');
+        const m = parseInt(mStr, 10) - 1;
+        const res = await axios.get(`/api/employees?month=${m}&year=${y}&t=${Date.now()}`);
+        setData(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (selectedMonth) fetchHours();
+  }, [selectedMonth]);
+
+  return (
+    <div className="space-y-8 print:block">
+      <div className="bg-brand-card print:bg-white rounded-2xl border border-gray-800 print:border-none shadow-lg print:shadow-none overflow-hidden print:block p-8">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-800 print:border-gray-400 pb-6 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-500/10 print:bg-transparent rounded-xl text-blue-500 print:text-black">
+              <Clock className="w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-blue-200 print:text-black">Employee Training Hours</h2>
+              <p className="text-gray-400 print:text-gray-600">Total training hours by employee for selected month</p>
+            </div>
+          </div>
+          <div className="print:hidden">
+            <input 
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="bg-[#181818] border border-gray-700 rounded-lg p-3 text-blue-200 focus:border-brand-primary outline-none font-bold text-lg"
+              style={{colorScheme: 'dark'}}
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">Loading...</div>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-gray-800 print:border-gray-300">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-900 print:bg-gray-100">
+                  <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Emp No</th>
+                  <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Employee Name</th>
+                  <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black">Department</th>
+                  <th className="p-4 border-b border-gray-800 print:border-gray-300 text-sm font-bold text-gray-400 print:text-black text-center">Total Hours</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((emp) => (
+                  <tr key={emp.emp_no} className="hover:bg-gray-800/50 print:hover:bg-transparent transition-colors">
+                    <td className="p-4 border-b border-gray-800 print:border-gray-300 text-blue-200 print:text-black font-mono">{emp.emp_no}</td>
+                    <td className="p-4 border-b border-gray-800 print:border-gray-300 text-blue-200 print:text-black font-medium">{emp.full_name}</td>
+                    <td className="p-4 border-b border-gray-800 print:border-gray-300 text-gray-400 print:text-gray-700">{emp.department || 'N/A'}</td>
+                    <td className="p-4 border-b border-gray-800 print:border-gray-300 text-brand-primary print:text-black font-bold text-center">{Number(emp.total_training_hours || 0).toFixed(1)}</td>
+                  </tr>
+                ))}
+                {data.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="p-12 text-center text-gray-500 border-b border-gray-800 print:border-gray-300">No employees found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const DEPARTMENTS = ['All Staff', 'Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
 
@@ -403,7 +486,7 @@ export default function Reports() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800 mb-8 overflow-x-auto print:hidden">
-        {['overview', 'audit-report', 'attendance', 'ojt-performance', 'detailed-summary', 'birthday-calendar', 'service-years', 'ai-report'].map((tab) => {
+        {['overview', 'audit-report', 'attendance', 'ojt-performance', 'detailed-summary', 'birthday-calendar', 'service-years', 'employee-hours', 'ai-report'].map((tab) => {
           if (tab === 'ai-report' && !isAiThinking && !aiResult) return null;
           return (
             <button
@@ -412,7 +495,7 @@ export default function Reports() {
               className={`px-6 py-3 font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 ${selectedReportTab === tab ? 'text-brand-primary border-b-2 border-brand-primary bg-brand-primary/5' : 'text-gray-400 hover:text-blue-200'}`}
             >
               {tab === 'ai-report' && <Sparkles className="w-4 h-4"/>}
-              {tab === 'overview' ? 'Training Overview' : tab === 'audit-report' ? 'Audit Report' : tab === 'attendance' ? 'Attendance & Coverage' : tab === 'ojt-performance' ? 'OJT Employee Details' : tab === 'detailed-summary' ? 'Detailed Summary (Printable)' : tab === 'birthday-calendar' ? 'Birthday Calendar' : tab === 'service-years' ? 'Service Years' : 'AI Custom Report'}
+              {tab === 'overview' ? 'Training Overview' : tab === 'audit-report' ? 'Audit Report' : tab === 'attendance' ? 'Attendance & Coverage' : tab === 'ojt-performance' ? 'OJT Employee Details' : tab === 'detailed-summary' ? 'Detailed Summary (Printable)' : tab === 'birthday-calendar' ? 'Birthday Calendar' : tab === 'service-years' ? 'Service Years' : tab === 'employee-hours' ? 'Employee Training Hours' : 'AI Custom Report'}
             </button>
           )
         })}
@@ -421,6 +504,11 @@ export default function Reports() {
       
       {/* AUDIT REPORT TAB */}
       {selectedReportTab === 'audit-report' && <AuditReportTab />}
+
+            {/* EMPLOYEE HOURS TAB */}
+      {(selectedReportTab === 'employee-hours' || (typeof window !== 'undefined' && window.matchMedia('print').matches && selectedReportTab === 'employee-hours')) && (
+        <EmployeeHoursReportTab />
+      )}
 
       {/* AI CUSTOM REPORT TAB */}
       {selectedReportTab === 'ai-report' && (
