@@ -61,7 +61,7 @@ export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [timelineFilter, setTimelineFilter] = useState('Month'); // Date, Week, Month
-  const [dashboardFilter, setDashboardFilter] = useState(''); // empty means All Time
+  const [dashboardFilter, setDashboardFilter] = useState(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
 
   const fetchData = async () => {
     try {
