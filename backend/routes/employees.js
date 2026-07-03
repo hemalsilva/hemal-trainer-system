@@ -194,6 +194,15 @@ router.put('/:emp_no', upload.single('photo'), async (req, res) => {
       RETURNING *`,
       [new_emp_no || old_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status || 'Active', old_emp_no]
     );
+
+    // Update photo separately if a new one is uploaded
+    if (req.file) {
+      const photo_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      await client.query('UPDATE employees SET photo_url = $1 WHERE TRIM(emp_no) = TRIM($2)', [photo_url, new_emp_no || old_emp_no]);
+      if (result.rows.length > 0) {
+        result.rows[0].photo_url = photo_url;
+      }
+    }
     
     await client.query('COMMIT');
     res.json(result.rows[0]);
