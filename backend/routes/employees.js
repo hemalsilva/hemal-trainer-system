@@ -74,7 +74,7 @@ router.get('/', async (req, res) => {
 router.post('/', upload.single('photo'), async (req, res) => {
   const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status } = req.body;
 
-  const photo_url = null; // Photo upload not supported on serverless // Normalize slashes for DB
+  const photo_url = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null;
 
   try {
     const result = await pool.query(
@@ -151,7 +151,7 @@ router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
       const extIndex = file.originalname.lastIndexOf('.');
       const emp_no = extIndex > 0 ? file.originalname.substring(0, extIndex) : file.originalname;
       
-      const photo_url = file.path.replace(/\\/g, '/');
+      const photo_url = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
       
       const result = await pool.query(
         'UPDATE employees SET photo_url = $1 WHERE UPPER(emp_no) = UPPER($2)',
