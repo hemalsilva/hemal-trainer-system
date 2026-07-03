@@ -250,12 +250,13 @@ export default function Employees() {
       {/* Add Staff Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-brand-card border border-gray-800 rounded-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-brand-card border border-gray-800 rounded-xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null, status: 'Active' });}} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200">
               <X className="w-5 h-5" />
             </button>
             <h2 className="text-xl font-bold text-blue-200 mb-6">{isEditing ? 'Edit Staff' : 'Add New Staff'}</h2>
-            <form onSubmit={handleAddSubmit} className="space-y-4">
+            <form onSubmit={handleAddSubmit} className="flex flex-col md:flex-row gap-8">
+              <div className="flex-1 space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Employee No</label>
                 <input required type="text" value={formData.emp_no || ''} onChange={(e) => setFormData({...formData, emp_no: e.target.value})} className={`w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none`} />
@@ -306,6 +307,22 @@ export default function Employees() {
                 <button type="submit" className="w-full bg-brand-primary hover:bg-brand-primaryHover text-black py-2.5 rounded-lg font-bold transition-colors">
                   Save Employee
                 </button>
+              </div>
+              </div>
+              
+              <div className="w-full md:w-56 flex flex-col items-center justify-start pt-2 border-t md:border-t-0 md:border-l border-gray-800 md:pl-8">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-gray-700 bg-gray-800 flex items-center justify-center mb-4">
+                  {formData.photo ? (
+                    <img src={URL.createObjectURL(formData.photo)} alt="Preview" className="w-full h-full object-cover" />
+                  ) : formData.photo_url ? (
+                    <img src={formData.photo_url.startsWith('data:') || formData.photo_url.startsWith('http') ? formData.photo_url : `/${formData.photo_url}`} alt="Current" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-brand-primary text-5xl font-bold">{formData.full_name?.charAt(0) || '?'}</span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-400 text-center">
+                  {formData.photo ? 'New photo selected' : formData.photo_url ? 'Current photo' : 'No photo'}
+                </p>
               </div>
             </form>
           </div>
