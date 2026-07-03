@@ -202,7 +202,7 @@ export default function Employees() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {emp.photo_url ? (
-                          <img src={`/${emp.photo_url}`} alt={emp.full_name} className="w-9 h-9 rounded-full object-cover border border-gray-700" />
+                          <img src={emp.photo_url.startsWith('data:') || emp.photo_url.startsWith('http') ? emp.photo_url : `/${emp.photo_url}`} alt={emp.full_name} className="w-9 h-9 rounded-full object-cover border border-gray-700" />
                         ) : (
                           <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 text-brand-primary flex items-center justify-center font-bold text-sm">
                             {emp.full_name?.charAt(0) || '?'}
