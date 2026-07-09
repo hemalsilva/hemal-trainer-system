@@ -72,17 +72,17 @@ router.get('/', async (req, res) => {
 
 // POST single employee
 router.post('/', upload.single('photo'), async (req, res) => {
-  const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status } = req.body;
+  const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status, gender_identity } = req.body;
 
   const photo_url = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null;
 
   try {
     const result = await pool.query(
       `INSERT INTO employees
-      (emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      (emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url, status, gender_identity)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *`,
-      [emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url, status || 'Active']
+      [emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, photo_url, status || 'Active', gender_identity]
     );
     res.json(result.rows[0]);
   } catch (err) {

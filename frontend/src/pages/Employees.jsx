@@ -251,7 +251,7 @@ export default function Employees() {
       {showModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-brand-card border border-gray-800 rounded-xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null, status: 'Active' });}} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200">
+            <button onClick={() => {setShowModal(false); setIsEditing(false); setFormData({ emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', gender_identity: '', photo: null, status: 'Active' });}} className="absolute top-4 right-4 text-gray-400 hover:text-blue-200">
               <X className="w-5 h-5" />
             </button>
             <h2 className="text-xl font-bold text-blue-200 mb-6">{isEditing ? 'Edit Staff' : 'Add New Staff'}</h2>
@@ -292,6 +292,17 @@ export default function Employees() {
                 <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
                 <input type="date" value={formData.date_of_birth} onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" style={{ colorScheme: 'dark' }} />
               </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Gender Identity</label>
+                <select value={formData.gender_identity || ''} onChange={(e) => setFormData({...formData, gender_identity: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Status</label>
                 <select value={formData.status || 'Active'} onChange={(e) => setFormData({...formData, status: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">

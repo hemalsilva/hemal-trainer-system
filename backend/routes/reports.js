@@ -368,6 +368,7 @@ const getOrdinal = (n) => {
 };
 
 
+
 router.get('/ojt-excel', async (req, res) => {
   try {
     const { month, year } = req.query;
@@ -382,7 +383,7 @@ router.get('/ojt-excel', async (req, res) => {
     
     // Fetch all active employees for specific departments
     const empRes = await pool.query(`
-      SELECT emp_no, full_name, designation, department, status
+      SELECT emp_no, full_name, designation, department, status, gender_identity
       FROM employees 
       WHERE status = 'Active' 
       AND department IN ('Rooms', 'Public Area', 'Flower', 'Laundry')
@@ -412,6 +413,16 @@ router.get('/ojt-excel', async (req, res) => {
       attendance = attRes.rows;
     }
 
+    // Fetch OJT records
+    const ojtRes = await pool.query(`
+      SELECT id, topic, duration_minutes, assessment_date as training_date, 
+             department, trainer_name, emp_no
+      FROM ojt_records
+      WHERE EXTRACT(MONTH FROM assessment_date) = $1
+      AND EXTRACT(YEAR FROM assessment_date) = $2
+    `, [m, y]);
+    const ojtRecords = ojtRes.rows;
+
     const workbook = new excel.Workbook();
     const departments = ['Rooms', 'Public Area', 'Flower', 'Laundry'];
     let summaryData = [];
@@ -419,6 +430,7 @@ router.get('/ojt-excel', async (req, res) => {
     departments.forEach(dept => {
       const deptEmployees = allEmployees.filter(e => e.department === dept);
       const deptTrainings = trainings.filter(t => t.department === dept || t.department === 'General');
+      const deptOjts = ojtRecords.filter(o => o.department === dept || o.department === 'General');
       
       const sheet = workbook.addWorksheet(dept);
       const totalCol = 7 + daysInMonth + 1;
@@ -449,10 +461,16 @@ router.get('/ojt-excel', async (req, res) => {
       r3.height = 40;
 
       const trainingsByDay = {};
+      const ojtsByDay = {};
+      
       for (let d = 1; d <= daysInMonth; d++) {
         trainingsByDay[d] = deptTrainings.filter(t => new Date(t.training_date).getDate() === d);
-        let trainerNames = Array.from(new Set(trainingsByDay[d].map(t => t.trainer_name || 'Trainer'))).join(' / ');
-        let topics = trainingsByDay[d].map(t => t.topic).join(' / ');
+        ojtsByDay[d] = deptOjts.filter(o => new Date(o.training_date).getDate() === d);
+        
+        let allDayTrainings = [...trainingsByDay[d], ...ojtsByDay[d]];
+        
+        let trainerNames = Array.from(new Set(allDayTrainings.map(t => t.trainer_name || 'Trainer'))).join(' / ');
+        let topics = Array.from(new Set(allDayTrainings.map(t => t.topic))).join(' / ');
         
         r2.getCell(8 + d).value = trainerNames;
         r2.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
@@ -491,19 +509,29 @@ router.get('/ojt-excel', async (req, res) => {
       let rowIdx = 5;
 
       deptEmployees.forEach(emp => {
-        const rowData = [emp.emp_no, emp.full_name, '', emp.status, emp.designation, 'Housekeeping', dept];
+        const rowData = [emp.emp_no, emp.full_name, emp.gender_identity || '', emp.status, emp.designation, 'Housekeeping', dept];
         const r = sheet.addRow(rowData);
         
         for (let d = 1; d <= daysInMonth; d++) {
-          const dayTrainings = trainingsByDay[d];
           let totalMins = 0;
-          dayTrainings.forEach(t => {
+          
+          // Add Standard Trainings
+          trainingsByDay[d].forEach(t => {
             const attended = attendance.some(a => a.training_id === t.id && a.emp_no === emp.emp_no);
             if (attended) {
               totalMins += t.duration_minutes || 0;
               employeesTrained.add(emp.emp_no);
             }
           });
+          
+          // Add OJT Records
+          ojtsByDay[d].forEach(o => {
+            if (o.emp_no === emp.emp_no) {
+              totalMins += o.duration_minutes || 0;
+              employeesTrained.add(emp.emp_no);
+            }
+          });
+
           if (totalMins > 0) {
             r.getCell(7 + d).value = totalMins;
           }
@@ -588,5 +616,4 @@ router.get('/ojt-excel', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate Excel report', details: err.message, stack: err.stack });
   }
 });
-
-module.exports = router;
+\nmodule.exports = router;
