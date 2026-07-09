@@ -133,7 +133,7 @@ export default function Dashboard() {
   const deptHoursMap = {};
   const housekeepingHoursMap = {};
 
-  employees.forEach(emp => {
+  employees.filter(e => e.status === 'Active').forEach(emp => {
     const total = Number(emp.total_training_hours) || 0;
     const ojt = Number(emp.ojt_hours) || 0;
     const standard = Number(emp.standard_training_hours) || 0;
@@ -360,7 +360,7 @@ export default function Dashboard() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'].map(dept => {
-            const deptEmps = employees.filter(e => e.department === dept);
+            const deptEmps = employees.filter(e => e.department === dept && e.status === 'Active');
             const deptTotalHrs = deptEmps.reduce((sum, e) => sum + (Number(e.total_training_hours) || 0), 0);
             const deptActive = trainings.filter(t => t.department === dept && t.training_date && new Date(t.training_date).getMonth() === currentMonth).length;
             
