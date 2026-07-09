@@ -588,4 +588,5 @@ router.get('/ojt-excel', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate Excel report', details: err.message, stack: err.stack });
   }
 });
-\nmodule.exports = router;
+
+module.exports = router;
