@@ -392,10 +392,7 @@ router.get('/ojt-excel', async (req, res) => {
 
     // Fetch trainings for the month
     const trnRes = await pool.query(`
-      SELECT t.id, t.topic, t.duration_minutes, t.training_date, 
-             t.department, u.username as trainer_name
-      FROM trainings t
-      LEFT JOIN users u ON t.trainer_id = u.id
+      SELECT t.id, t.topic, t.duration_minutes, t.training_date, t.department, t.trainer_name FROM trainings t
       WHERE EXTRACT(MONTH FROM t.training_date) = $1
       AND EXTRACT(YEAR FROM t.training_date) = $2
     `, [m, y]);
