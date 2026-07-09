@@ -607,7 +607,7 @@ export default function Reports() {
             </div>
 
             <div className="bg-brand-card rounded-2xl p-6 border border-gray-800 shadow-lg">
-              <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><PieChartIcon className="w-5 h-5 text-brand-primary"/> Dept. Training Hours (Housekeeping)</h2>
+              <h2 className="text-lg font-bold text-blue-200 mb-6 flex items-center gap-2"><PieChartIcon className="w-5 h-5 text-brand-primary"/> Departmental Training Hours</h2>
               <div className="h-64 flex items-center relative">
                 <div className="w-1/2 h-full">
                   <ResponsiveContainer width="100%" height="100%">
