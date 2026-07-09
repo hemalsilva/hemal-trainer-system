@@ -352,4 +352,239 @@ router.get('/timeline', async (req, res) => {
   }
 });
 
+
+const excel = require('exceljs');
+
+// Helper to get month name
+const getMonthName = (monthIndex) => {
+  const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+  return months[monthIndex - 1] || '';
+};
+
+const getOrdinal = (n) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
+router.get('/ojt-excel', async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    if (!month || !year) {
+      return res.status(400).json({ error: 'Month and year are required' });
+    }
+
+    const m = parseInt(month, 10);
+    const y = parseInt(year, 10);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const monthName = getMonthName(m);
+
+    const client = await pool.connect();
+    
+    // Fetch all active employees for specific departments
+    const empRes = await client.query(`
+      SELECT emp_no, full_name, designation, department, status
+      FROM employees 
+      WHERE status = 'Active' 
+      AND department IN ('Rooms', 'Public Area', 'Flower', 'Laundry')
+      ORDER BY full_name ASC
+    `);
+    const allEmployees = empRes.rows;
+
+    // Fetch trainings for the month
+    const trnRes = await client.query(`
+      SELECT t.id, t.topic, t.duration_minutes, t.training_date, 
+             t.department, u.username as trainer_name
+      FROM trainings t
+      LEFT JOIN users u ON t.trainer_id = u.id
+      WHERE EXTRACT(MONTH FROM t.training_date) = $1
+      AND EXTRACT(YEAR FROM t.training_date) = $2
+    `, [m, y]);
+    const trainings = trnRes.rows;
+
+    // Fetch attendance for these trainings
+    let attendance = [];
+    if (trainings.length > 0) {
+      const tIds = trainings.map(t => t.id);
+      const attRes = await client.query(`
+        SELECT a.training_id, a.emp_no
+        FROM attendance_records a
+        WHERE a.training_id = ANY($1)
+      `, [tIds]);
+      attendance = attRes.rows;
+    }
+    
+    client.release();
+
+    const workbook = new excel.Workbook();
+
+    const departments = ['Rooms', 'Public Area', 'Flower', 'Laundry'];
+    let summaryData = [];
+
+    departments.forEach(dept => {
+      const deptEmployees = allEmployees.filter(e => e.department === dept);
+      const deptTrainings = trainings.filter(t => t.department === dept || t.department === 'General');
+      
+      const sheet = workbook.addWorksheet(dept);
+
+      // --- Formatting ---
+      // Row 1: Month Name
+      const r1 = sheet.addRow([monthName]);
+      r1.font = { bold: true };
+      r1.alignment = { horizontal: 'center' };
+      sheet.mergeCells(1, 1, 1, 7 + daysInMonth);
+
+      // Row 2: Title and Trainer header
+      const r2 = sheet.addRow([]);
+      r2.getCell(1).value = 'Departmental On The Job Training Tracker';
+      sheet.mergeCells(2, 1, 3, 7);
+      r2.getCell(1).font = { bold: true };
+      r2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+      
+      r2.getCell(8).value = 'Trainer';
+      r2.getCell(8).font = { bold: true };
+      r2.getCell(8).alignment = { horizontal: 'center', vertical: 'middle' };
+      r2.height = 25;
+
+      // Row 3: Training Topic header
+      const r3 = sheet.addRow([]);
+      r3.getCell(8).value = 'Training Topic';
+      r3.getCell(8).font = { bold: true };
+      r3.getCell(8).alignment = { horizontal: 'center', vertical: 'middle' };
+      r3.height = 40;
+
+      // Group trainings by day
+      const trainingsByDay = {};
+      for (let d = 1; d <= daysInMonth; d++) {
+        trainingsByDay[d] = deptTrainings.filter(t => new Date(t.training_date).getDate() === d);
+        
+        let trainerNames = Array.from(new Set(trainingsByDay[d].map(t => t.trainer_name || 'Trainer'))).join(' / ');
+        let topics = trainingsByDay[d].map(t => t.topic).join(' / ');
+        
+        r2.getCell(8 + d).value = trainerNames;
+        r2.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
+        
+        r3.getCell(8 + d).value = topics;
+        r3.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
+      }
+
+      // Row 4: Column Headers
+      const headers = ['User/Employee ID', 'Name', 'Gender Identity', 'Employee Status', 'Position Title', 'Division', 'Sub Department'];
+      const r4 = sheet.addRow(headers);
+      
+      for (let d = 1; d <= daysInMonth; d++) {
+        r4.getCell(7 + d).value = getOrdinal(d);
+        r4.getCell(7 + d).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+        r4.getCell(7 + d).alignment = { horizontal: 'center', vertical: 'middle' };
+      }
+      r4.font = { bold: true };
+      r4.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      // Set Column Widths
+      sheet.getColumn(1).width = 15;
+      sheet.getColumn(2).width = 25;
+      sheet.getColumn(3).width = 15;
+      sheet.getColumn(4).width = 15;
+      sheet.getColumn(5).width = 30;
+      sheet.getColumn(6).width = 20;
+      sheet.getColumn(7).width = 20;
+      for (let d = 1; d <= daysInMonth; d++) {
+        sheet.getColumn(7 + d).width = 5;
+      }
+
+      // Add Employee Rows
+      let totalDeptHours = 0;
+      let employeesTrained = new Set();
+
+      deptEmployees.forEach(emp => {
+        const rowData = [
+          emp.emp_no,
+          emp.full_name,
+          '', // Gender Identity
+          emp.status,
+          emp.designation,
+          'Housekeeping',
+          dept
+        ];
+        
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dayTrainings = trainingsByDay[d];
+          let totalMins = 0;
+          dayTrainings.forEach(t => {
+            const attended = attendance.some(a => a.training_id === t.id && a.emp_no === emp.emp_no);
+            if (attended) {
+              totalMins += t.duration_minutes || 0;
+              employeesTrained.add(emp.emp_no);
+            }
+          });
+          rowData.push(totalMins > 0 ? totalMins : '');
+          totalDeptHours += (totalMins / 60);
+        }
+        
+        sheet.addRow(rowData);
+      });
+
+      summaryData.push({
+        dept,
+        totalHours: totalDeptHours.toFixed(1),
+        employeesTrained: employeesTrained.size,
+        totalEmployees: deptEmployees.length
+      });
+
+      // Apply borders to all cells
+      sheet.eachRow({ includeEmpty: true }, function(row, rowNumber) {
+        row.eachCell({ includeEmpty: true }, function(cell, colNumber) {
+          if (rowNumber >= 2 && rowNumber <= 4 + deptEmployees.length && colNumber <= 7 + daysInMonth) {
+             cell.border = {
+              top: {style:'thin'},
+              left: {style:'thin'},
+              bottom: {style:'thin'},
+              right: {style:'thin'}
+            };
+          }
+        });
+      });
+    });
+
+    // --- Summary Tab ---
+    const summarySheet = workbook.addWorksheet('Summary');
+    summarySheet.columns = [
+      { header: 'Sub Department', key: 'dept', width: 25 },
+      { header: 'Total Employees', key: 'total', width: 20 },
+      { header: 'Employees Trained', key: 'trained', width: 20 },
+      { header: 'Total Training Hours', key: 'hours', width: 25 },
+    ];
+    
+    summarySheet.getRow(1).font = { bold: true };
+    
+    let totalAllHours = 0;
+    summaryData.forEach(d => {
+      summarySheet.addRow({
+        dept: d.dept,
+        total: d.totalEmployees,
+        trained: d.employeesTrained,
+        hours: d.totalHours
+      });
+      totalAllHours += parseFloat(d.totalHours);
+    });
+
+    summarySheet.addRow({
+      dept: 'TOTAL (All Housekeeping)',
+      total: summaryData.reduce((acc, cur) => acc + cur.totalEmployees, 0),
+      trained: summaryData.reduce((acc, cur) => acc + cur.employeesTrained, 0),
+      hours: totalAllHours.toFixed(1)
+    }).font = { bold: true };
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=' + `OJT_Tracker_${monthName}_${y}.xlsx`);
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (err) {
+    console.error('Error generating Excel:', err);
+    res.status(500).json({ error: 'Failed to generate Excel report' });
+  }
+});
+
 module.exports = router;

@@ -409,6 +409,16 @@ export default function Reports() {
           <p className="text-gray-400">Deep insights into training performance and compliance.</p>
         </div>
         <div className="flex gap-3">
+          <button onClick={() => {
+            const dateStr = window.prompt("Enter month for Excel Export (YYYY-MM):", new Date().toISOString().slice(0, 7));
+            if (dateStr) {
+              const [y, m] = dateStr.split('-');
+              window.location.href = `/api/reports/ojt-excel?month=${parseInt(m, 10)}&year=${parseInt(y, 10)}`;
+            }
+          }} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-emerald-500 shadow-lg">
+            <FileText className="w-4 h-4" />
+            Download OJT Tracker
+          </button>
           <button onClick={() => window.print()} className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-blue-200 px-4 py-2 rounded-lg font-medium transition-colors border border-gray-700 shadow-lg">
             <Printer className="w-4 h-4" />
             Print Current Report
