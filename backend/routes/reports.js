@@ -379,10 +379,9 @@ router.get('/ojt-excel', async (req, res) => {
     const daysInMonth = new Date(y, m, 0).getDate();
     const monthName = getMonthName(m);
 
-    const client = await pool.connect();
-    
+        
     // Fetch all active employees for specific departments
-    const empRes = await client.query(`
+    const empRes = await pool.query(`
       SELECT emp_no, full_name, designation, department, status
       FROM employees 
       WHERE status = 'Active' 
@@ -392,7 +391,7 @@ router.get('/ojt-excel', async (req, res) => {
     const allEmployees = empRes.rows;
 
     // Fetch trainings for the month
-    const trnRes = await client.query(`
+    const trnRes = await pool.query(`
       SELECT t.id, t.topic, t.duration_minutes, t.training_date, 
              t.department, u.username as trainer_name
       FROM trainings t
@@ -406,7 +405,7 @@ router.get('/ojt-excel', async (req, res) => {
     let attendance = [];
     if (trainings.length > 0) {
       const tIds = trainings.map(t => t.id);
-      const attRes = await client.query(`
+      const attRes = await pool.query(`
         SELECT a.training_id, a.emp_no
         FROM attendance_records a
         WHERE a.training_id = ANY($1)
@@ -414,8 +413,7 @@ router.get('/ojt-excel', async (req, res) => {
       attendance = attRes.rows;
     }
     
-    client.release();
-
+    
     const workbook = new excel.Workbook();
 
     const departments = ['Rooms', 'Public Area', 'Flower', 'Laundry'];
@@ -583,7 +581,7 @@ router.get('/ojt-excel', async (req, res) => {
 
   } catch (err) {
     console.error('Error generating Excel:', err);
-    res.status(500).json({ error: 'Failed to generate Excel report' });
+    res.status(500).json({ error: 'Failed to generate Excel report', details: err.message, stack: err.stack });
   }
 });
 
