@@ -367,6 +367,7 @@ const getOrdinal = (n) => {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 };
 
+
 router.get('/ojt-excel', async (req, res) => {
   try {
     const { month, year } = req.query;
@@ -378,8 +379,7 @@ router.get('/ojt-excel', async (req, res) => {
     const y = parseInt(year, 10);
     const daysInMonth = new Date(y, m, 0).getDate();
     const monthName = getMonthName(m);
-
-        
+    
     // Fetch all active employees for specific departments
     const empRes = await pool.query(`
       SELECT emp_no, full_name, designation, department, status
@@ -392,7 +392,9 @@ router.get('/ojt-excel', async (req, res) => {
 
     // Fetch trainings for the month
     const trnRes = await pool.query(`
-      SELECT t.id, t.topic, t.duration_minutes, t.training_date, t.department, t.trainer_name FROM trainings t
+      SELECT t.id, t.topic, t.duration_minutes, t.training_date, 
+             t.department, t.trainer_name
+      FROM trainings t
       WHERE EXTRACT(MONTH FROM t.training_date) = $1
       AND EXTRACT(YEAR FROM t.training_date) = $2
     `, [m, y]);
@@ -409,10 +411,8 @@ router.get('/ojt-excel', async (req, res) => {
       `, [tIds]);
       attendance = attRes.rows;
     }
-    
-    
-    const workbook = new excel.Workbook();
 
+    const workbook = new excel.Workbook();
     const departments = ['Rooms', 'Public Area', 'Flower', 'Laundry'];
     let summaryData = [];
 
@@ -421,13 +421,13 @@ router.get('/ojt-excel', async (req, res) => {
       const deptTrainings = trainings.filter(t => t.department === dept || t.department === 'General');
       
       const sheet = workbook.addWorksheet(dept);
+      const totalCol = 7 + daysInMonth + 1;
 
-      // --- Formatting ---
       // Row 1: Month Name
       const r1 = sheet.addRow([monthName]);
       r1.font = { bold: true };
       r1.alignment = { horizontal: 'center' };
-      sheet.mergeCells(1, 1, 1, 7 + daysInMonth);
+      sheet.mergeCells(1, 1, 1, totalCol);
 
       // Row 2: Title and Trainer header
       const r2 = sheet.addRow([]);
@@ -448,17 +448,14 @@ router.get('/ojt-excel', async (req, res) => {
       r3.getCell(8).alignment = { horizontal: 'center', vertical: 'middle' };
       r3.height = 40;
 
-      // Group trainings by day
       const trainingsByDay = {};
       for (let d = 1; d <= daysInMonth; d++) {
         trainingsByDay[d] = deptTrainings.filter(t => new Date(t.training_date).getDate() === d);
-        
         let trainerNames = Array.from(new Set(trainingsByDay[d].map(t => t.trainer_name || 'Trainer'))).join(' / ');
         let topics = trainingsByDay[d].map(t => t.topic).join(' / ');
         
         r2.getCell(8 + d).value = trainerNames;
         r2.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
-        
         r3.getCell(8 + d).value = topics;
         r3.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
       }
@@ -472,10 +469,11 @@ router.get('/ojt-excel', async (req, res) => {
         r4.getCell(7 + d).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
         r4.getCell(7 + d).alignment = { horizontal: 'center', vertical: 'middle' };
       }
+      r4.getCell(totalCol).value = 'Total Hours';
+      r4.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
       r4.font = { bold: true };
       r4.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      // Set Column Widths
       sheet.getColumn(1).width = 15;
       sheet.getColumn(2).width = 25;
       sheet.getColumn(3).width = 15;
@@ -486,21 +484,15 @@ router.get('/ojt-excel', async (req, res) => {
       for (let d = 1; d <= daysInMonth; d++) {
         sheet.getColumn(7 + d).width = 5;
       }
+      sheet.getColumn(totalCol).width = 15;
 
-      // Add Employee Rows
       let totalDeptHours = 0;
       let employeesTrained = new Set();
+      let rowIdx = 5;
 
       deptEmployees.forEach(emp => {
-        const rowData = [
-          emp.emp_no,
-          emp.full_name,
-          '', // Gender Identity
-          emp.status,
-          emp.designation,
-          'Housekeeping',
-          dept
-        ];
+        const rowData = [emp.emp_no, emp.full_name, '', emp.status, emp.designation, 'Housekeeping', dept];
+        const r = sheet.addRow(rowData);
         
         for (let d = 1; d <= daysInMonth; d++) {
           const dayTrainings = trainingsByDay[d];
@@ -512,13 +504,37 @@ router.get('/ojt-excel', async (req, res) => {
               employeesTrained.add(emp.emp_no);
             }
           });
-          rowData.push(totalMins > 0 ? totalMins : '');
+          if (totalMins > 0) {
+            r.getCell(7 + d).value = totalMins;
+          }
           totalDeptHours += (totalMins / 60);
         }
         
-        sheet.addRow(rowData);
+        const startLetter = sheet.getColumn(8).letter;
+        const endLetter = sheet.getColumn(7 + daysInMonth).letter;
+        r.getCell(totalCol).value = { formula: `SUM(${startLetter}${rowIdx}:${endLetter}${rowIdx})/60` };
+        r.getCell(totalCol).numFmt = '0.0';
+        
+        rowIdx++;
       });
 
+      // Daily Total Auto-calculate Row
+      const dailyTotalRow = sheet.addRow(['Daily Total Hours']);
+      dailyTotalRow.font = { bold: true };
+      sheet.mergeCells(rowIdx, 1, rowIdx, 7);
+      dailyTotalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
+      
+      for (let d = 1; d <= daysInMonth; d++) {
+        const colLetter = sheet.getColumn(7 + d).letter;
+        dailyTotalRow.getCell(7 + d).value = { formula: `SUM(${colLetter}5:${colLetter}${rowIdx-1})/60` };
+        dailyTotalRow.getCell(7 + d).numFmt = '0.0';
+      }
+      
+      const tColLetter = sheet.getColumn(totalCol).letter;
+      dailyTotalRow.getCell(totalCol).value = { formula: `SUM(${tColLetter}5:${tColLetter}${rowIdx-1})` };
+      dailyTotalRow.getCell(totalCol).numFmt = '0.0';
+      dailyTotalRow.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+      
       summaryData.push({
         dept,
         totalHours: totalDeptHours.toFixed(1),
@@ -526,22 +542,18 @@ router.get('/ojt-excel', async (req, res) => {
         totalEmployees: deptEmployees.length
       });
 
-      // Apply borders to all cells
+      // Apply borders
       sheet.eachRow({ includeEmpty: true }, function(row, rowNumber) {
         row.eachCell({ includeEmpty: true }, function(cell, colNumber) {
-          if (rowNumber >= 2 && rowNumber <= 4 + deptEmployees.length && colNumber <= 7 + daysInMonth) {
+          if (rowNumber >= 2 && rowNumber <= rowIdx && colNumber <= totalCol) {
              cell.border = {
-              top: {style:'thin'},
-              left: {style:'thin'},
-              bottom: {style:'thin'},
-              right: {style:'thin'}
+              top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'}
             };
           }
         });
       });
     });
 
-    // --- Summary Tab ---
     const summarySheet = workbook.addWorksheet('Summary');
     summarySheet.columns = [
       { header: 'Sub Department', key: 'dept', width: 25 },
@@ -554,12 +566,7 @@ router.get('/ojt-excel', async (req, res) => {
     
     let totalAllHours = 0;
     summaryData.forEach(d => {
-      summarySheet.addRow({
-        dept: d.dept,
-        total: d.totalEmployees,
-        trained: d.employeesTrained,
-        hours: d.totalHours
-      });
+      summarySheet.addRow({ dept: d.dept, total: d.totalEmployees, trained: d.employeesTrained, hours: d.totalHours });
       totalAllHours += parseFloat(d.totalHours);
     });
 
@@ -581,5 +588,4 @@ router.get('/ojt-excel', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate Excel report', details: err.message, stack: err.stack });
   }
 });
-
-module.exports = router;
+\nmodule.exports = router;
