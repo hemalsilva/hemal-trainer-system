@@ -95,7 +95,7 @@ router.get('/analytics', async (req, res) => {
     if (department) {
        // Assuming ojt_records has no department, but we can join employees
        ojtParams.push(department);
-       ojtFilter += ` AND e.department = ${ojtParams.length}`;
+       ojtFilter += ` AND e.department = $${ojtParams.length}`;
     }
 
     const lowOJTRes = await pool.query(`
