@@ -433,7 +433,24 @@ router.get('/ojt-excel', async (req, res) => {
       const deptOjts = ojtRecords.filter(o => o.department === dept || o.department === 'General');
       
       const sheet = workbook.addWorksheet(dept);
-      const totalCol = 7 + daysInMonth + 1;
+      
+      // Calculate dynamic day columns
+      let dayColumns = [];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const tByDay = deptTrainings.filter(t => new Date(t.training_date).getDate() === d).map(t => ({...t, _type: 'training'}));
+        const oByDay = deptOjts.filter(o => new Date(o.training_date).getDate() === d).map(o => ({...o, _type: 'ojt'}));
+        const allDay = [...tByDay, ...oByDay];
+        
+        if (allDay.length === 0) {
+          dayColumns.push({ day: d, _type: 'empty' });
+        } else {
+          allDay.forEach(session => {
+             dayColumns.push({ day: d, _type: session._type, data: session });
+          });
+        }
+      }
+
+      const totalCol = 7 + dayColumns.length + 1;
 
       // Row 1: Month Name
       const r1 = sheet.addRow([monthName]);
@@ -447,46 +464,48 @@ router.get('/ojt-excel', async (req, res) => {
       sheet.mergeCells(2, 1, 3, 7);
       r2.getCell(1).font = { bold: true };
       r2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
-      
-      r2.getCell(8).value = 'Trainer';
-      r2.getCell(8).font = { bold: true };
-      r2.getCell(8).alignment = { horizontal: 'center', vertical: 'middle' };
       r2.height = 25;
 
       // Row 3: Training Topic header
       const r3 = sheet.addRow([]);
-      r3.getCell(8).value = 'Training Topic';
-      r3.getCell(8).font = { bold: true };
-      r3.getCell(8).alignment = { horizontal: 'center', vertical: 'middle' };
       r3.height = 40;
-
-      const trainingsByDay = {};
-      const ojtsByDay = {};
       
-      for (let d = 1; d <= daysInMonth; d++) {
-        trainingsByDay[d] = deptTrainings.filter(t => new Date(t.training_date).getDate() === d);
-        ojtsByDay[d] = deptOjts.filter(o => new Date(o.training_date).getDate() === d);
+      dayColumns.forEach((colDef, idx) => {
+        const colNum = 8 + idx;
+        let trainer = colDef._type !== 'empty' ? (colDef.data.trainer_name || 'Trainer') : '';
+        let topic = colDef._type !== 'empty' ? colDef.data.topic : '';
         
-        let allDayTrainings = [...trainingsByDay[d], ...ojtsByDay[d]];
+        r2.getCell(colNum).value = trainer;
+        r2.getCell(colNum).font = { bold: true };
+        r2.getCell(colNum).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
         
-        let trainerNames = Array.from(new Set(allDayTrainings.map(t => t.trainer_name || 'Trainer'))).join(' / ');
-        let topics = Array.from(new Set(allDayTrainings.map(t => t.topic))).join(' / ');
-        
-        r2.getCell(8 + d).value = trainerNames;
-        r2.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center' };
-        r3.getCell(8 + d).value = topics;
-        r3.getCell(8 + d).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
-      }
+        r3.getCell(colNum).value = topic;
+        r3.getCell(colNum).font = { bold: true };
+        r3.getCell(colNum).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
+      });
 
       // Row 4: Column Headers
       const headers = ['User/Employee ID', 'Name', 'Gender Identity', 'Employee Status', 'Position Title', 'Division', 'Sub Department'];
       const r4 = sheet.addRow(headers);
       
+      dayColumns.forEach((colDef, idx) => {
+        const colNum = 8 + idx;
+        r4.getCell(colNum).value = getOrdinal(colDef.day);
+        r4.getCell(colNum).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+        r4.getCell(colNum).alignment = { horizontal: 'center', vertical: 'middle' };
+      });
+      
+      // Merge date headers if there are multiple sessions in the same day
       for (let d = 1; d <= daysInMonth; d++) {
-        r4.getCell(7 + d).value = getOrdinal(d);
-        r4.getCell(7 + d).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
-        r4.getCell(7 + d).alignment = { horizontal: 'center', vertical: 'middle' };
+        const matches = [];
+        dayColumns.forEach((colDef, idx) => {
+           if(colDef.day === d) matches.push(8 + idx);
+        });
+        if(matches.length > 1) {
+           sheet.mergeCells(4, matches[0], 4, matches[matches.length - 1]);
+        }
       }
+
       r4.getCell(totalCol).value = 'Total Hours';
       r4.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
       r4.font = { bold: true };
@@ -499,9 +518,9 @@ router.get('/ojt-excel', async (req, res) => {
       sheet.getColumn(5).width = 30;
       sheet.getColumn(6).width = 20;
       sheet.getColumn(7).width = 20;
-      for (let d = 1; d <= daysInMonth; d++) {
-        sheet.getColumn(7 + d).width = 5;
-      }
+      dayColumns.forEach((_, idx) => {
+        sheet.getColumn(8 + idx).width = 5;
+      });
       sheet.getColumn(totalCol).width = 15;
 
       let totalDeptHours = 0;
@@ -512,34 +531,33 @@ router.get('/ojt-excel', async (req, res) => {
         const rowData = [emp.emp_no, emp.full_name, emp.gender_identity || '', emp.status, emp.designation, 'Housekeeping', dept];
         const r = sheet.addRow(rowData);
         
-        for (let d = 1; d <= daysInMonth; d++) {
-          let totalMins = 0;
-          
-          // Add Standard Trainings
-          trainingsByDay[d].forEach(t => {
-            const attended = attendance.some(a => a.training_id === t.id && a.emp_no === emp.emp_no);
-            if (attended) {
-              totalMins += t.duration_minutes || 0;
-              employeesTrained.add(emp.emp_no);
-            }
-          });
-          
-          // Add OJT Records
-          ojtsByDay[d].forEach(o => {
-            if (o.emp_no === emp.emp_no) {
-              totalMins += o.duration_minutes || 0;
-              employeesTrained.add(emp.emp_no);
-            }
-          });
-
-          if (totalMins > 0) {
-            r.getCell(7 + d).value = totalMins;
+        let empTotalMins = 0;
+        
+        dayColumns.forEach((colDef, idx) => {
+          const colNum = 8 + idx;
+          let mins = 0;
+          if (colDef._type === 'training') {
+             const attended = attendance.some(a => a.training_id === colDef.data.id && a.emp_no === emp.emp_no);
+             if(attended) {
+                 mins = colDef.data.duration_minutes || 0;
+             }
+          } else if (colDef._type === 'ojt') {
+             if(colDef.data.emp_no === emp.emp_no) {
+                 mins = colDef.data.duration_minutes || 0;
+             }
           }
-          totalDeptHours += (totalMins / 60);
-        }
+          
+          if(mins > 0) {
+             r.getCell(colNum).value = mins;
+             empTotalMins += mins;
+             employeesTrained.add(emp.emp_no);
+          }
+        });
+
+        totalDeptHours += (empTotalMins / 60);
         
         const startLetter = sheet.getColumn(8).letter;
-        const endLetter = sheet.getColumn(7 + daysInMonth).letter;
+        const endLetter = sheet.getColumn(7 + dayColumns.length).letter;
         r.getCell(totalCol).value = { formula: `SUM(${startLetter}${rowIdx}:${endLetter}${rowIdx})/60` };
         r.getCell(totalCol).numFmt = '0.0';
         
@@ -552,11 +570,12 @@ router.get('/ojt-excel', async (req, res) => {
       sheet.mergeCells(rowIdx, 1, rowIdx, 7);
       dailyTotalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle' };
       
-      for (let d = 1; d <= daysInMonth; d++) {
-        const colLetter = sheet.getColumn(7 + d).letter;
-        dailyTotalRow.getCell(7 + d).value = { formula: `SUM(${colLetter}5:${colLetter}${rowIdx-1})/60` };
-        dailyTotalRow.getCell(7 + d).numFmt = '0.0';
-      }
+      dayColumns.forEach((_, idx) => {
+        const colNum = 8 + idx;
+        const colLetter = sheet.getColumn(colNum).letter;
+        dailyTotalRow.getCell(colNum).value = { formula: `SUM(${colLetter}5:${colLetter}${rowIdx-1})/60` };
+        dailyTotalRow.getCell(colNum).numFmt = '0.0';
+      });
       
       const tColLetter = sheet.getColumn(totalCol).letter;
       dailyTotalRow.getCell(totalCol).value = { formula: `SUM(${tColLetter}5:${tColLetter}${rowIdx-1})` };
@@ -598,12 +617,14 @@ router.get('/ojt-excel', async (req, res) => {
       totalAllHours += parseFloat(d.totalHours);
     });
 
-    summarySheet.addRow({
+    summarySheet.addRow({});
+    const finalRow = summarySheet.addRow({
       dept: 'TOTAL (All Housekeeping)',
       total: summaryData.reduce((acc, cur) => acc + cur.totalEmployees, 0),
       trained: summaryData.reduce((acc, cur) => acc + cur.employeesTrained, 0),
       hours: totalAllHours.toFixed(1)
-    }).font = { bold: true };
+    });
+    finalRow.font = { bold: true };
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=' + `OJT_Tracker_${monthName}_${y}.xlsx`);
@@ -615,6 +636,4 @@ router.get('/ojt-excel', async (req, res) => {
     console.error('Error generating Excel:', err);
     res.status(500).json({ error: 'Failed to generate Excel report', details: err.message, stack: err.stack });
   }
-});
-
-module.exports = router;
+});module.exports = router;
