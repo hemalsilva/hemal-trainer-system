@@ -461,7 +461,6 @@ router.get('/ojt-excel', async (req, res) => {
       // Row 2: Title and Trainer header
       const r2 = sheet.addRow([]);
       r2.getCell(1).value = 'Departmental On The Job Training Tracker';
-      sheet.mergeCells(2, 1, 3, 7);
       r2.getCell(1).font = { bold: true };
       r2.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
       r2.height = 25;
@@ -469,6 +468,9 @@ router.get('/ojt-excel', async (req, res) => {
       // Row 3: Training Topic header
       const r3 = sheet.addRow([]);
       r3.height = 40;
+      
+      // NOW merge Rows 2 and 3 for the title area, AFTER they both exist
+      sheet.mergeCells(2, 1, 3, 7);
       
       dayColumns.forEach((colDef, idx) => {
         const colNum = 8 + idx;
@@ -495,7 +497,7 @@ router.get('/ojt-excel', async (req, res) => {
         r4.getCell(colNum).alignment = { horizontal: 'center', vertical: 'middle' };
       });
       
-      // Merge date headers if there are multiple sessions in the same day
+      // Merge date headers if there are multiple sessions in the same day (Row 4)
       for (let d = 1; d <= daysInMonth; d++) {
         const matches = [];
         dayColumns.forEach((colDef, idx) => {
@@ -636,4 +638,6 @@ router.get('/ojt-excel', async (req, res) => {
     console.error('Error generating Excel:', err);
     res.status(500).json({ error: 'Failed to generate Excel report', details: err.message, stack: err.stack });
   }
-});module.exports = router;
+});
+
+module.exports = router;
