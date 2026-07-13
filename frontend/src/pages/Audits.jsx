@@ -65,8 +65,7 @@ export default function Audits() {
 
   useEffect(() => {
     fetchAudits();
-    const interval = setInterval(() => fetchAudits(true), 5000);
-    return () => clearInterval(interval);
+    
   }, [month, year]);
 
   const auditTypes = ['Departure', 'Stayover', 'IP Departure', 'IP Stayover', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Team Leader'];

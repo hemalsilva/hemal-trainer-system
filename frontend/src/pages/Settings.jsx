@@ -172,8 +172,7 @@ export default function Settings() {
   useEffect(() => {
     if (activeTab === 'whatsapp') {
       fetchWaStatus();
-      const interval = setInterval(fetchWaStatus, 3000);
-      return () => clearInterval(interval);
+      
     }
   }, [activeTab]);
   

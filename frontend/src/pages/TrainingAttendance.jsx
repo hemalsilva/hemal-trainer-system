@@ -36,11 +36,7 @@ export default function TrainingAttendance() {
   useEffect(() => {
     fetchTrainings();
     fetchEmployees();
-    const interval = setInterval(() => {
-      axios.get(`/api/trainings?t=${Date.now()}&t=${Date.now()}`).then(res => setTrainings(res.data)).catch(console.error);
-      axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`).then(res => setEmployees(res.data)).catch(console.error);
-    }, 5000);
-    return () => clearInterval(interval);
+    
   }, []);
 
   

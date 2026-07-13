@@ -34,8 +34,7 @@ export default function OJT() {
     axios.get(`/api/employees?t=${Date.now()}&t=${Date.now()}`).then(res => setEmployees(res.data)).catch(console.error);
     if (activeTab === 'view') {
       fetchRecords();
-      const interval = setInterval(() => fetchRecords(true), 5000);
-      return () => clearInterval(interval);
+      
     }
   }, [activeTab]);
 
