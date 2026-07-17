@@ -429,8 +429,19 @@ router.get('/ojt-excel', async (req, res) => {
 
     departments.forEach(dept => {
       const deptEmployees = allEmployees.filter(e => e.department === dept);
-      const deptTrainings = trainings.filter(t => t.department === dept || t.department === 'General');
-      const deptOjts = ojtRecords.filter(o => o.department === dept || o.department === 'General');
+      const deptEmpNos = deptEmployees.map(e => e.emp_no);
+      
+      const deptTrainings = trainings.filter(t => 
+        t.department === dept || 
+        t.department === 'General' ||
+        attendance.some(a => a.training_id === t.id && deptEmpNos.includes(a.emp_no))
+      );
+      
+      const deptOjts = ojtRecords.filter(o => 
+        o.department === dept || 
+        o.department === 'General' ||
+        deptEmpNos.includes(o.emp_no)
+      );
       
       const sheet = workbook.addWorksheet(dept);
       
