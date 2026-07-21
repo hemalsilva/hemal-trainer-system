@@ -16,7 +16,7 @@ export default function Employees() {
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedPosition, setSelectedPosition] = useState('All');
   const [formData, setFormData] = useState({
-    emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', photo: null, status: 'Active'
+    emp_no: '', full_name: '', department: '', designation: '', join_date: '', date_of_birth: '', gender_identity: '', photo: null, status: 'Active'
   });
   const fileInputRef = useRef(null);
 
@@ -172,6 +172,7 @@ export default function Employees() {
                 <tr className="bg-[#181818] border-b border-gray-800 text-xs uppercase tracking-wider text-gray-400 font-semibold">
                   <th className="p-4 pl-6 text-[11px] text-gray-400 font-bold tracking-wider">EMP NO</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">NAME</th>
+                  <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">GENDER</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">POSITION</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF JOINED</th>
                   <th className="p-4 text-[11px] text-gray-400 font-bold tracking-wider">DATE OF BIRTH</th>
@@ -191,7 +192,7 @@ export default function Employees() {
                   });
 
                   if (filteredEmployees.length === 0) {
-                    return <tr><td colSpan="7" className="p-8 text-center text-gray-500">No employees found.</td></tr>;
+                    return <tr><td colSpan="9" className="p-8 text-center text-gray-500">No employees found.</td></tr>;
                   }
 
                   return filteredEmployees.map((emp) => (
@@ -212,6 +213,8 @@ export default function Employees() {
                           <p className="font-medium text-blue-200">{emp.full_name}</p>
                         </div>
                       </div>
+                    </td>                    <td className="p-4">
+                      <p className="text-gray-300 text-sm font-medium">{emp.gender_identity || '—'}</p>
                     </td>
                     <td className="p-4">
                       <p className="text-gray-300 text-sm font-medium">{emp.designation || 'Staff'}</p>

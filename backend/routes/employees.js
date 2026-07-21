@@ -173,7 +173,7 @@ router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
 
 // PUT single employee
 router.put('/:emp_no', upload.single('photo'), async (req, res) => {
-  const { emp_no: new_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status } = req.body;
+  const { emp_no: new_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status, gender_identity } = req.body;
   const old_emp_no = req.params.emp_no;
 
   const client = await pool.connect();
@@ -189,10 +189,10 @@ router.put('/:emp_no', upload.single('photo'), async (req, res) => {
 
     const result = await client.query(
       `UPDATE employees
-      SET emp_no = $1, full_name = $2, department = $3, designation = $4, join_date = $5, date_of_birth = $6, contact_number = $7, email = $8, status = $9
+      SET emp_no = $1, full_name = $2, department = $3, designation = $4, join_date = $5, date_of_birth = $6, contact_number = $7, email = $8, status = $9, gender_identity = $11
       WHERE TRIM(emp_no) = TRIM($10)
       RETURNING *`,
-      [new_emp_no || old_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status || 'Active', old_emp_no]
+      [new_emp_no || old_emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status || 'Active', old_emp_no, gender_identity]
     );
 
     // Update photo separately if a new one is uploaded
