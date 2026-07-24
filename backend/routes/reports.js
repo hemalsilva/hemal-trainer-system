@@ -424,7 +424,15 @@ router.get('/ojt-excel', async (req, res) => {
     const ojtRecords = ojtRes.rows;
 
     const workbook = new excel.Workbook();
-    const departments = [...new Set(allEmployees.map(e => e.department).filter(Boolean))].sort();
+    const desiredOrder = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'General'];
+    const departments = [...new Set(allEmployees.map(e => e.department).filter(Boolean))].sort((a, b) => {
+      const idxA = desiredOrder.indexOf(a);
+      const idxB = desiredOrder.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
     let summaryData = [];
 
     departments.forEach(dept => {
@@ -572,7 +580,7 @@ router.get('/ojt-excel', async (req, res) => {
         
         const startLetter = sheet.getColumn(8).letter;
         const endLetter = sheet.getColumn(7 + dayColumns.length).letter;
-        r.getCell(totalCol).value = { formula: `SUM(${startLetter}${rowIdx}:${endLetter}${rowIdx})/60` };
+        r.getCell(totalCol).value = { formula: `SUM(${startLetter}${rowIdx}:${endLetter}${rowIdx})/60`, result: empTotalMins / 60 };
         r.getCell(totalCol).numFmt = '0.0';
         
         rowIdx++;
@@ -592,7 +600,7 @@ router.get('/ojt-excel', async (req, res) => {
       });
       
       const tColLetter = sheet.getColumn(totalCol).letter;
-      dailyTotalRow.getCell(totalCol).value = { formula: `SUM(${tColLetter}5:${tColLetter}${rowIdx-1})` };
+      dailyTotalRow.getCell(totalCol).value = { formula: `SUM(${tColLetter}5:${tColLetter}${rowIdx-1})`, result: totalDeptHours };
       dailyTotalRow.getCell(totalCol).numFmt = '0.0';
       dailyTotalRow.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
       
