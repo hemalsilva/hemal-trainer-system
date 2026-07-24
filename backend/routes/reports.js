@@ -386,7 +386,7 @@ router.get('/ojt-excel', async (req, res) => {
       SELECT emp_no, full_name, designation, department, status, gender_identity
       FROM employees 
       WHERE status = 'Active' 
-      AND department IN ('Rooms', 'Public Area', 'Flower', 'Laundry')
+      
       ORDER BY full_name ASC
     `);
     const allEmployees = empRes.rows;
@@ -424,7 +424,7 @@ router.get('/ojt-excel', async (req, res) => {
     const ojtRecords = ojtRes.rows;
 
     const workbook = new excel.Workbook();
-    const departments = ['Rooms', 'Public Area', 'Flower', 'Laundry'];
+    const departments = [...new Set(allEmployees.map(e => e.department).filter(Boolean))].sort();
     let summaryData = [];
 
     departments.forEach(dept => {
@@ -541,7 +541,8 @@ router.get('/ojt-excel', async (req, res) => {
       let rowIdx = 5;
 
       deptEmployees.forEach(emp => {
-        const rowData = [emp.emp_no, emp.full_name, emp.gender_identity || '', emp.status, emp.designation, 'Housekeeping', dept];
+        const division = ['Rooms', 'Public Area', 'Flower', 'Laundry'].includes(dept) ? 'Housekeeping' : '—';
+        const rowData = [emp.emp_no, emp.full_name, emp.gender_identity || '', emp.status, emp.designation, division, dept];
         const r = sheet.addRow(rowData);
         
         let empTotalMins = 0;
@@ -632,7 +633,7 @@ router.get('/ojt-excel', async (req, res) => {
 
     summarySheet.addRow({});
     const finalRow = summarySheet.addRow({
-      dept: 'TOTAL (All Housekeeping)',
+      dept: 'TOTAL (All Departments)',
       total: summaryData.reduce((acc, cur) => acc + cur.totalEmployees, 0),
       trained: summaryData.reduce((acc, cur) => acc + cur.employeesTrained, 0),
       hours: totalAllHours.toFixed(1)
