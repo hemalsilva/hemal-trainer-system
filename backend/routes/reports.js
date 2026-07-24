@@ -625,7 +625,7 @@ router.get('/ojt-excel', async (req, res) => {
       });
     });
 
-    const summarySheet = workbook.addWorksheet('Summary');
+        const summarySheet = workbook.addWorksheet('Summary');
     summarySheet.columns = [
       { header: 'Sub Department', key: 'dept', width: 25 },
       { header: 'Total Employees', key: 'total', width: 20 },
@@ -633,22 +633,43 @@ router.get('/ojt-excel', async (req, res) => {
       { header: 'Total Training Hours', key: 'hours', width: 25 },
     ];
     
-    summarySheet.getRow(1).font = { bold: true };
+    // Style Header Row
+    const headerRow = summarySheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E78' } };
     
     let totalAllHours = 0;
-    summaryData.forEach(d => {
-      summarySheet.addRow({ dept: d.dept, total: d.totalEmployees, trained: d.employeesTrained, hours: d.totalHours });
+    summaryData.forEach((d, index) => {
+      const row = summarySheet.addRow({ dept: d.dept, total: d.totalEmployees, trained: d.employeesTrained, hours: d.totalHours });
+      
+      // Alternate row colors
+      if (index % 2 === 1) {
+          row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+      }
+      
       totalAllHours += parseFloat(d.totalHours);
     });
 
-    summarySheet.addRow({});
     const finalRow = summarySheet.addRow({
       dept: 'TOTAL (All Departments)',
       total: summaryData.reduce((acc, cur) => acc + cur.totalEmployees, 0),
       trained: summaryData.reduce((acc, cur) => acc + cur.employeesTrained, 0),
       hours: totalAllHours.toFixed(1)
     });
-    finalRow.font = { bold: true };
+    
+    // Style Final Row
+    finalRow.font = { bold: true, color: { argb: 'FF000000' } };
+    finalRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFD966' } };
+    
+    // Apply center alignment and borders to all populated cells
+    summarySheet.eachRow({ includeEmpty: false }, function(row, rowNumber) {
+        row.eachCell({ includeEmpty: false }, function(cell, colNumber) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = {
+                top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'}
+            };
+        });
+    });
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=' + `OJT_Tracker_${monthName}_${y}.xlsx`);
