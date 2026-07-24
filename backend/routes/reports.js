@@ -545,6 +545,7 @@ router.get('/ojt-excel', async (req, res) => {
       sheet.getColumn(totalCol).width = 15;
 
       let totalDeptHours = 0;
+      let colSums = Array(dayColumns.length).fill(0);
       let employeesTrained = new Set();
       let rowIdx = 5;
 
@@ -572,6 +573,7 @@ router.get('/ojt-excel', async (req, res) => {
           if(mins > 0) {
              r.getCell(colNum).value = mins;
              empTotalMins += mins;
+             colSums[idx] += mins;
              employeesTrained.add(emp.emp_no);
           }
         });
@@ -595,7 +597,7 @@ router.get('/ojt-excel', async (req, res) => {
       dayColumns.forEach((_, idx) => {
         const colNum = 8 + idx;
         const colLetter = sheet.getColumn(colNum).letter;
-        dailyTotalRow.getCell(colNum).value = { formula: `SUM(${colLetter}5:${colLetter}${rowIdx-1})/60` };
+        dailyTotalRow.getCell(colNum).value = { formula: `SUM(${colLetter}5:${colLetter}${rowIdx-1})/60`, result: colSums[idx] / 60 };
         dailyTotalRow.getCell(colNum).numFmt = '0.0';
       });
       
