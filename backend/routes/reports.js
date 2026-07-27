@@ -489,12 +489,16 @@ router.get('/ojt-excel', async (req, res) => {
       r3.height = 40;
       
       // NOW merge Rows 2 and 3 for the title area, AFTER they both exist
-      sheet.mergeCells(2, 1, 3, 7);
+      sheet.mergeCells(2, 1, 4, 7);
+      
+      const r4 = sheet.addRow([]);
+      r4.height = 40;
       
       dayColumns.forEach((colDef, idx) => {
         const colNum = 8 + idx;
         let trainer = colDef._type !== 'empty' ? (colDef.data.trainer_name || 'Trainer') : '';
         let topic = colDef._type !== 'empty' ? colDef.data.topic : '';
+        let duration = colDef._type !== 'empty' ? (colDef.data.duration_minutes ? `${colDef.data.duration_minutes} Mins` : '') : '';
         
         r2.getCell(colNum).value = trainer;
         r2.getCell(colNum).font = { bold: true };
@@ -503,34 +507,38 @@ router.get('/ojt-excel', async (req, res) => {
         r3.getCell(colNum).value = topic;
         r3.getCell(colNum).font = { bold: true };
         r3.getCell(colNum).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
+        
+        r4.getCell(colNum).value = duration;
+        r4.getCell(colNum).font = { bold: true };
+        r4.getCell(colNum).alignment = { textRotation: 90, vertical: 'bottom', horizontal: 'center', wrapText: true };
       });
 
-      // Row 4: Column Headers
+      // Row 5: Column Headers
       const headers = ['User/Employee ID', 'Name', 'Gender Identity', 'Employee Status', 'Position Title', 'Division', 'Sub Department'];
-      const r4 = sheet.addRow(headers);
+      const r5 = sheet.addRow(headers);
       
       dayColumns.forEach((colDef, idx) => {
         const colNum = 8 + idx;
-        r4.getCell(colNum).value = getOrdinal(colDef.day);
-        r4.getCell(colNum).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
-        r4.getCell(colNum).alignment = { horizontal: 'center', vertical: 'middle' };
+        r5.getCell(colNum).value = getOrdinal(colDef.day);
+        r5.getCell(colNum).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+        r5.getCell(colNum).alignment = { horizontal: 'center', vertical: 'middle' };
       });
       
-      // Merge date headers if there are multiple sessions in the same day (Row 4)
+      // Merge date headers if there are multiple sessions in the same day (Row 5)
       for (let d = 1; d <= daysInMonth; d++) {
         const matches = [];
         dayColumns.forEach((colDef, idx) => {
            if(colDef.day === d) matches.push(8 + idx);
         });
         if(matches.length > 1) {
-           sheet.mergeCells(4, matches[0], 4, matches[matches.length - 1]);
+           sheet.mergeCells(5, matches[0], 5, matches[matches.length - 1]);
         }
       }
 
-      r4.getCell(totalCol).value = 'Total Hours';
-      r4.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
-      r4.font = { bold: true };
-      r4.alignment = { horizontal: 'center', vertical: 'middle' };
+      r5.getCell(totalCol).value = 'Total Hours';
+      r5.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+      r5.font = { bold: true };
+      r5.alignment = { horizontal: 'center', vertical: 'middle' };
 
       sheet.getColumn(1).width = 15;
       sheet.getColumn(2).width = 25;
@@ -547,7 +555,7 @@ router.get('/ojt-excel', async (req, res) => {
       let totalDeptHours = 0;
       let colSums = Array(dayColumns.length).fill(0);
       let employeesTrained = new Set();
-      let rowIdx = 5;
+      let rowIdx = 6;
 
       deptEmployees.forEach(emp => {
         const division = ['Rooms', 'Public Area', 'Flower', 'Laundry'].includes(dept) ? 'Housekeeping' : '—';
@@ -597,12 +605,12 @@ router.get('/ojt-excel', async (req, res) => {
       dayColumns.forEach((_, idx) => {
         const colNum = 8 + idx;
         const colLetter = sheet.getColumn(colNum).letter;
-        dailyTotalRow.getCell(colNum).value = { formula: `SUM(${colLetter}5:${colLetter}${rowIdx-1})/60`, result: colSums[idx] / 60 };
+        dailyTotalRow.getCell(colNum).value = { formula: `SUM(${colLetter}6:${colLetter}${rowIdx-1})/60`, result: colSums[idx] / 60 };
         dailyTotalRow.getCell(colNum).numFmt = '0.0';
       });
       
       const tColLetter = sheet.getColumn(totalCol).letter;
-      dailyTotalRow.getCell(totalCol).value = { formula: `SUM(${tColLetter}5:${tColLetter}${rowIdx-1})`, result: totalDeptHours };
+      dailyTotalRow.getCell(totalCol).value = { formula: `SUM(${tColLetter}6:${tColLetter}${rowIdx-1})`, result: totalDeptHours };
       dailyTotalRow.getCell(totalCol).numFmt = '0.0';
       dailyTotalRow.getCell(totalCol).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
       
