@@ -498,7 +498,13 @@ router.get('/ojt-excel', async (req, res) => {
         const colNum = 8 + idx;
         let trainer = colDef._type !== 'empty' ? (colDef.data.trainer_name || 'Trainer') : '';
         let topic = colDef._type !== 'empty' ? colDef.data.topic : '';
-        let duration = colDef._type !== 'empty' ? (colDef.data.duration_minutes ? `${colDef.data.duration_minutes} Mins` : '') : '';
+        let duration = '';
+        if (colDef._type !== 'empty' && colDef.data.training_date) {
+            const d = new Date(colDef.data.training_date);
+            if (!isNaN(d)) {
+                duration = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            }
+        }
         
         r2.getCell(colNum).value = trainer;
         r2.getCell(colNum).font = { bold: true };
