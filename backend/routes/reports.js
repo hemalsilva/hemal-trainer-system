@@ -499,10 +499,15 @@ router.get('/ojt-excel', async (req, res) => {
         let trainer = colDef._type !== 'empty' ? (colDef.data.trainer_name || 'Trainer') : '';
         let topic = colDef._type !== 'empty' ? colDef.data.topic : '';
         let duration = '';
-        if (colDef._type !== 'empty' && colDef.data.training_date) {
+        if (colDef._type === 'training' && colDef.data.training_date) {
             const d = new Date(colDef.data.training_date);
             if (!isNaN(d)) {
-                duration = d.toLocaleTimeString('en-US', { timeZone: 'Asia/Colombo', hour: 'numeric', minute: '2-digit', hour12: true });
+                // If it's an old record with no time (defaults to 00:00:00 UTC), skip showing 5:30 AM
+                if (d.getUTCHours() === 0 && d.getUTCMinutes() === 0) {
+                    duration = '';
+                } else {
+                    duration = d.toLocaleTimeString('en-US', { timeZone: 'Asia/Colombo', hour: 'numeric', minute: '2-digit', hour12: true });
+                }
             }
         }
         
