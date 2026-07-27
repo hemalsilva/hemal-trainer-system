@@ -502,7 +502,7 @@ router.get('/ojt-excel', async (req, res) => {
         if (colDef._type !== 'empty' && colDef.data.training_date) {
             const d = new Date(colDef.data.training_date);
             if (!isNaN(d)) {
-                duration = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                duration = d.toLocaleTimeString('en-US', { timeZone: 'Asia/Colombo', hour: 'numeric', minute: '2-digit', hour12: true });
             }
         }
         
