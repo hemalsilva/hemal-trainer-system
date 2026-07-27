@@ -488,11 +488,11 @@ router.get('/ojt-excel', async (req, res) => {
       const r3 = sheet.addRow([]);
       r3.height = 40;
       
-      // NOW merge Rows 2 and 3 for the title area, AFTER they both exist
-      sheet.mergeCells(2, 1, 4, 7);
-      
       const r4 = sheet.addRow([]);
       r4.height = 40;
+      
+      // NOW merge Rows 2, 3 and 4 for the title area, AFTER they all exist
+      sheet.mergeCells(2, 1, 4, 7);
       
       dayColumns.forEach((colDef, idx) => {
         const colNum = 8 + idx;
