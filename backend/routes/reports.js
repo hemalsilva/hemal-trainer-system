@@ -566,6 +566,7 @@ router.get('/ojt-excel', async (req, res) => {
       let totalDeptHours = 0;
       let colSums = Array(dayColumns.length).fill(0);
       let employeesTrained = new Set();
+      let activeTopicsSet = new Set();
       let rowIdx = 6;
 
       deptEmployees.forEach(emp => {
@@ -594,6 +595,9 @@ router.get('/ojt-excel', async (req, res) => {
              empTotalMins += mins;
              colSums[idx] += mins;
              employeesTrained.add(emp.emp_no);
+             if (colDef.data && colDef.data.topic) {
+                 activeTopicsSet.add(colDef.data.topic);
+             }
           }
         });
 
@@ -629,7 +633,8 @@ router.get('/ojt-excel', async (req, res) => {
         dept,
         totalHours: totalDeptHours.toFixed(1),
         employeesTrained: employeesTrained.size,
-        totalEmployees: deptEmployees.length
+        totalEmployees: deptEmployees.length,
+        activeTopicCount: activeTopicsSet.size
       });
 
       // Apply borders
@@ -649,6 +654,7 @@ router.get('/ojt-excel', async (req, res) => {
       { header: 'Sub Department', key: 'dept', width: 25 },
       { header: 'Total Employees', key: 'total', width: 20 },
       { header: 'Employees Trained', key: 'trained', width: 20 },
+      { header: 'Active Training Topics', key: 'topics', width: 25 },
       { header: 'Total Training Hours', key: 'hours', width: 25 },
     ];
     
@@ -659,7 +665,7 @@ router.get('/ojt-excel', async (req, res) => {
     
     let totalAllHours = 0;
     summaryData.forEach((d, index) => {
-      const row = summarySheet.addRow({ dept: d.dept, total: d.totalEmployees, trained: d.employeesTrained, hours: d.totalHours });
+      const row = summarySheet.addRow({ dept: d.dept, total: d.totalEmployees, trained: d.employeesTrained, topics: d.activeTopicCount, hours: d.totalHours });
       
       // Alternate row colors
       if (index % 2 === 1) {
@@ -673,6 +679,7 @@ router.get('/ojt-excel', async (req, res) => {
       dept: 'TOTAL (All Departments)',
       total: summaryData.reduce((acc, cur) => acc + cur.totalEmployees, 0),
       trained: summaryData.reduce((acc, cur) => acc + cur.employeesTrained, 0),
+      topics: summaryData.reduce((acc, cur) => acc + cur.activeTopicCount, 0),
       hours: totalAllHours.toFixed(1)
     });
     
@@ -689,6 +696,12 @@ router.get('/ojt-excel', async (req, res) => {
             };
         });
     });
+
+    // Mechanism Note
+    summarySheet.addRow({});
+    const noteRow = summarySheet.addRow(['* Mechanism of final training hour calculation: Total training hours are computed by taking the total count of training minutes actively attended by employees in the department and dividing by 60.']);
+    noteRow.font = { italic: true, color: { argb: 'FF555555' } };
+    summarySheet.mergeCells(noteRow.number, 1, noteRow.number, 5);
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=' + `OJT_Tracker_${monthName}_${y}.xlsx`);
