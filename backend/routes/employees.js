@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
       FROM employees e
       LEFT JOIN (
         SELECT a.emp_no, SUM(t.duration_minutes) / 60.0 AS training_hours
-        FROM attendance_records a
+        FROM (SELECT DISTINCT training_id, emp_no FROM attendance_records) a
         JOIN trainings t ON a.training_id = t.id
         ${standardWhere}
         GROUP BY a.emp_no

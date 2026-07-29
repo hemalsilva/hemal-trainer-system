@@ -61,6 +61,7 @@ export default function Dashboard() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [timelineFilter, setTimelineFilter] = useState('Month'); // Date, Week, Month
+  const [deptSummary, setDeptSummary] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
 
   const fetchData = async () => {
@@ -71,12 +72,14 @@ export default function Dashboard() {
         const m = parseInt(mStr, 10) - 1;
         queryParams = `?month=${m}&year=${y}`;
       }
-      const [empRes, trainRes, ojtRes, timelineRes] = await Promise.all([
+      const [empRes, trainRes, ojtRes, timelineRes, deptSummaryRes] = await Promise.all([
         axios.get(`/api/employees${queryParams}?t=${Date.now()}`),
         axios.get(`/api/trainings${queryParams}?t=${Date.now()}`),
         axios.get(`/api/ojt${queryParams}?t=${Date.now()}`),
-        axios.get(`/api/reports/timeline?t=${Date.now()}&t=${Date.now()}`)
+        axios.get(`/api/reports/timeline?t=${Date.now()}&t=${Date.now()}`),
+        axios.get(`/api/reports/department-summary${queryParams ? queryParams + '&' : '?'}t=${Date.now()}`)
       ]);
+      setDeptSummary(deptSummaryRes.data || []);
       setEmployees(empRes.data || []);
       setTrainings(trainRes.data || []);
       setOjtRecords(ojtRes.data || []);
@@ -359,33 +362,29 @@ export default function Dashboard() {
           <Briefcase className="w-6 h-6 text-brand-primary" /> Department Summary
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'].map(dept => {
-            const deptEmps = employees.filter(e => e.department === dept && e.status === 'Active');
-            const deptTotalHrs = deptEmps.reduce((sum, e) => sum + (Number(e.total_training_hours) || 0), 0);
-            const deptActive = trainings.filter(t => t.department === dept && t.training_date && new Date(t.training_date).getMonth() === currentMonth).length;
-            
-            if (deptEmps.length === 0 && deptTotalHrs === 0 && deptActive === 0) return null;
+          {deptSummary.length > 0 ? deptSummary.map(d => {
+            if (d.totalEmployees === 0 && d.totalHours === 0 && d.activeTopicCount === 0) return null;
             
             return (
-              <div key={dept} className="bg-[#181818] border border-gray-800 rounded-2xl p-5 hover:border-brand-primary/30 transition-colors shadow-lg group">
-                <h3 className="text-lg font-bold text-blue-200 mb-4 pb-2 border-b border-gray-800 group-hover:border-brand-primary/30 transition-colors">{dept}</h3>
+              <div key={d.dept} className="bg-[#181818] border border-gray-800 rounded-2xl p-5 hover:border-brand-primary/30 transition-colors shadow-lg group">
+                <h3 className="text-lg font-bold text-blue-200 mb-4 pb-2 border-b border-gray-800 group-hover:border-brand-primary/30 transition-colors">{d.dept}</h3>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="bg-gray-900 rounded-xl py-2">
-                    <p className="text-xl font-bold text-gray-200">{deptEmps.length}</p>
+                    <p className="text-xl font-bold text-gray-200">{d.totalEmployees}</p>
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1">Staff</p>
                   </div>
                   <div className="bg-brand-primary/10 rounded-xl py-2 border border-brand-primary/20">
-                    <p className="text-xl font-bold text-brand-primary">{deptActive}</p>
+                    <p className="text-xl font-bold text-brand-primary">{d.activeTopicCount}</p>
                     <p className="text-[10px] text-brand-primary/70 font-bold uppercase tracking-wider mt-1">Active</p>
                   </div>
                   <div className="bg-yellow-500/10 rounded-xl py-2 border border-yellow-500/20">
-                    <p className="text-xl font-bold text-yellow-500">{deptTotalHrs.toFixed(1)}</p>
+                    <p className="text-xl font-bold text-yellow-500">{d.totalHours.toFixed(1)}</p>
                     <p className="text-[10px] text-yellow-500/70 font-bold uppercase tracking-wider mt-1">Hours</p>
                   </div>
                 </div>
               </div>
             );
-          })}
+          }) : <div className="text-gray-500 p-4 col-span-4 text-center border border-dashed border-gray-700 rounded-xl">Loading department statistics...</div>}
         </div>
       </div>
 

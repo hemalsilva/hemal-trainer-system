@@ -715,4 +715,117 @@ router.get('/ojt-excel', async (req, res) => {
   }
 });
 
+
+// GET /api/reports/department-summary
+// Provides exactly the same summary calculations as the Excel OJT Tracker
+router.get('/department-summary', async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    if (!month || !year) {
+      return res.status(400).json({ error: 'Month and year are required' });
+    }
+    const dbMonth = parseInt(month) + 1;
+    const y = parseInt(year);
+    
+    // Fetch data
+    const [empRes, trainRes, attRes, ojtRes] = await Promise.all([
+      pool.query("SELECT emp_no, full_name, designation, department, status, gender_identity FROM employees WHERE status = 'Active' ORDER BY full_name ASC"),
+      pool.query('SELECT * FROM trainings WHERE EXTRACT(MONTH FROM training_date) = $1 AND EXTRACT(YEAR FROM training_date) = $2', [dbMonth, y]),
+      pool.query('SELECT a.* FROM attendance_records a JOIN trainings t ON a.training_id = t.id WHERE EXTRACT(MONTH FROM t.training_date) = $1 AND EXTRACT(YEAR FROM t.training_date) = $2', [dbMonth, y]),
+      pool.query('SELECT * FROM ojt_records WHERE EXTRACT(MONTH FROM assessment_date) = $1 AND EXTRACT(YEAR FROM assessment_date) = $2', [dbMonth, y])
+    ]);
+    
+    const allEmployees = empRes.rows;
+    const trainings = trainRes.rows;
+    const attendance = attRes.rows;
+    const ojtRecords = ojtRes.rows;
+    
+    const departments = [...new Set(allEmployees.map(e => e.department).filter(Boolean))];
+    const desiredOrder = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+    departments.sort((a, b) => {
+      const idxA = desiredOrder.indexOf(a);
+      const idxB = desiredOrder.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    const daysInMonth = new Date(y, dbMonth, 0).getDate();
+    let summaryData = [];
+    
+    departments.forEach(dept => {
+      const deptEmployees = allEmployees.filter(e => e.department === dept);
+      const deptEmpNos = deptEmployees.map(e => e.emp_no);
+      
+      const deptTrainings = trainings.filter(t => 
+        t.department === dept || 
+        t.department === 'General' ||
+        attendance.some(a => a.training_id === t.id && deptEmpNos.includes(a.emp_no))
+      );
+      
+      const deptOjts = ojtRecords.filter(o => 
+        o.department === dept || 
+        o.department === 'General' ||
+        deptEmpNos.includes(o.emp_no)
+      );
+      
+      let dayColumns = [];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const tByDay = deptTrainings.filter(t => new Date(t.training_date).getDate() === d).map(t => ({...t, _type: 'training'}));
+        const oByDay = deptOjts.filter(o => new Date(o.assessment_date || o.training_date).getDate() === d).map(o => ({...o, _type: 'ojt'}));
+        const allDay = [...tByDay, ...oByDay];
+        
+        if (allDay.length > 0) {
+          allDay.forEach(session => {
+             dayColumns.push({ day: d, _type: session._type, data: session });
+          });
+        }
+      }
+      
+      let totalDeptHours = 0;
+      let employeesTrained = new Set();
+      let activeTopicsSet = new Set();
+      
+      deptEmployees.forEach(emp => {
+        let empTotalMins = 0;
+        dayColumns.forEach((colDef) => {
+          let mins = 0;
+          if (colDef._type === 'training') {
+             const attended = attendance.some(a => a.training_id === colDef.data.id && a.emp_no === emp.emp_no);
+             if(attended) {
+                 mins = colDef.data.duration_minutes || 0;
+             }
+          } else if (colDef._type === 'ojt') {
+             if(colDef.data.emp_no === emp.emp_no) {
+                 mins = colDef.data.duration_minutes || 0;
+             }
+          }
+          if(mins > 0) {
+             empTotalMins += mins;
+             employeesTrained.add(emp.emp_no);
+             if (colDef.data && (colDef.data.topic || colDef.data.task_name)) {
+                 activeTopicsSet.add(colDef.data.topic || colDef.data.task_name);
+             }
+          }
+        });
+        totalDeptHours += (empTotalMins / 60.0);
+      });
+      
+      summaryData.push({
+        dept,
+        totalHours: Number(totalDeptHours.toFixed(1)),
+        employeesTrained: employeesTrained.size,
+        totalEmployees: deptEmployees.length,
+        activeTopicCount: activeTopicsSet.size
+      });
+    });
+
+    res.json(summaryData);
+  } catch (err) {
+    console.error('Error fetching department summary:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
