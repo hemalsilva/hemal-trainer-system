@@ -242,10 +242,15 @@ export default function Dashboard() {
 
   const trainingData = processTimeline();
 
+  // Calculate aggregated stats from deptSummary to perfectly match Excel report
+  const aggregatedTotalEmployees = deptSummary.reduce((acc, cur) => acc + cur.totalEmployees, 0);
+  const aggregatedActiveTrainings = deptSummary.reduce((acc, cur) => acc + cur.activeTopicCount, 0);
+  const aggregatedTotalHours = deptSummary.reduce((acc, cur) => acc + cur.totalHours, 0);
+
   const stats = [
-    { title: 'Total Employees', value: totalEmployees.toString(), icon: Users, trend: 'Updated dynamically' },
-    { title: 'Active Trainings', value: activeTrainings.length.toString(), icon: BookOpen, trend: !dashboardFilter ? 'This month' : 'Selected month' },
-    { title: 'Total Training Hours', value: totalHours.toFixed(1), icon: Clock, trend: `${ojtTotalHours.toFixed(1)} OJT / ${standardTotalHours.toFixed(1)} Std` },
+    { title: 'Total Employees', value: aggregatedTotalEmployees.toString(), icon: Users, trend: 'Updated dynamically' },
+    { title: 'Active Trainings', value: aggregatedActiveTrainings.toString(), icon: BookOpen, trend: !dashboardFilter ? 'This month' : 'Selected month' },
+    { title: 'Total Training Hours', value: aggregatedTotalHours.toFixed(1), icon: Clock, trend: `${ojtTotalHours.toFixed(1)} OJT / ${standardTotalHours.toFixed(1)} Std` },
     { title: 'Est. Completion', value: `${completionRate}%`, icon: CheckCircle2, trend: 'Based on targets' }
   ];
 
