@@ -480,6 +480,7 @@ export default function TrainingAttendance() {
                       <th className="pb-3 font-medium">Emp No</th>
                       <th className="pb-3 font-medium">Name</th>
                       <th className="pb-3 font-medium">Department</th>
+                      <th className="pb-3 font-medium text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -493,6 +494,15 @@ export default function TrainingAttendance() {
                           <td className="py-3 text-blue-200">{emp.emp_no}</td>
                           <td className="py-3 text-gray-300">{emp.emp_name}</td>
                           <td className="py-3 text-gray-400 text-sm">{emp.department || 'N/A'}</td>
+                          <td className="py-3 text-right">
+                            <button
+                              onClick={() => removeAttendance(emp.emp_no)}
+                              className="text-red-400 hover:text-red-300 transition-colors p-1"
+                              title="Remove Attendance"
+                            >
+                              <XCircle className="w-5 h-5" />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -517,6 +527,7 @@ export default function TrainingAttendance() {
                       <th className="pb-3 font-medium">Emp No</th>
                       <th className="pb-3 font-medium">Name</th>
                       <th className="pb-3 font-medium">Department</th>
+                      <th className="pb-3 font-medium text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -530,6 +541,15 @@ export default function TrainingAttendance() {
                           <td className="py-3 text-blue-200">{emp.emp_no}</td>
                           <td className="py-3 text-gray-300">{emp.emp_name}</td>
                           <td className="py-3 text-gray-400 text-sm">{emp.department || 'N/A'}</td>
+                          <td className="py-3 text-right">
+                            <button
+                              onClick={() => removeAttendance(emp.emp_no)}
+                              className="text-red-400 hover:text-red-300 transition-colors p-1"
+                              title="Remove Attendance"
+                            >
+                              <XCircle className="w-5 h-5" />
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
