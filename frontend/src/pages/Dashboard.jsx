@@ -368,7 +368,7 @@ export default function Dashboard() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {deptSummary.length > 0 ? deptSummary.map(d => {
-            if (d.totalEmployees === 0 && d.totalHours === 0 && d.activeTopicCount === 0) return null;
+            // Removed filter so all departments show, including Hotel School
             
             return (
               <div key={d.dept} className="bg-[#181818] border border-gray-800 rounded-2xl p-5 hover:border-brand-primary/30 transition-colors shadow-lg group">
