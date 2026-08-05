@@ -243,7 +243,7 @@ export default function Dashboard() {
   const trainingData = processTimeline();
 
   // Calculate aggregated stats from deptSummary to perfectly match Excel report
-  const aggregatedTotalEmployees = deptSummary.reduce((acc, cur) => acc + cur.totalEmployees, 0);
+  const aggregatedTotalEmployees = deptSummary.reduce((acc, cur) => acc + (cur.dept === 'Hotel School' || cur.dept === 'Cinnamon Hotel Academy' ? 0 : cur.totalEmployees), 0);
   const aggregatedActiveTrainings = deptSummary.reduce((acc, cur) => acc + cur.activeTopicCount, 0);
   const aggregatedTotalHours = deptSummary.reduce((acc, cur) => acc + cur.totalHours, 0);
 

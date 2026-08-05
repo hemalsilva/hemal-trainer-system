@@ -677,7 +677,7 @@ router.get('/ojt-excel', async (req, res) => {
 
     const finalRow = summarySheet.addRow({
       dept: 'TOTAL (All Departments)',
-      total: summaryData.reduce((acc, cur) => acc + cur.totalEmployees, 0),
+      total: summaryData.reduce((acc, cur) => acc + (cur.dept === 'Hotel School' || cur.dept === 'Cinnamon Hotel Academy' ? 0 : cur.totalEmployees), 0),
       trained: summaryData.reduce((acc, cur) => acc + cur.employeesTrained, 0),
       topics: summaryData.reduce((acc, cur) => acc + cur.activeTopicCount, 0),
       hours: totalAllHours.toFixed(1)
