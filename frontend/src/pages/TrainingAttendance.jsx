@@ -41,6 +41,19 @@ export default function TrainingAttendance() {
 
   
   
+  
+  const removeAttendance = async (empNo) => {
+    if (!window.confirm('Are you sure you want to remove this staff member from the attendance list?')) return;
+    try {
+      await axios.delete(`/api/trainings/${selectedTrainingId}/attendance/${empNo}`);
+      fetchAttendanceSummary();
+      showMessage('Attendance record removed', 'success');
+    } catch (err) {
+      console.error(err);
+      showMessage('Failed to remove attendance', 'error');
+    }
+  };
+
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -431,9 +444,9 @@ export default function TrainingAttendance() {
                   </thead>
                   <tbody>
                     {loading ? (
-                      <tr><td colSpan="3" className="py-8 text-center text-gray-500">Loading...</td></tr>
+                      <tr><td colSpan="4" className="py-8 text-center text-gray-500">Loading...</td></tr>
                     ) : attended.length === 0 ? (
-                      <tr><td colSpan="3" className="py-8 text-center text-gray-500 border-b border-gray-800/50">No records found.</td></tr>
+                      <tr><td colSpan="4" className="py-8 text-center text-gray-500 border-b border-gray-800/50">No records found.</td></tr>
                     ) : (
                       attended.map((emp, i) => (
                         <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
@@ -468,9 +481,9 @@ export default function TrainingAttendance() {
                   </thead>
                   <tbody>
                     {loading ? (
-                      <tr><td colSpan="3" className="py-8 text-center text-gray-500">Loading...</td></tr>
+                      <tr><td colSpan="4" className="py-8 text-center text-gray-500">Loading...</td></tr>
                     ) : absent.length === 0 ? (
-                      <tr><td colSpan="3" className="py-8 text-center text-gray-500 border-b border-gray-800/50">Everyone attended!</td></tr>
+                      <tr><td colSpan="4" className="py-8 text-center text-gray-500 border-b border-gray-800/50">Everyone attended!</td></tr>
                     ) : (
                       absent.map((emp, i) => (
                         <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">

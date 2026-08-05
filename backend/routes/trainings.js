@@ -372,4 +372,16 @@ router.get('/allocations/all', async (req, res) => {
   }
 });
 
+
+// Delete a specific attendance record
+router.delete('/:id/attendance/:emp_no', async (req, res) => {
+  try {
+    const { id, emp_no } = req.params;
+    await pool.query('DELETE FROM attendance_records WHERE training_id = $1 AND emp_no = $2', [id, emp_no]);
+    res.json({ message: 'Attendance record removed successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
