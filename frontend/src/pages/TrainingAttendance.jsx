@@ -167,6 +167,25 @@ export default function TrainingAttendance() {
     const validRows = manualRows.filter(r => r.emp_no || r.emp_name);
     if (validRows.length === 0) return showMessage('No valid employee records to save', 'error');
 
+    const tr = trainings.find(t => t.id === Number(selectedTrainingId));
+    if (tr && tr.department && tr.department !== 'General') {
+      const mismatchedEmployees = [];
+      for (const row of validRows) {
+        const emp = employees.find(e => e.emp_no === row.emp_no);
+        if (emp && emp.department !== tr.department) {
+          mismatchedEmployees.push(`${emp.full_name || emp.emp_name || row.emp_no} (${emp.department})`);
+        }
+      }
+      if (mismatchedEmployees.length > 0) {
+        const confirmMsg = `The following staff belong to different departments, but this training is for ${tr.department}:\n\n` +
+                           mismatchedEmployees.join('\n') +
+                           `\n\nDo you still want to add them to this attendance?`;
+        if (!window.confirm(confirmMsg)) {
+          return;
+        }
+      }
+    }
+
     setSavingManual(true);
     try {
       const res = await axios.post(`/api/trainings/${selectedTrainingId}/attendance/bulk`, { records: validRows });
@@ -221,6 +240,27 @@ export default function TrainingAttendance() {
         setOcrLoading(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
         return;
+      }
+
+      const tr = trainings.find(t => t.id === Number(selectedTrainingId));
+      if (tr && tr.department && tr.department !== 'General') {
+        const mismatchedEmployees = [];
+        for (const empNo of uniqueNumbers) {
+          const emp = employees.find(e => e.emp_no === empNo);
+          if (emp && emp.department !== tr.department) {
+            mismatchedEmployees.push(`${emp.full_name || empNo} (${emp.department})`);
+          }
+        }
+        if (mismatchedEmployees.length > 0) {
+          const confirmMsg = `The sign sheet contains staff from different departments, but this training is for ${tr.department}:\n\n` +
+                             mismatchedEmployees.join('\n') +
+                             `\n\nDo you still want to add them?`;
+          if (!window.confirm(confirmMsg)) {
+            setOcrLoading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+          }
+        }
       }
 
       const res = await axios.post('/api/trainings/' + selectedTrainingId + '/attendance/bulk', {
