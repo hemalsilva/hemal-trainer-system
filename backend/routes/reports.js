@@ -424,8 +424,8 @@ router.get('/ojt-excel', async (req, res) => {
     const ojtRecords = ojtRes.rows;
 
     const workbook = new excel.Workbook();
-    const desiredOrder = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'General'];
-    const departments = [...new Set(allEmployees.map(e => e.department).filter(Boolean))].sort((a, b) => {
+    const desiredOrder = ['Rooms', 'Public Area', 'Laundry', 'Flower', 'Stores', 'Coordinator', 'Hotel School', 'Cinnamon Hotel Academy', 'General'];
+    const departments = [...new Set([...desiredOrder, ...allEmployees.map(e => e.department).filter(Boolean)])].sort((a, b) => {
       const idxA = desiredOrder.indexOf(a);
       const idxB = desiredOrder.indexOf(b);
       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
