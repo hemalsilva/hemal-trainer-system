@@ -329,10 +329,15 @@ router.post('/:id/attendance/bulk', async (req, res) => {
     }
 
     for (const record of finalRecords) {
-      const cleanEmpNo = record.emp_no?.toString().trim();
-      if (!cleanEmpNo) continue;
+      let cleanEmpNo = record.emp_no?.toString().trim();
+      let empName = record.emp_name?.trim();
       
-      let empName = record.emp_name;
+      if (!cleanEmpNo && empName) {
+        cleanEmpNo = `HS-${Math.random().toString(36).substring(2,8).toUpperCase()}`;
+      } else if (!cleanEmpNo) {
+        continue;
+      }
+      
       if (!empName) {
         // Fetch name from DB
         const empRes = await client.query('SELECT full_name FROM employees WHERE emp_no = $1', [cleanEmpNo]);
