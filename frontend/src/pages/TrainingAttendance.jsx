@@ -591,6 +591,9 @@ export default function TrainingAttendance() {
                   <option value="Mandatory">Mandatory</option>
                   <option value="Optional">Optional</option>
                   <option value="Compliance">Compliance</option>
+                  <option value="OJT">OJT</option>
+                  <option value="SOP">SOP</option>
+                  <option value="Hotel HR">Hotel HR</option>
                 </select>
               </div>
 

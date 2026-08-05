@@ -1079,7 +1079,12 @@ export default function Schedule() {
               </div>
               <div><label className="block text-sm text-gray-400 mb-1">Category</label>
                 <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none">
-                  <option>Mandatory</option><option>OJT</option><option>SOP</option><option>Hotel HR</option>
+                  <option value="Mandatory">Mandatory</option>
+                  <option value="Optional">Optional</option>
+                  <option value="Compliance">Compliance</option>
+                  <option value="OJT">OJT</option>
+                  <option value="SOP">SOP</option>
+                  <option value="Hotel HR">Hotel HR</option>
                 </select>
               </div>
               <div><label className="block text-sm text-gray-400 mb-1">Trainer</label><input type="text" value={formData.trainer} onChange={(e) => setFormData({...formData, trainer: e.target.value})} placeholder="TBD" className="w-full bg-[#181818] border border-gray-700 rounded-lg p-2.5 text-blue-200 focus:border-brand-primary outline-none" /></div>
