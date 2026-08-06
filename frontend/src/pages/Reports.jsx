@@ -385,11 +385,26 @@ export default function Reports() {
           <p className="text-gray-400">Deep insights into training performance and compliance.</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => {
+          <button onClick={async () => {
             const dateStr = window.prompt("Enter month for Excel Export (YYYY-MM):", new Date().toISOString().slice(0, 7));
             if (dateStr) {
               const [y, m] = dateStr.split('-');
-              window.location.href = `/api/reports/ojt-excel?month=${parseInt(m, 10)}&year=${parseInt(y, 10)}`;
+              try {
+                const baseURL = axios.defaults.baseURL || '';
+                const response = await axios.get(`${baseURL}/api/reports/ojt-excel?month=${parseInt(m, 10)}&year=${parseInt(y, 10)}`, {
+                  responseType: 'blob'
+                });
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `OJT_Tracker_${y}_${m}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+              } catch (error) {
+                console.error('Download failed', error);
+                alert('Failed to download Excel file. Please try again.');
+              }
             }
           }} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition-colors border border-emerald-500 shadow-lg">
             <FileText className="w-4 h-4" />
