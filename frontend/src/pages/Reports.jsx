@@ -686,6 +686,7 @@ export default function Reports() {
                     className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none focus:border-brand-primary transition-colors"
                   >
                     <option value="">Select Department</option>
+                    <option value="All Staff">All Staff</option>
                     {departments.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
@@ -736,6 +737,7 @@ export default function Reports() {
                           <tr className="bg-[#181818] border-b border-gray-800">
                             <th className="p-3 text-sm font-semibold text-gray-400 pl-6">Emp No</th>
                             <th className="p-3 text-sm font-semibold text-gray-400">Employee Name</th>
+                            <th className="p-3 text-sm font-semibold text-gray-400">Department</th>
                             <th className="p-3 text-sm font-semibold text-gray-400">Designation</th>
                           </tr>
                         </thead>
@@ -744,6 +746,7 @@ export default function Reports() {
                             <tr key={emp.emp_no} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                               <td className="p-3 pl-6 font-mono text-gray-400 text-sm">{emp.emp_no}</td>
                               <td className="p-3 font-medium text-blue-200">{emp.full_name}</td>
+                              <td className="p-3 text-gray-400 text-sm">{emp.department}</td>
                               <td className="p-3 text-gray-400 text-sm">{emp.designation}</td>
                             </tr>
                           ))}

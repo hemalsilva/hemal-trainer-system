@@ -848,18 +848,27 @@ router.get('/topic-absentees', async (req, res) => {
     if (!department || !topic) {
       return res.status(400).json({ error: 'Department and topic are required' });
     }
+
+    let queryParams = [topic];
+    let deptFilter = "";
+    if (department !== 'All Staff') {
+      queryParams.push(department);
+      deptFilter = "AND e.department = $2";
+    }
+
     const result = await pool.query(`
-      SELECT e.emp_no, e.full_name, e.designation
+      SELECT e.emp_no, e.full_name, e.designation, e.department
       FROM employees e
-      WHERE e.status = 'Active' AND e.department = $1
+      WHERE e.status = 'Active' ${deptFilter}
       AND e.emp_no NOT IN (
           SELECT a.emp_no
           FROM attendance_records a
           JOIN trainings t ON a.training_id = t.id
-          WHERE t.topic = $2
+          WHERE t.topic = $1
       )
-      ORDER BY e.full_name ASC
-    `, [department, topic]);
+      ORDER BY e.department ASC, e.full_name ASC
+    `, queryParams);
+
     res.json(result.rows);
   } catch (error) {
     console.error(error);
