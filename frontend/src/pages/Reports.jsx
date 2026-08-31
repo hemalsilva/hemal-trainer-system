@@ -316,6 +316,7 @@ export default function Reports() {
 
   const handleFetchTopicAbsentees = async () => {
     if (!filterDepartment || filterTopics.length === 0) return;
+    setIsTopicDropdownOpen(false);
     setFetchingAbsentees(true);
     try {
       const res = await axios.get(`/api/reports/topic-absentees?department=${encodeURIComponent(filterDepartment)}&topics=${encodeURIComponent(JSON.stringify(filterTopics))}&designation=${encodeURIComponent(filterDesignation)}`);
