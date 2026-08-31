@@ -876,13 +876,13 @@ router.get('/topic-absentees', async (req, res) => {
 
     if (department !== 'All Staff') {
       queryParams.push(department);
-      filterString += ` AND e.department = ${paramIndex}`;
+      filterString += ` AND e.department = $${paramIndex}`;
       paramIndex++;
     }
 
     if (designation && designation !== 'All Designations' && designation !== '') {
       queryParams.push(designation);
-      filterString += ` AND e.designation = ${paramIndex}`;
+      filterString += ` AND e.designation = $${paramIndex}`;
       paramIndex++;
     }
 
