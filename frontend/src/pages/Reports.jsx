@@ -672,7 +672,7 @@ export default function Reports() {
         <div className="space-y-8 print:hidden">
 
           {/* Topic Absentees Finder Section */}
-          <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-visible">
+          <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-visible min-h-[400px]">
             <div className="p-6 border-b border-gray-800 bg-[#181818] rounded-t-2xl">
               <h2 className="text-lg font-bold text-blue-200 flex items-center gap-2"><Search className="w-5 h-5 text-brand-primary"/> Find Topic Absentees</h2>
               <p className="text-gray-400 text-sm mt-1">Select a department and topic to find employees who have NEVER attended that topic across any session.</p>
@@ -703,7 +703,7 @@ export default function Reports() {
                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                   </div>
                   {isTopicDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                    <div className="absolute z-[999] w-full mt-1 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto">
                       {topicsList.map(t => (
                         <label key={t} className="flex items-center px-4 py-2 hover:bg-gray-800 cursor-pointer">
                           <input 
