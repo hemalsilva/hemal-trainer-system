@@ -686,7 +686,10 @@ export default function Reports() {
                   <label className="block text-sm font-semibold text-gray-400 mb-2">Department</label>
                   <select 
                     value={filterDepartment}
-                    onChange={(e) => setFilterDepartment(e.target.value)}
+                    onChange={(e) => {
+                      setFilterDepartment(e.target.value);
+                      if (e.target.value !== 'All Staff') setFilterDesignation('');
+                    }}
                     className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none focus:border-brand-primary transition-colors"
                   >
                     <option value="">Select Department</option>
@@ -696,6 +699,7 @@ export default function Reports() {
                     ))}
                   </select>
                 </div>
+                {filterDepartment === 'All Staff' && (
                 <div className="flex-1">
                   <label className="block text-sm font-semibold text-gray-400 mb-2">Designation</label>
                   <select 
@@ -709,6 +713,7 @@ export default function Reports() {
                     ))}
                   </select>
                 </div>
+                )}
                 <div className="flex-1 relative">
                   <label className="block text-sm font-semibold text-gray-400 mb-2">Training Topics</label>
                   <div 
