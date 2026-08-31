@@ -844,12 +844,24 @@ router.get('/all-topics', async (req, res) => {
 
 router.get('/topic-absentees', async (req, res) => {
   try {
-    const { department, topic } = req.query;
-    if (!department || !topic) {
-      return res.status(400).json({ error: 'Department and topic are required' });
+    const { department, topics, topic } = req.query;
+    // Allow fallback to single topic for backward compatibility
+    let topicsData = topics || topic;
+    if (!department || !topicsData) {
+      return res.status(400).json({ error: 'Department and topics are required' });
     }
 
-    let queryParams = [topic];
+    let topicsArray = [];
+    try {
+      topicsArray = JSON.parse(topicsData);
+      if (!Array.isArray(topicsArray)) {
+          topicsArray = [topicsArray];
+      }
+    } catch (e) {
+      topicsArray = typeof topicsData === 'string' ? topicsData.split(',') : [topicsData];
+    }
+
+    let queryParams = [topicsArray];
     let deptFilter = "";
     if (department !== 'All Staff') {
       queryParams.push(department);
@@ -864,7 +876,7 @@ router.get('/topic-absentees', async (req, res) => {
           SELECT a.emp_no
           FROM attendance_records a
           JOIN trainings t ON a.training_id = t.id
-          WHERE t.topic = $1
+          WHERE t.topic = ANY($1)
       )
       ORDER BY e.department ASC, e.full_name ASC
     `, queryParams);

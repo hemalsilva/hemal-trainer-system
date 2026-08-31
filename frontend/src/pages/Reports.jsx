@@ -293,7 +293,8 @@ export default function Reports() {
   // Added for Topic Absentees Feature
   const [topicsList, setTopicsList] = useState([]);
   const [filterDepartment, setFilterDepartment] = useState('');
-  const [filterTopic, setFilterTopic] = useState('');
+  const [filterTopics, setFilterTopics] = useState([]);
+  const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
   const [topicAbsentees, setTopicAbsentees] = useState(null);
   const [fetchingAbsentees, setFetchingAbsentees] = useState(false);
 
@@ -312,10 +313,10 @@ export default function Reports() {
   }, [selectedReportTab]);
 
   const handleFetchTopicAbsentees = async () => {
-    if (!filterDepartment || !filterTopic) return;
+    if (!filterDepartment || filterTopics.length === 0) return;
     setFetchingAbsentees(true);
     try {
-      const res = await axios.get(`/api/reports/topic-absentees?department=${encodeURIComponent(filterDepartment)}&topic=${encodeURIComponent(filterTopic)}`);
+      const res = await axios.get(`/api/reports/topic-absentees?department=${encodeURIComponent(filterDepartment)}&topics=${encodeURIComponent(JSON.stringify(filterTopics))}`);
       setTopicAbsentees(res.data);
     } catch (err) {
       console.error('Failed to fetch absentees:', err);
@@ -692,23 +693,41 @@ export default function Reports() {
                     ))}
                   </select>
                 </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-400 mb-2">Training Topic</label>
-                  <select 
-                    value={filterTopic}
-                    onChange={(e) => setFilterTopic(e.target.value)}
-                    className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none focus:border-brand-primary transition-colors"
+                <div className="flex-1 relative">
+                  <label className="block text-sm font-semibold text-gray-400 mb-2">Training Topics</label>
+                  <div 
+                    onClick={() => setIsTopicDropdownOpen(!isTopicDropdownOpen)}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none cursor-pointer flex justify-between items-center"
                   >
-                    <option value="">Select Topic</option>
-                    {topicsList.map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                    <span className="truncate">{filterTopics.length > 0 ? `${filterTopics.length} topic(s) selected` : 'Select Topics'}</span>
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                  {isTopicDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                      {topicsList.map(t => (
+                        <label key={t} className="flex items-center px-4 py-2 hover:bg-gray-800 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="mr-3 rounded border-gray-600 text-brand-primary focus:ring-brand-primary"
+                            checked={filterTopics.includes(t)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFilterTopics([...filterTopics, t]);
+                              } else {
+                                setFilterTopics(filterTopics.filter(topic => topic !== t));
+                              }
+                            }}
+                          />
+                          <span className="text-sm text-blue-200 truncate" title={t}>{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-end">
                   <button 
                     onClick={handleFetchTopicAbsentees}
-                    disabled={!filterDepartment || !filterTopic || fetchingAbsentees}
+                    disabled={!filterDepartment || filterTopics.length === 0 || fetchingAbsentees}
                     className="h-[50px] px-8 bg-brand-primary text-brand-dark font-bold rounded-lg hover:bg-brand-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
                   >
                     {fetchingAbsentees ? <Loader2 className="w-5 h-5 animate-spin"/> : <Search className="w-5 h-5"/>}
@@ -722,7 +741,7 @@ export default function Reports() {
                   {topicAbsentees.length === 0 ? (
                     <div className="text-center p-8 bg-[#1a1a1a] rounded-xl border border-emerald-500/30">
                       <p className="text-emerald-400 font-bold text-lg">Great News!</p>
-                      <p className="text-gray-400 text-sm">Everyone in {filterDepartment} has attended {filterTopic}.</p>
+                      <p className="text-gray-400 text-sm">Everyone in {filterDepartment} has attended all {filterTopics.length} selected topics.</p>
                     </div>
                   ) : (
                     <div className="border border-red-500/30 rounded-xl overflow-hidden">
@@ -730,7 +749,7 @@ export default function Reports() {
                         <h3 className="text-red-400 font-bold flex items-center gap-2">
                           <UserX className="w-4 h-4"/> {topicAbsentees.length} Employees Missing Topic
                         </h3>
-                        <span className="text-xs font-mono text-gray-400">{filterTopic}</span>
+                        <span className="text-xs font-mono text-gray-400">{filterTopics.length} topic(s) selected</span>
                       </div>
                       <table className="w-full text-left border-collapse">
                         <thead>
