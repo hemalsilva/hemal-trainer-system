@@ -672,8 +672,8 @@ export default function Reports() {
         <div className="space-y-8 print:hidden">
 
           {/* Topic Absentees Finder Section */}
-          <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-800 bg-[#181818]">
+          <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-visible">
+            <div className="p-6 border-b border-gray-800 bg-[#181818] rounded-t-2xl">
               <h2 className="text-lg font-bold text-blue-200 flex items-center gap-2"><Search className="w-5 h-5 text-brand-primary"/> Find Topic Absentees</h2>
               <p className="text-gray-400 text-sm mt-1">Select a department and topic to find employees who have NEVER attended that topic across any session.</p>
             </div>
