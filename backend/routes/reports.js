@@ -834,7 +834,16 @@ router.get('/department-summary', async (req, res) => {
 
 router.get('/all-topics', async (req, res) => {
   try {
-    const result = await pool.query("SELECT DISTINCT topic FROM trainings WHERE topic IS NOT NULL AND topic != '' ORDER BY topic ASC");
+    const query = `
+      SELECT DISTINCT topic 
+      FROM trainings 
+      WHERE topic IS NOT NULL 
+      AND topic != '' 
+      AND training_date >= date_trunc('month', CURRENT_DATE + interval '1 month')
+      AND training_date < date_trunc('month', CURRENT_DATE + interval '2 months')
+      ORDER BY topic ASC
+    `;
+    const result = await pool.query(query);
     res.json(result.rows.map(r => r.topic));
   } catch (error) {
     console.error(error);
