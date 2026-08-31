@@ -289,10 +289,12 @@ export default function Reports() {
   const [selectedDepartment, setSelectedDepartment] = useState('');
 
   const departments = [...new Set(employees.map(e => e.department).filter(Boolean))];
+  const designations = [...new Set(employees.map(e => e.designation).filter(Boolean))].sort();
 
   // Added for Topic Absentees Feature
   const [topicsList, setTopicsList] = useState([]);
   const [filterDepartment, setFilterDepartment] = useState('');
+  const [filterDesignation, setFilterDesignation] = useState('');
   const [filterTopics, setFilterTopics] = useState([]);
   const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
   const [topicAbsentees, setTopicAbsentees] = useState(null);
@@ -316,7 +318,7 @@ export default function Reports() {
     if (!filterDepartment || filterTopics.length === 0) return;
     setFetchingAbsentees(true);
     try {
-      const res = await axios.get(`/api/reports/topic-absentees?department=${encodeURIComponent(filterDepartment)}&topics=${encodeURIComponent(JSON.stringify(filterTopics))}`);
+      const res = await axios.get(`/api/reports/topic-absentees?department=${encodeURIComponent(filterDepartment)}&topics=${encodeURIComponent(JSON.stringify(filterTopics))}&designation=${encodeURIComponent(filterDesignation)}`);
       setTopicAbsentees(res.data);
     } catch (err) {
       console.error('Failed to fetch absentees:', err);
@@ -689,6 +691,19 @@ export default function Reports() {
                     <option value="">Select Department</option>
                     <option value="All Staff">All Staff</option>
                     {departments.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-400 mb-2">Designation</label>
+                  <select 
+                    value={filterDesignation}
+                    onChange={(e) => setFilterDesignation(e.target.value)}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none focus:border-brand-primary transition-colors"
+                  >
+                    <option value="">All Designations</option>
+                    {designations.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>

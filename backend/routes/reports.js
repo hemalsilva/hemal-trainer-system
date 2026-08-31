@@ -844,7 +844,7 @@ router.get('/all-topics', async (req, res) => {
 
 router.get('/topic-absentees', async (req, res) => {
   try {
-    const { department, topics, topic } = req.query;
+    const { department, topics, topic, designation } = req.query;
     // Allow fallback to single topic for backward compatibility
     let topicsData = topics || topic;
     if (!department || !topicsData) {
@@ -862,16 +862,25 @@ router.get('/topic-absentees', async (req, res) => {
     }
 
     let queryParams = [topicsArray];
-    let deptFilter = "";
+    let filterString = "";
+    let paramIndex = 2;
+
     if (department !== 'All Staff') {
       queryParams.push(department);
-      deptFilter = "AND e.department = $2";
+      filterString += ` AND e.department = ${paramIndex}`;
+      paramIndex++;
+    }
+
+    if (designation && designation !== 'All Designations' && designation !== '') {
+      queryParams.push(designation);
+      filterString += ` AND e.designation = ${paramIndex}`;
+      paramIndex++;
     }
 
     const result = await pool.query(`
       SELECT e.emp_no, e.full_name, e.designation, e.department
       FROM employees e
-      WHERE e.status = 'Active' ${deptFilter}
+      WHERE e.status = 'Active' ${filterString}
       AND e.emp_no NOT IN (
           SELECT a.emp_no
           FROM attendance_records a
