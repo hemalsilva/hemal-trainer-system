@@ -759,7 +759,7 @@ export default function Reports() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Old tables hidden as requested */} {false && ( <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-hidden">
               <div className="p-6 border-b border-gray-800 bg-[#181818]">
                 <h2 className="text-lg font-bold text-blue-200 flex items-center gap-2"><UserX className="w-5 h-5 text-red-400"/> Topic-wise Absenteeism</h2>
@@ -816,6 +816,7 @@ export default function Reports() {
               </div>
             </div>
           </div>
+          )}
         </div>
       )}
 
