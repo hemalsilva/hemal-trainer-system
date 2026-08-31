@@ -831,4 +831,41 @@ router.get('/department-summary', async (req, res) => {
   }
 });
 
+
+router.get('/all-topics', async (req, res) => {
+  try {
+    const result = await pool.query("SELECT DISTINCT topic FROM trainings WHERE topic IS NOT NULL AND topic != '' ORDER BY topic ASC");
+    res.json(result.rows.map(r => r.topic));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/topic-absentees', async (req, res) => {
+  try {
+    const { department, topic } = req.query;
+    if (!department || !topic) {
+      return res.status(400).json({ error: 'Department and topic are required' });
+    }
+    const result = await pool.query(`
+      SELECT e.emp_no, e.full_name, e.designation
+      FROM employees e
+      WHERE e.status = 'Active' AND e.department = $1
+      AND e.emp_no NOT IN (
+          SELECT a.emp_no
+          FROM attendance_records a
+          JOIN trainings t ON a.training_id = t.id
+          WHERE t.topic = $2
+      )
+      ORDER BY e.full_name ASC
+    `, [department, topic]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
+

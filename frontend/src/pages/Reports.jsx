@@ -290,6 +290,41 @@ export default function Reports() {
 
   const departments = [...new Set(employees.map(e => e.department).filter(Boolean))];
 
+  // Added for Topic Absentees Feature
+  const [topicsList, setTopicsList] = useState([]);
+  const [filterDepartment, setFilterDepartment] = useState('');
+  const [filterTopic, setFilterTopic] = useState('');
+  const [topicAbsentees, setTopicAbsentees] = useState(null);
+  const [fetchingAbsentees, setFetchingAbsentees] = useState(false);
+
+  useEffect(() => {
+    if (selectedReportTab === 'attendance') {
+      const fetchTopics = async () => {
+        try {
+          const res = await axios.get('/api/reports/all-topics');
+          setTopicsList(res.data);
+        } catch (err) {
+          console.error('Failed to fetch topics:', err);
+        }
+      };
+      fetchTopics();
+    }
+  }, [selectedReportTab]);
+
+  const handleFetchTopicAbsentees = async () => {
+    if (!filterDepartment || !filterTopic) return;
+    setFetchingAbsentees(true);
+    try {
+      const res = await axios.get(`/api/reports/topic-absentees?department=${encodeURIComponent(filterDepartment)}&topic=${encodeURIComponent(filterTopic)}`);
+      setTopicAbsentees(res.data);
+    } catch (err) {
+      console.error('Failed to fetch absentees:', err);
+    } finally {
+      setFetchingAbsentees(false);
+    }
+  };
+
+
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -634,6 +669,93 @@ export default function Reports() {
       {/* ATTENDANCE TAB */}
       {selectedReportTab === 'attendance' && (
         <div className="space-y-8 print:hidden">
+
+          {/* Topic Absentees Finder Section */}
+          <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-hidden">
+            <div className="p-6 border-b border-gray-800 bg-[#181818]">
+              <h2 className="text-lg font-bold text-blue-200 flex items-center gap-2"><Search className="w-5 h-5 text-brand-primary"/> Find Topic Absentees</h2>
+              <p className="text-gray-400 text-sm mt-1">Select a department and topic to find employees who have NEVER attended that topic across any session.</p>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-400 mb-2">Department</label>
+                  <select 
+                    value={filterDepartment}
+                    onChange={(e) => setFilterDepartment(e.target.value)}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none focus:border-brand-primary transition-colors"
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-400 mb-2">Training Topic</label>
+                  <select 
+                    value={filterTopic}
+                    onChange={(e) => setFilterTopic(e.target.value)}
+                    className="w-full bg-[#1a1a1a] border border-gray-700 text-blue-200 p-3 rounded-lg outline-none focus:border-brand-primary transition-colors"
+                  >
+                    <option value="">Select Topic</option>
+                    {topicsList.map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <button 
+                    onClick={handleFetchTopicAbsentees}
+                    disabled={!filterDepartment || !filterTopic || fetchingAbsentees}
+                    className="h-[50px] px-8 bg-brand-primary text-brand-dark font-bold rounded-lg hover:bg-brand-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                  >
+                    {fetchingAbsentees ? <Loader2 className="w-5 h-5 animate-spin"/> : <Search className="w-5 h-5"/>}
+                    Search
+                  </button>
+                </div>
+              </div>
+
+              {topicAbsentees !== null && (
+                <div className="mt-8">
+                  {topicAbsentees.length === 0 ? (
+                    <div className="text-center p-8 bg-[#1a1a1a] rounded-xl border border-emerald-500/30">
+                      <p className="text-emerald-400 font-bold text-lg">Great News!</p>
+                      <p className="text-gray-400 text-sm">Everyone in {filterDepartment} has attended {filterTopic}.</p>
+                    </div>
+                  ) : (
+                    <div className="border border-red-500/30 rounded-xl overflow-hidden">
+                      <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex justify-between items-center">
+                        <h3 className="text-red-400 font-bold flex items-center gap-2">
+                          <UserX className="w-4 h-4"/> {topicAbsentees.length} Employees Missing Topic
+                        </h3>
+                        <span className="text-xs font-mono text-gray-400">{filterTopic}</span>
+                      </div>
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-[#181818] border-b border-gray-800">
+                            <th className="p-3 text-sm font-semibold text-gray-400 pl-6">Emp No</th>
+                            <th className="p-3 text-sm font-semibold text-gray-400">Employee Name</th>
+                            <th className="p-3 text-sm font-semibold text-gray-400">Designation</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {topicAbsentees.map(emp => (
+                            <tr key={emp.emp_no} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                              <td className="p-3 pl-6 font-mono text-gray-400 text-sm">{emp.emp_no}</td>
+                              <td className="p-3 font-medium text-blue-200">{emp.full_name}</td>
+                              <td className="p-3 text-gray-400 text-sm">{emp.designation}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-brand-card rounded-2xl border border-gray-800 shadow-lg overflow-hidden">
               <div className="p-6 border-b border-gray-800 bg-[#181818]">
