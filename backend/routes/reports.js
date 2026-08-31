@@ -839,8 +839,8 @@ router.get('/all-topics', async (req, res) => {
       FROM trainings 
       WHERE topic IS NOT NULL 
       AND topic != '' 
-      AND training_date >= date_trunc('month', CURRENT_DATE + interval '1 month')
-      AND training_date < date_trunc('month', CURRENT_DATE + interval '2 months')
+      AND training_date >= date_trunc('month', CURRENT_DATE)
+      AND training_date < date_trunc('month', CURRENT_DATE + interval '1 month')
       ORDER BY topic ASC
     `;
     const result = await pool.query(query);
