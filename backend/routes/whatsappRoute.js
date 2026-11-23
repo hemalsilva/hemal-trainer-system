@@ -1,6 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { sendWhatsAppMessage, isReady, getQrCode } = require('../services/whatsapp');
+
+let sendWhatsAppMessage, isReady, getQrCode;
+try {
+  ({ sendWhatsAppMessage, isReady, getQrCode } = require('../services/whatsapp'));
+} catch (e) {
+  sendWhatsAppMessage = async () => { throw new Error('WhatsApp not available'); };
+  isReady = () => false;
+  getQrCode = () => null;
+}
+
 
 router.post('/send', async (req, res) => {
   const { phone, message } = req.body;

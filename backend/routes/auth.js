@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+
 
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const user = (req.body.username || req.body.email || '').toString().trim().toLowerCase();
+  const password = (req.body.password || '').toString().trim();
   
-  // Default MVP Credentials
-  if (username === 'admin' && password === 'admin123') {
+  // Admin credentials (supports both Admin / Admin123 and admin / admin123)
+  if (user === 'admin' && (password === 'Admin123' || password === 'admin123')) {
     const token = jwt.sign(
       { username: 'admin', role: 'admin' },
       process.env.JWT_SECRET || 'secret123',
-      { expiresIn: '1d' }
+      { expiresIn: '7d' }
     );
-    return res.json({ token });
+    return res.json({ token, user: { username: 'Admin', role: 'admin' } });
   }
 
   // Invalid credentials

@@ -980,6 +980,7 @@ export default function Reports() {
                 <tbody>
                   {(() => {
                     const monthBirthdays = employees
+                      .filter(emp => !emp.status || emp.status.toLowerCase() !== 'inactive')
                       .filter(emp => !selectedDepartment || emp.department === selectedDepartment)
                       .filter(emp => emp.date_of_birth && new Date(emp.date_of_birth).getMonth() === birthdayMonth)
                       .sort((a, b) => new Date(a.date_of_birth).getDate() - new Date(b.date_of_birth).getDate());

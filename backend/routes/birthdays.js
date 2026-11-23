@@ -57,9 +57,10 @@ router.get('/today', async (req, res) => {
     }
 
     const result = await pool.query(`
-      SELECT emp_no, full_name, date_of_birth, photo_url 
+      SELECT emp_no, full_name, date_of_birth, photo_url, status 
       FROM employees 
       WHERE date_of_birth IS NOT NULL
+        AND (status IS NULL OR LOWER(status) != 'inactive')
         AND EXTRACT(MONTH FROM date_of_birth) = $1 
         AND EXTRACT(DAY FROM date_of_birth) = $2
     `, [currentMonth, currentDay]);

@@ -5,11 +5,10 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend && rm -rf public && cp -r frontend/dist public",
-    "postinstall": "npm run build"
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "archiver": "^8.0.0",

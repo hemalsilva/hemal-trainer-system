@@ -1,15 +1,26 @@
+const dns = require('dns');
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch (e) {}
+
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { initializeWhatsApp } = require('./services/whatsapp');
 
-// Initialize the WhatsApp Web Engine on server boot
-if (process.env.NODE_ENV !== 'production') {
-  initializeWhatsApp();
+// Load .env FIRST so DB credentials are available immediately
+dotenv.config({ path: require('path').join(__dirname, '.env') });
+
+
+// Initialize the WhatsApp Web Engine on server boot (only if explicitly enabled)
+try {
+  const { initializeWhatsApp } = require('./services/whatsapp');
+  if (process.env.ENABLE_WHATSAPP === 'true') {
+    initializeWhatsApp();
+  }
+} catch (e) {
+  console.warn('WhatsApp module not available. Skipping WhatsApp init.');
 }
-
-dotenv.config();
 
 const app = express();
 
@@ -40,9 +51,8 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 module.exports = app;
+

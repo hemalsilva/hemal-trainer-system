@@ -103,6 +103,7 @@ export default function Dashboard() {
   const currentMonth = new Date().getMonth();
   const upcomingBirthdays = employees.filter(emp => {
     if (!emp.date_of_birth) return false;
+    if (emp.status && emp.status.toLowerCase() === 'inactive') return false;
     let monthIndex;
     if (typeof emp.date_of_birth === 'string' && emp.date_of_birth.includes('-')) {
         monthIndex = parseInt(emp.date_of_birth.split('T')[0].split('-')[1], 10) - 1;
@@ -113,6 +114,7 @@ export default function Dashboard() {
   }).sort((a, b) => new Date(a.date_of_birth).getDate() - new Date(b.date_of_birth).getDate());
   const upcomingAnniversaries = employees.filter(emp => {
     if (!emp.join_date) return false;
+    if (emp.status && emp.status.toLowerCase() === 'inactive') return false;
     let monthIndex;
     if (typeof emp.join_date === 'string' && emp.join_date.includes('-')) {
         monthIndex = parseInt(emp.join_date.split('T')[0].split('-')[1], 10) - 1;
@@ -296,7 +298,7 @@ export default function Dashboard() {
 
       
       {/* AI Today's Birthdays Widget */}
-      {birthdays && birthdays.length > 0 && (
+      {birthdays && birthdays.filter(emp => !emp.status || emp.status.toLowerCase() !== 'inactive').length > 0 && (
         <div className="bg-gradient-to-r from-brand-card to-[#2a1b00] border border-brand-primary/40 rounded-2xl p-6 mb-10 shadow-[0_0_30px_rgba(212,175,55,0.15)] relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-primary"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
@@ -306,7 +308,7 @@ export default function Dashboard() {
             Today's Birthdays
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
-            {birthdays.map((emp, i) => (
+            {birthdays.filter(emp => !emp.status || emp.status.toLowerCase() !== 'inactive').map((emp, i) => (
               <div key={i} className="bg-black/40 border border-brand-primary/20 rounded-xl p-5 hover:border-brand-primary/50 transition-colors flex flex-col justify-center">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-brand-primary/20 flex items-center justify-center border border-brand-primary/30 shrink-0">

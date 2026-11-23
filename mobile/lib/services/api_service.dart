@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Use 10.0.2.2 for Android Emulator connecting to localhost
-  final String baseUrl = 'http://10.0.2.2:5000/api';
+  // Online public secure Tailscale Funnel endpoint
+  final String baseUrl = 'https://xlcmrn.tailc45dc7.ts.net/api';
   String? authToken;
 
   Future<bool> login(String email, String password) async {

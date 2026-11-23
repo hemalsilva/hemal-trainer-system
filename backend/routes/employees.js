@@ -7,10 +7,26 @@ const OfficeCrypto = require('officecrypto-tool');
 const ExcelJS = require('exceljs');
 
 const fs = require('fs');
+const path = require('path');
 
 // Ensure uploads directories exist
-const uploadsDir = '/tmp/photos';
+const uploadsDir = path.join(__dirname, '../uploads/photos');
 try { if (!fs.existsSync(uploadsDir)){ fs.mkdirSync(uploadsDir, { recursive: true }); } } catch(e) {}
+
+const savePhotoFile = (buffer, mimetype, emp_no) => {
+  try {
+    let ext = 'jpg';
+    if (mimetype && mimetype.includes('png')) ext = 'png';
+    else if (mimetype && mimetype.includes('webp')) ext = 'webp';
+    const filename = `emp_${emp_no.replace(/[^a-zA-Z0-9_-]/g, '')}.${ext}`;
+    const filePath = path.join(uploadsDir, filename);
+    fs.writeFileSync(filePath, buffer);
+    return `uploads/photos/${filename}`;
+  } catch (err) {
+    console.error('Failed to save photo to disk:', err);
+    return null;
+  }
+};
 
 const os = require('os');
 const storage = multer.memoryStorage();
@@ -74,7 +90,7 @@ router.get('/', async (req, res) => {
 router.post('/', upload.single('photo'), async (req, res) => {
   const { emp_no, full_name, department, designation, join_date, date_of_birth, contact_number, email, status, gender_identity } = req.body;
 
-  const photo_url = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null;
+  const photo_url = req.file ? savePhotoFile(req.file.buffer, req.file.mimetype, emp_no) : null;
 
   try {
     const result = await pool.query(
@@ -151,7 +167,8 @@ router.post('/bulk-photos', upload.array('photos', 500), async (req, res) => {
       const extIndex = file.originalname.lastIndexOf('.');
       const emp_no = extIndex > 0 ? file.originalname.substring(0, extIndex) : file.originalname;
       
-      const photo_url = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      const photo_url = savePhotoFile(file.buffer, file.mimetype, emp_no);
+      if (!photo_url) continue;
       
       const result = await pool.query(
         'UPDATE employees SET photo_url = $1 WHERE UPPER(emp_no) = UPPER($2)',
@@ -197,10 +214,12 @@ router.put('/:emp_no', upload.single('photo'), async (req, res) => {
 
     // Update photo separately if a new one is uploaded
     if (req.file) {
-      const photo_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      await client.query('UPDATE employees SET photo_url = $1 WHERE TRIM(emp_no) = TRIM($2)', [photo_url, new_emp_no || old_emp_no]);
-      if (result.rows.length > 0) {
-        result.rows[0].photo_url = photo_url;
+      const photo_url = savePhotoFile(req.file.buffer, req.file.mimetype, new_emp_no || old_emp_no);
+      if (photo_url) {
+        await client.query('UPDATE employees SET photo_url = $1 WHERE TRIM(emp_no) = TRIM($2)', [photo_url, new_emp_no || old_emp_no]);
+        if (result.rows.length > 0) {
+          result.rows[0].photo_url = photo_url;
+        }
       }
     }
     
