@@ -1,3 +1,7 @@
+# Backups
+*backup*.json
+backend/*backup*.json
+
 # Dependencies
 node_modules/
 */node_modules/
